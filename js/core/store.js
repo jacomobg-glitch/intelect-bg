@@ -3,12 +3,15 @@ import { CONFIG } from './config.js';
 import { getAll, getOne, writeAll } from './db.js';
 import { applyXP, difficultyCeiling } from './evolution.js';
 import { activeSkills } from './registry.js';
-import { cleanProfile, cleanRecord, cleanSettings, defaultProfile, defaultRecord, defaultSettings } from './model.js';
+import {
+  cleanProfile, cleanRecord, cleanSettings, cleanTopic, defaultProfile, defaultRecord, defaultSettings, defaultTopic,
+} from './model.js';
 
 export const state = {
   profile: defaultProfile(),
   settings: defaultSettings(),
   records: new Map(),
+  topics: new Map(),
   simSnapshot: null, // реалният прогрес, докато тестовият режим е включен
 };
 
@@ -18,9 +21,11 @@ export async function loadState() {
   const snap = await getOne('meta', 'simSnapshot');
   state.simSnapshot = snap ? cleanProfile(snap.profile) : null;
   state.records = new Map((await getAll('records')).map(cleanRecord).filter(Boolean).map((r) => [r.id, r]));
+  state.topics = new Map((await getAll('topics')).map(cleanTopic).filter(Boolean).map((t) => [t.id, t]));
 }
 
 export const recordOf = (id) => state.records.get(id) || defaultRecord(id);
+export const topicOf = (id) => state.topics.get(id) || defaultTopic(id);
 export const maxDifficulty = () => difficultyCeiling(state.profile.step);
 
 export async function saveProfile(profile) {
@@ -31,6 +36,11 @@ export async function saveProfile(profile) {
 export async function saveSettings(patch) {
   state.settings = { ...state.settings, ...patch };
   await writeAll([{ store: 'meta', value: state.settings }]);
+}
+
+export async function saveTopic(topic) {
+  state.topics.set(topic.id, topic);
+  await writeAll([{ store: 'topics', value: topic }]);
 }
 
 export async function markDemoSeen(id) {

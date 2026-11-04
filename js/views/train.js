@@ -15,7 +15,7 @@ function gameCard(game) {
     h('span', { class: 'card-meta small' }, skills, rec.bestScore > 0 ? ` · рекорд ${rec.bestScore}` : ''),
   ];
   return open
-    ? h('a', { class: 'card card-link', href: `#/play/${game.id}` }, body)
+    ? h('a', { class: 'card card-link', href: game.route || `#/play/${game.id}` }, body)
     : h('div', { class: 'card card-locked' }, body);
 }
 

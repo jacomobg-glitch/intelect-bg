@@ -68,6 +68,7 @@ export const defaultTopic = (id) => ({
   mastered: false,   // „усвоена“: идва само от тест с 80% или повече
   masteredAt: null,  // YYYY-MM-DD, единствената дата, която се показва
   bestTest: 0,
+  level: 1,          // докъде е стигнала трудността на упражненията
   sm2: null,         // { ef, interval, reps, due } за тихия преговор
 });
 
@@ -85,6 +86,7 @@ export function cleanTopic(raw) {
     mastered: raw.mastered === true,
     masteredAt: isISODate(raw.masteredAt) ? raw.masteredAt : null,
     bestTest: isCount(raw.bestTest) ? Math.min(100, raw.bestTest) : 0,
+    level: isCount(raw.level) && raw.level >= 1 ? raw.level : 1,
     sm2: cleanSm2(raw.sm2),
   };
 }

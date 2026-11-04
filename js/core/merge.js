@@ -49,6 +49,7 @@ export function mergeTopic(a, b) {
     mastered: a.mastered || b.mastered,
     masteredAt: newerDate(a.masteredAt, b.masteredAt),
     bestTest: Math.max(a.bestTest, b.bestTest),
+    level: Math.max(a.level, b.level),
     sm2,
   };
 }

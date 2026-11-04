@@ -7,6 +7,7 @@ import games from './modules/index.js';
 import './install.js';
 import { renderGallery } from './views/gallery.js';
 import { renderHome } from './views/home.js';
+import { renderMathHome, renderMathSession, renderSubtopic } from './views/math.js';
 import { renderPlay } from './views/play.js';
 import { renderSettings } from './views/settings.js';
 import { renderTrain } from './views/train.js';
@@ -18,16 +19,19 @@ function route() {
   if (cleanup) cleanup();
   cleanup = null;
   window.scrollTo(0, 0);
-  const [, name = '', arg] = location.hash.replace(/^#/, '').split('/');
+  const [, name = '', arg, mode] = location.hash.replace(/^#/, '').split('/');
 
   if (name === 'train') renderTrain(view);
   else if (name === 'gallery') renderGallery(view);
   else if (name === 'settings') renderSettings(view);
   else if (name === 'play' && arg) cleanup = renderPlay(view, arg) || null;
+  else if (name === 'math' && arg && mode) cleanup = renderMathSession(view, arg, mode) || null;
+  else if (name === 'math' && arg) renderSubtopic(view, arg);
+  else if (name === 'math') renderMathHome(view);
   else renderHome(view);
 
   for (const link of document.querySelectorAll('.nav a')) {
-    const active = link.dataset.route === (name === 'play' ? 'train' : name);
+    const active = link.dataset.route === (name === 'play' || name === 'math' ? 'train' : name);
     if (active) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   }

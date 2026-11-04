@@ -1,6 +1,6 @@
 // Генериран файл: не се редактира на ръка. Обновява се с `npm run precache`.
 self.PRECACHE = {
-  "version": "e66b290fefde",
+  "version": "8d3d0b683ad1",
   "files": [
     "./",
     "./icons/icon-192.png",
@@ -8,6 +8,8 @@ self.PRECACHE = {
     "./icons/icon-maskable-512.png",
     "./icons/icon.svg",
     "./js/app.js",
+    "./js/content/math/generators.js",
+    "./js/content/math/topics.js",
     "./js/content/planned.js",
     "./js/content/skins/nature.js",
     "./js/core/backup.js",
@@ -25,9 +27,12 @@ self.PRECACHE = {
     "./js/install.js",
     "./js/modules/fireflies.js",
     "./js/modules/index.js",
+    "./js/modules/math.js",
     "./js/views/evolution.js",
     "./js/views/gallery.js",
     "./js/views/home.js",
+    "./js/views/math-viz.js",
+    "./js/views/math.js",
     "./js/views/play.js",
     "./js/views/settings.js",
     "./js/views/train.js",

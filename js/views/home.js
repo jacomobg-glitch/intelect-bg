@@ -4,6 +4,7 @@ import { h, mount } from '../core/dom.js';
 import { nextStepInfo } from '../core/evolution.js';
 import { activeSkills, moduleForSkill } from '../core/registry.js';
 import { state } from '../core/store.js';
+import { dueSubtopics } from './math.js';
 import { avatarEl, creatureAt, formatXP, fullName, meter } from './ui.js';
 
 const joinSkills = (skills) => skills.map((s) => SKILL_LABELS[s]).join(', ');
@@ -32,6 +33,9 @@ export function renderHome(root) {
       info.isMax ? null : meter(info.fraction, 'Напредък до следващата стъпка'),
       h('p', { class: 'next-hint', 'aria-live': 'polite' }, hintFor(info))),
     h('a', { class: 'btn btn-primary btn-big btn-train', href: '#/train' }, 'Тренирай'),
+    dueSubtopics().length
+      ? h('a', { class: 'review-link muted small', href: '#/math' }, `Готови за преговор: ${dueSubtopics().length}`)
+      : null,
     h('section', { class: 'skills', 'aria-label': 'Шестте способности' },
       info.gates.map((g) => h('div', { class: `skill ${g.active ? (g.ok ? 'skill-ok' : '') : 'skill-inactive'}` },
         h('span', { class: 'skill-name' }, SKILL_LABELS[g.skill]),

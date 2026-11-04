@@ -14,7 +14,7 @@ const profile = (skillXP, step = 0) => {
   const full = { ...Object.fromEntries(SKILLS.map((s) => [s, 0])), ...skillXP };
   return { key: 'profile', skillXP: full, totalXP: Object.values(full).reduce((a, b) => a + b, 0), step };
 };
-const topic = (id, over = {}) => ({ id, checked: false, mastered: false, masteredAt: null, bestTest: 0, sm2: null, ...over });
+const topic = (id, over = {}) => ({ id, checked: false, mastered: false, masteredAt: null, bestTest: 0, level: 1, sm2: null, ...over });
 
 test('активни способности: само със „Светулки“ изкачването е възможно', () => {
   const { profile: p, to } = applyXP(defaultProfile(), 150, ['speed', 'attention'], FIREFLIES_ONLY);
@@ -147,7 +147,7 @@ test('импорт: празен и повреден файл се отхвър�
 
 test('темите се изчистват: непознати полета и лоши дати отпадат', () => {
   const t = cleanTopic({ id: 't', checked: true, mastered: true, masteredAt: 'вчера', bestTest: 500, evil: 1, sm2: { ef: 'x' } });
-  assert.deepEqual(t, { id: 't', checked: true, mastered: true, masteredAt: null, bestTest: 100, sm2: null });
+  assert.deepEqual(t, { id: 't', checked: true, mastered: true, masteredAt: null, bestTest: 100, level: 1, sm2: null });
   assert.equal(cleanTopic({ id: '../x' }), null);
 });
 
