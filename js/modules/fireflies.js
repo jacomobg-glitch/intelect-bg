@@ -168,19 +168,20 @@ const game = {
   draw(now) {
     const g = this.g;
     g.clearRect(0, 0, this.w, this.h);
+    this.drawGrid(g);
     const s = this.stim;
     if (!s) return;
     if (s.type === 'firefly') {
       const pulse = 1 + 0.08 * Math.sin(now / 90);
       const glow = g.createRadialGradient(s.x, s.y, s.r * 0.2, s.x, s.y, s.r * 1.5 * pulse);
-      glow.addColorStop(0, 'rgba(236,255,120,0.95)');
-      glow.addColorStop(0.55, 'rgba(190,240,70,0.45)');
-      glow.addColorStop(1, 'rgba(190,240,70,0)');
+      glow.addColorStop(0, 'rgba(238,245,240,0.95)');
+      glow.addColorStop(0.55, 'rgba(143,220,154,0.5)');
+      glow.addColorStop(1, 'rgba(143,220,154,0)');
       g.fillStyle = glow;
       g.beginPath();
       g.arc(s.x, s.y, s.r * 1.5 * pulse, 0, Math.PI * 2);
       g.fill();
-      g.fillStyle = '#f7ffc4';
+      g.fillStyle = '#c8f0b0';
       g.beginPath();
       g.arc(s.x, s.y, s.r * 0.5, 0, Math.PI * 2);
       g.fill();
@@ -190,13 +191,24 @@ const game = {
       g.translate(s.x, s.y);
       g.rotate(Math.PI / 4);
       const a = s.r * 0.95;
-      g.fillStyle = '#ff7a3c';
+      g.fillStyle = '#ff8a6b';
       g.fillRect(-a, -a, a * 2, a * 2);
-      g.fillStyle = '#20150f';
+      g.fillStyle = '#0b1512';
       g.fillRect(-a, -a * 0.45, a * 2, a * 0.35);
       g.fillRect(-a, a * 0.2, a * 2, a * 0.35);
       g.restore();
     }
+  },
+
+  // Същата мрежа като фона на приложението.
+  drawGrid(g) {
+    const STEP = 56;
+    g.strokeStyle = '#12221c';
+    g.lineWidth = 1;
+    g.beginPath();
+    for (let x = STEP; x < this.w; x += STEP) { g.moveTo(x, 0); g.lineTo(x, this.h); }
+    for (let y = STEP; y < this.h; y += STEP) { g.moveTo(0, y); g.lineTo(this.w, y); }
+    g.stroke();
   },
 
   score() {

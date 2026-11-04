@@ -1,5 +1,5 @@
 // Светла и тъмна тема на интерфейса. Нямат общо с „кожите“ на стълбата.
-const COLORS = { dark: '#11141a', light: '#f5f3ee' };
+const COLORS = { dark: '#0b1512', light: '#e6efe9' };
 const media = window.matchMedia('(prefers-color-scheme: dark)');
 let current = 'auto';
 

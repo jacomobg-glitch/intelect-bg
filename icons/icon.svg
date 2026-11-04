@@ -1,9 +1,9 @@
 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <rect width="100" height="100" rx="22" fill="#11141a"/>
+  <rect width="100" height="100" rx="22" fill="#0b1512"/>
   <g transform="translate(14 14) scale(.72)">
-    <path d="M44 44 24 32M44 50H18M44 56 24 72M56 44 76 32M56 50H82M56 56 76 72M46 19Q40 9 31 10M54 19Q60 9 69 10" fill="none" stroke="#e8a13d" stroke-width="4" stroke-linecap="round"/>
-    <circle cx="50" cy="25" r="10" fill="#e8a13d"/>
-    <ellipse cx="50" cy="45" rx="8" ry="11" fill="#b5761f"/>
-    <ellipse cx="50" cy="71" rx="13" ry="19" fill="#e8a13d"/>
+    <path d="M44 44 24 32M44 50H18M44 56 24 72M56 44 76 32M56 50H82M56 56 76 72M46 19Q40 9 31 10M54 19Q60 9 69 10" fill="none" stroke="#8fdc9a" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="50" cy="25" r="10" fill="#8fdc9a"/>
+    <ellipse cx="50" cy="45" rx="8" ry="11" fill="#c8f0b0"/>
+    <ellipse cx="50" cy="71" rx="13" ry="19" fill="#8fdc9a"/>
   </g>
 </svg>

@@ -10,7 +10,7 @@ import { activeSkin, formatXP, fullName } from './ui.js';
 import { canInstall, promptInstall } from '../install.js';
 
 const THEMES = [['auto', 'Като системата'], ['dark', 'Тъмна'], ['light', 'Светла']];
-const APP_VERSION = '0.4.0';
+const APP_VERSION = '0.5.0';
 const TAPS_FOR_TEST_MODE = 7;
 
 async function exportBackup() {

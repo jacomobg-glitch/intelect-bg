@@ -1,9 +1,13 @@
-// Списък с модули, групирани по вид. Групите се пълнят автоматично от регистъра.
+// Списък с модули. Без аргумент показва всички групи, с аргумент само една категория.
 import { CATEGORIES, SKILL_LABELS } from '../core/config.js';
 import { h, mount } from '../core/dom.js';
 import { allGames, isUnlocked } from '../core/registry.js';
 import { recordOf, state } from '../core/store.js';
 import { fullName } from './ui.js';
+
+const CATEGORY_NOTES = {
+  cognitive: 'Когнитивните игри идват в следващия етап.',
+};
 
 function gameCard(game) {
   const open = isUnlocked(game, state.profile.step);
@@ -19,16 +23,16 @@ function gameCard(game) {
     : h('div', { class: 'card card-locked' }, body);
 }
 
-export function renderTrain(root) {
+export function renderTrain(root, categoryId) {
   const games = allGames();
+  const categories = categoryId ? CATEGORIES.filter((c) => c.id === categoryId) : CATEGORIES;
   mount(root,
-    h('h1', { class: 'page-title' }, 'Тренирай'),
+    h('h1', { class: 'page-title' }, categoryId ? categories[0].label : 'Тренирай'),
     h('p', { class: 'muted' }, 'Избери каквото искаш, за колкото време искаш.'),
-    CATEGORIES.map((cat) => {
+    categories.map((cat) => {
       const list = games.filter((g) => g.category === cat.id);
       return h('section', { class: 'group' },
-        h('h2', {}, cat.label),
-        list.length ? list.map(gameCard) : h('p', { class: 'muted small' }, 'Идва в следващите етапи.'));
-    }),
-  );
+        categoryId ? null : h('h2', {}, cat.label),
+        list.length ? list.map(gameCard) : h('p', { class: 'muted small' }, CATEGORY_NOTES[cat.id] || 'Идва в следващите етапи.'));
+    }));
 }

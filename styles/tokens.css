@@ -1,0 +1,120 @@
+/* Дизайн токени. Всички цветове на интерфейса идват оттук; app.css ползва само променливите. */
+@font-face {
+  font-family: "Manrope";
+  src: url("fonts/manrope-cyrillic-wght-normal.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Manrope";
+  src: url("fonts/manrope-latin-wght-normal.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --radius-xl: 32px;
+
+  --ease: cubic-bezier(.2, .7, .3, 1);
+  --fast: 200ms;
+  --slow: 300ms;
+
+  --blur: blur(18px);
+}
+
+/* Тъмно стъкло върху почти черен фон с зелен оттенък */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1512;
+  --bg-grid: #12221c;
+  --panel: rgba(20, 40, 32, .55);
+  --panel-solid: #14231d;
+  --panel-border: rgba(140, 220, 170, .18);
+  --panel-strong: rgba(30, 58, 46, .7);
+
+  --accent: #8fdc9a;
+  --accent-2: #c8f0b0;
+  --accent-gradient: linear-gradient(135deg, #8fdc9a, #c8f0b0);
+  --on-accent: #0b1512;
+  --accent-glow: 0 0 24px rgba(120, 220, 150, .35);
+  --glow-soft: rgba(120, 220, 150, .16);
+
+  --text: #eef5f0;
+  --text-muted: #9db3a6;
+  --highlight: #a9b8ff;
+
+  --card-light: rgba(235, 240, 255, .92);
+  --card-light-text: #14201a;
+  --card-light-muted: #46544c;
+  --card-light-done: #1b7c4b;
+
+  --pill: #f3ecd9;
+  --pill-text: #1b2a22;
+
+  --hero-a: #10231b;
+  --hero-b: #0d1a2a;
+  --hero-c: #16301f;
+
+  --sil: #2c4036;
+  --av-d: #101a16;
+  --av-e: #f3f1ea;
+}
+
+/* Същите тонове, обърнати: светло зеленикаво стъкло, а не стандартно бяло */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #e6efe9;
+  --bg-grid: #cfdfd5;
+  --panel: rgba(250, 253, 250, .62);
+  --panel-solid: #f3f8f4;
+  --panel-border: rgba(30, 90, 60, .22);
+  --panel-strong: rgba(255, 255, 255, .75);
+
+  --accent: #1b7c4b;
+  --accent-2: #17693f;
+  --accent-gradient: linear-gradient(135deg, #17693f, #1b7c4b);
+  --on-accent: #ffffff;
+  --accent-glow: 0 0 22px rgba(27, 124, 75, .28);
+  --glow-soft: rgba(27, 124, 75, .14);
+
+  --text: #10231a;
+  --text-muted: #46594e;
+  --highlight: #3b4bc2;
+
+  --card-light: rgba(18, 38, 30, .92);
+  --card-light-text: #eef5f0;
+  --card-light-muted: #b4c7bb;
+  --card-light-done: #8fdc9a;
+
+  --pill: #1b2a22;
+  --pill-text: #f3ecd9;
+
+  --hero-a: #f5faf5;
+  --hero-b: #e4e9fb;
+  --hero-c: #dcefe0;
+
+  --sil: #b9cbc0;
+  --av-d: #101a16;
+  --av-e: #fbfaf5;
+}
+
+/* Без поддръжка на размиване или при бавно устройство: плътен фон вместо стъкло */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --blur: none; }
+  [data-theme] { --panel: var(--panel-solid); }
+}
+.no-blur { --blur: none; }
+.no-blur[data-theme] { --panel: var(--panel-solid); }
+@media (prefers-reduced-transparency: reduce) {
+  :root { --blur: none; }
+  [data-theme] { --panel: var(--panel-solid); }
+}

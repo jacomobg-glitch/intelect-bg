@@ -1,8 +1,9 @@
 // Генериран файл: не се редактира на ръка. Обновява се с `npm run precache`.
 self.PRECACHE = {
-  "version": "8d3d0b683ad1",
+  "version": "a1680c86eaca",
   "files": [
     "./",
+    "./icons/LUCIDE-LICENSE.txt",
     "./icons/icon-192.png",
     "./icons/icon-512.png",
     "./icons/icon-maskable-512.png",
@@ -31,13 +32,21 @@ self.PRECACHE = {
     "./js/views/evolution.js",
     "./js/views/gallery.js",
     "./js/views/home.js",
+    "./js/views/icons.js",
     "./js/views/math-viz.js",
     "./js/views/math.js",
+    "./js/views/perf.js",
     "./js/views/play.js",
+    "./js/views/profile.js",
     "./js/views/settings.js",
+    "./js/views/shell.js",
     "./js/views/train.js",
     "./js/views/ui.js",
     "./manifest.json",
-    "./styles/app.css"
+    "./styles/app.css",
+    "./styles/fonts/OFL.txt",
+    "./styles/fonts/manrope-cyrillic-wght-normal.woff2",
+    "./styles/fonts/manrope-latin-wght-normal.woff2",
+    "./styles/tokens.css"
   ]
 };

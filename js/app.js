@@ -8,8 +8,11 @@ import './install.js';
 import { renderGallery } from './views/gallery.js';
 import { renderHome } from './views/home.js';
 import { renderMathHome, renderMathSession, renderSubtopic } from './views/math.js';
+import { watchFrameRate } from './views/perf.js';
 import { renderPlay } from './views/play.js';
+import { renderProfile } from './views/profile.js';
 import { renderSettings } from './views/settings.js';
+import { initShell, renderShell } from './views/shell.js';
 import { renderTrain } from './views/train.js';
 
 const view = document.getElementById('view');
@@ -22,7 +25,10 @@ function route() {
   const [, name = '', arg, mode] = location.hash.replace(/^#/, '').split('/');
 
   if (name === 'train') renderTrain(view);
+  else if (name === 'games') renderTrain(view, 'cognitive');
+  else if (name === 'reflex') renderTrain(view, 'reflex');
   else if (name === 'gallery') renderGallery(view);
+  else if (name === 'profile') renderProfile(view);
   else if (name === 'settings') renderSettings(view);
   else if (name === 'play' && arg) cleanup = renderPlay(view, arg) || null;
   else if (name === 'math' && arg && mode) cleanup = renderMathSession(view, arg, mode) || null;
@@ -30,11 +36,7 @@ function route() {
   else if (name === 'math') renderMathHome(view);
   else renderHome(view);
 
-  for (const link of document.querySelectorAll('.nav a')) {
-    const active = link.dataset.route === (name === 'play' || name === 'math' ? 'train' : name);
-    if (active) link.setAttribute('aria-current', 'page');
-    else link.removeAttribute('aria-current');
-  }
+  renderShell(name, arg);
 }
 
 function registerServiceWorker() {
@@ -58,11 +60,13 @@ async function boot() {
   }
   applyTheme(state.settings.theme);
   registerGames(games);
+  initShell();
   window.addEventListener('hashchange', route);
   route();
   document.body.classList.add('ready');
   requestPersistence();
   registerServiceWorker();
+  watchFrameRate();
 }
 
 boot();
