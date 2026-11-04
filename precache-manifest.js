@@ -1,0 +1,38 @@
+// Генериран файл: не се редактира на ръка. Обновява се с `npm run precache`.
+self.PRECACHE = {
+  "version": "e66b290fefde",
+  "files": [
+    "./",
+    "./icons/icon-192.png",
+    "./icons/icon-512.png",
+    "./icons/icon-maskable-512.png",
+    "./icons/icon.svg",
+    "./js/app.js",
+    "./js/content/planned.js",
+    "./js/content/skins/nature.js",
+    "./js/core/backup.js",
+    "./js/core/config.js",
+    "./js/core/db.js",
+    "./js/core/dom.js",
+    "./js/core/evolution.js",
+    "./js/core/merge.js",
+    "./js/core/model.js",
+    "./js/core/registry.js",
+    "./js/core/sm2.js",
+    "./js/core/store.js",
+    "./js/core/theme.js",
+    "./js/dev/simulator.js",
+    "./js/install.js",
+    "./js/modules/fireflies.js",
+    "./js/modules/index.js",
+    "./js/views/evolution.js",
+    "./js/views/gallery.js",
+    "./js/views/home.js",
+    "./js/views/play.js",
+    "./js/views/settings.js",
+    "./js/views/train.js",
+    "./js/views/ui.js",
+    "./manifest.json",
+    "./styles/app.css"
+  ]
+};

@@ -1,0 +1,4 @@
+# Еднакви краища на редовете: версията в precache-manifest.js зависи от съдържанието на файловете.
+* text=auto eol=lf
+*.png binary
+*.woff2 binary

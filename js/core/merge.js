@@ -1,0 +1,72 @@
+// Сливане на данни от две устройства. Чисти функции: нищо не се записва тук.
+import { SKILLS } from './config.js';
+import { advancedStep } from './evolution.js';
+
+const newerDate = (a, b) => {
+  if (!a) return b || null;
+  if (!b) return a;
+  return a > b ? a : b;
+};
+
+// Докато тестовият режим е включен, реалният прогрес е в снимката, а не в профила.
+export function realProfile(data) {
+  const snapshot = data.meta.find((m) => m.key === 'simSnapshot');
+  return snapshot ? snapshot.profile : data.meta.find((m) => m.key === 'profile');
+}
+
+export function mergeProfiles(a, b, activeFor) {
+  const skillXP = Object.fromEntries(SKILLS.map((s) => [s, Math.max(a.skillXP[s], b.skillXP[s])]));
+  const sum = SKILLS.reduce((acc, s) => acc + skillXP[s], 0);
+  const merged = {
+    key: 'profile',
+    skillXP,
+    totalXP: Math.max(sum, a.totalXP, b.totalXP),
+    // Вече достигнатата стъпка не се отнема; слетите данни могат само да я вдигнат.
+    step: Math.max(a.step, b.step),
+  };
+  merged.step = advancedStep(merged, activeFor);
+  return merged;
+}
+
+export function mergeRecord(a, b) {
+  const times = [a.bestMeanRT, b.bestMeanRT].filter((t) => t !== null);
+  return {
+    id: a.id,
+    bestScore: Math.max(a.bestScore, b.bestScore),
+    bestMeanRT: times.length ? Math.min(...times) : null,
+    lastDifficulty: Math.max(a.lastDifficulty, b.lastDifficulty),
+    plays: Math.max(a.plays, b.plays),
+    demoSeen: a.demoSeen || b.demoSeen,
+  };
+}
+
+// Отметките се обединяват. При конфликт печели по-новата дата: за усвояване и за срока на преговор.
+export function mergeTopic(a, b) {
+  const sm2 = !a.sm2 || !b.sm2 ? a.sm2 || b.sm2 : (a.sm2.due >= b.sm2.due ? a.sm2 : b.sm2);
+  return {
+    id: a.id,
+    checked: a.checked || b.checked,
+    mastered: a.mastered || b.mastered,
+    masteredAt: newerDate(a.masteredAt, b.masteredAt),
+    bestTest: Math.max(a.bestTest, b.bestTest),
+    sm2,
+  };
+}
+
+function mergeById(listA, listB, mergeOne) {
+  const out = new Map(listA.map((item) => [item.id, item]));
+  for (const item of listB) {
+    out.set(item.id, out.has(item.id) ? mergeOne(out.get(item.id), item) : item);
+  }
+  return [...out.values()];
+}
+
+// local и incoming са изчистени данни { meta, records, topics }. Настройките остават на устройството.
+export function mergeData(local, incoming, activeFor) {
+  const settings = local.meta.find((m) => m.key === 'settings');
+  return {
+    meta: [mergeProfiles(realProfile(local), realProfile(incoming), activeFor), ...(settings ? [settings] : [])],
+    records: mergeById(local.records, incoming.records, mergeRecord),
+    topics: mergeById(local.topics, incoming.topics, mergeTopic),
+  };
+}

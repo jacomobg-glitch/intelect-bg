@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="bg" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Забранява всякакви външни заявки на ниво браузър -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>Еволюция на ума</title>
+  <meta name="description" content="Математика от нулата, когнитивни игри и рефлекси. Офлайн, без регистрация и без известия.">
+  <meta name="theme-color" content="#11141a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+  <main id="view" class="view"></main>
+  <nav class="nav" aria-label="Основна навигация">
+    <a href="#/" data-route="">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>
+      <span>Начало</span>
+    </a>
+    <a href="#/train" data-route="train">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 10h3v4H2zM19 10h3v4h-3zM6 7h3v10H6zM15 7h3v10h-3zM9 11h6v2H9z"/></svg>
+      <span>Тренирай</span>
+    </a>
+    <a href="#/gallery" data-route="gallery">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
+      <span>Галерия</span>
+    </a>
+    <a href="#/settings" data-route="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h10v2H3zM17 6h4v2h-4zM13 4h4v6h-4zM3 16h4v2H3zM11 16h10v2H11zM7 14h4v6H7z"/></svg>
+      <span>Настройки</span>
+    </a>
+  </nav>
+  <noscript>Приложението изисква JavaScript.</noscript>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
