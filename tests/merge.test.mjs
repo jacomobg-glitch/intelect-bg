@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { APP_ID, BackupError, parseBackup, summarize } from '../js/core/backup.js';
 import { SKILLS } from '../js/core/config.js';
-import { CUMULATIVE_XP, TOTAL_STEPS, applyXP, advancedStep, nextStepInfo, requiredLevel } from '../js/core/evolution.js';
+import { CUMULATIVE_XP, TOTAL_STEPS, applyXP, advancedStep, nextStepInfo, requiredLevel, requirementFor, syncActivation } from '../js/core/evolution.js';
 import { mergeData, mergeProfiles, mergeRecord, mergeTopic } from '../js/core/merge.js';
 import { cleanTopic, defaultProfile, defaultRecord, defaultSettings } from '../js/core/model.js';
 import { addDays, gradeFromPercent, isDue, reviewUpdate } from '../js/core/sm2.js';
@@ -46,13 +46,76 @@ test('активни способности: нов модул не сваля �
   assert.equal(advancedStep(reached, allActive), reached.step);
 });
 
-test('активни способности: новото изискване важи за следващите стъпки', () => {
-  const reached = applyXP(defaultProfile(), 5000, ['speed', 'attention'], FIREFLIES_ONLY).profile;
-  const info = nextStepInfo(reached, SKILLS);
-  assert.ok(info.blocked.includes('memory'));
-  const need = requiredLevel(reached.step + 1);
-  const trained = applyXP(reached, 6 * need * need * 4, ['memory', 'math', 'logic', 'flexibility'], allActive);
-  assert.ok(trained.to > reached.step);
+test('мек преход (а): късно активиране не блокира следващата стъпка', () => {
+  // Логиката се активира на Гущер I (стъпка 9). Праговете на 9 и 10 са равни, значи за Гущер II не се иска нищо.
+  assert.equal(requiredLevel(9), requiredLevel(10));
+  const onlyOld = () => ['speed', 'attention'];
+  const atLizard = { ...profile({ speed: 2000, attention: 2000 }, 9), activationSteps: { speed: 0, attention: 0 } };
+  const withLogic = (step) => (step >= 9 ? ['speed', 'attention', 'logic'] : onlyOld());
+  const r = applyXP(atLizard, 10, ['speed'], withLogic);
+  assert.equal(r.profile.activationSteps.logic, 9);
+  assert.ok(r.to >= 10, `стъпка ${r.to}`);
+  assert.equal(r.profile.skillXP.logic, 0);
+});
+
+test('мек преход: изискването е разликата между праговете и расте оттам', () => {
+  const p = { ...profile({}, 9), activationSteps: { logic: 9 } };
+  assert.equal(requirementFor(p, 'logic', 10), 0);
+  assert.equal(requirementFor(p, 'logic', 20), requiredLevel(20) - requiredLevel(9));
+  assert.equal(requirementFor(p, 'logic', 44), requiredLevel(44) - requiredLevel(9));
+  assert.equal(requirementFor(p, 'logic', 5), 0);
+});
+
+test('мек преход: изоставането след активиране вече спира изкачването', () => {
+  const p = { ...profile({ speed: 20000 }, 9), totalXP: 90000, activationSteps: { speed: 0, logic: 9 } };
+  const only = () => ['speed', 'logic'];
+  const stuckAt = advancedStep(p, only);
+  assert.ok(stuckAt > 9 && stuckAt < 44, `стъпка ${stuckAt}`);
+  assert.ok(requirementFor(p, 'logic', stuckAt + 1) >= 1);
+});
+
+test('мек преход (б): способност, активна от началото, се смята както досега', () => {
+  const p = { ...defaultProfile(), activationSteps: Object.fromEntries(SKILLS.map((s) => [s, 0])) };
+  for (let step = 1; step < TOTAL_STEPS; step += 1) {
+    for (const s of SKILLS) assert.equal(requirementFor(p, s, step), requiredLevel(step), `${s}/${step}`);
+  }
+});
+
+test('мек преход (в): activationStep оцелява при експорт и импорт', () => {
+  const p = { ...profile({ speed: 500 }, 12), activationSteps: { speed: 0, logic: 9 } };
+  const parsed = parseBackup(JSON.stringify({ app: APP_ID, schema: 1, data: { meta: [p] } }));
+  assert.deepEqual(parsed.meta.find((m) => m.key === 'profile').activationSteps, { speed: 0, logic: 9 });
+});
+
+test('мек преход (в): при сливане печели по-ранната стойност', () => {
+  const a = { ...profile({ speed: 1 }, 5), activationSteps: { logic: 9, memory: 2, speed: 0 } };
+  const b = { ...profile({ speed: 1 }, 5), activationSteps: { logic: 4, attention: 1 } };
+  const m = mergeProfiles(a, b, () => ['speed']);
+  assert.deepEqual(m.activationSteps, { logic: 4, memory: 2, speed: 0, attention: 1 });
+});
+
+test('мек преход: повреден activationStep се изчиства при импорт', () => {
+  const p = { ...profile({}), activationSteps: { logic: 99, memory: -1, speed: 'x', evil: 3, attention: 2 } };
+  const parsed = parseBackup(JSON.stringify({ app: APP_ID, schema: 1, data: { meta: [p] } }));
+  assert.deepEqual(parsed.meta.find((m) => m.key === 'profile').activationSteps, { attention: 2 });
+});
+
+test('синхронизация: стар запис не се пипа, а липсващият взема текущата стъпка', () => {
+  const p = { ...profile({}, 7), activationSteps: { speed: 0 } };
+  const synced = syncActivation(p, () => ['speed', 'logic']);
+  assert.deepEqual(synced.activationSteps, { speed: 0, logic: 7 });
+  assert.equal(synced.step, 7);
+  assert.equal(syncActivation(synced, () => ['speed', 'logic']), synced);
+  // Профил от по-стара версия няма полето изобщо.
+  const old = { key: 'profile', totalXP: 0, step: 3, skillXP: profile({}).skillXP };
+  assert.deepEqual(syncActivation(old, () => ['math']).activationSteps, { math: 3 });
+});
+
+test('стъпките се записват и при няколко стъпки наведнъж', () => {
+  const opens = (step) => (step >= 4 ? ['speed', 'logic'] : ['speed']);
+  const { profile: p } = applyXP(defaultProfile(), 5000, ['speed'], opens);
+  assert.equal(p.activationSteps.speed, 0);
+  assert.equal(p.activationSteps.logic, 4);
 });
 
 test('активни способности: без функция важат всичките шест', () => {

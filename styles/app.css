@@ -468,3 +468,157 @@ body.playing .view { max-width: none; padding: 0; height: 100dvh; margin: 0; }
   .toast { bottom: 28px; left: calc(50% + 176px); }
   body.playing { padding-left: 0; }
 }
+
+/* Форми на буквите: важи навсякъде, включително там, където шорткътът font ги нулира */
+*, *::before, *::after { font-feature-settings: var(--font-features) !important; }
+
+.compare-note { margin-top: 10px; }
+
+/* Общо за игрите */
+.game-board {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: 8px 14px calc(14px + env(safe-area-inset-bottom)); touch-action: manipulation; user-select: none; -webkit-user-select: none;
+}
+.game-status { flex: 1; font-size: .85rem; color: var(--game-muted); }
+.ink-red { color: var(--game-red); }
+.ink-blue { color: var(--game-blue); }
+.ink-green { color: var(--game-green); }
+.ink-yellow { color: var(--game-yellow); }
+.ink-bg-red { background: var(--game-red); }
+.ink-bg-blue { background: var(--game-blue); }
+.ink-bg-green { background: var(--game-green); }
+.ink-bg-yellow { background: var(--game-yellow); }
+.answer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: min(560px, 100%); }
+.answer-btn {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 68px; padding: 8px;
+  border: 1px solid var(--game-line); border-radius: var(--radius-m); background: var(--game-panel); color: var(--game-text);
+  font: inherit; font-weight: 700; cursor: pointer; touch-action: manipulation;
+}
+.answer-btn kbd { position: absolute; right: 8px; top: 6px; font: 600 .7rem var(--font); color: var(--game-muted); }
+@media (hover: none) { .answer-btn kbd { display: none; } }
+.answer-btn-on { border-color: var(--game-green); box-shadow: 0 0 0 2px var(--game-green) inset; }
+.answer-btn-right { border-color: var(--game-green); box-shadow: 0 0 0 2px var(--game-green) inset; }
+.answer-btn-wrong { border-color: var(--game-red); box-shadow: 0 0 0 2px var(--game-red) inset; }
+.swatch { width: 22px; height: 22px; border-radius: 6px; flex: none; }
+.perf-live {
+  position: absolute; left: 10px; bottom: calc(6px + env(safe-area-inset-bottom)); z-index: 5; pointer-events: none;
+  font-size: .75rem; font-weight: 700; color: var(--game-text); background: var(--game-panel); padding: 2px 8px; border-radius: 99px; font-variant-numeric: tabular-nums;
+}
+
+/* Stroop */
+.stroop-cue { color: var(--game-muted); font-weight: 600; text-align: center; min-height: 1.5em; }
+.stroop-cue-switch { color: var(--game-text); }
+.stroop-stim { flex: 1; min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.stroop-word { font-size: clamp(2.4rem, 12vw, 5rem); font-weight: 800; letter-spacing: .01em; }
+.stroop-shape { display: block; width: 26px; height: 26px; flex: none; }
+.stroop-shape svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 7; stroke-linejoin: round; }
+.stroop-stim .stroop-shape { width: min(38vw, 26dvh); height: min(38vw, 26dvh); }
+.stroop-stim .stroop-shape svg { stroke-width: 5; }
+.stroop-caption { font-size: clamp(1.1rem, 5vw, 1.6rem); font-weight: 800; }
+
+/* Проста реакция и Go / No-Go */
+.reaction-pad {
+  flex: 1; width: 100%; min-height: 0; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-l);
+  background: var(--game-panel); border: 1px solid var(--game-line); cursor: pointer; touch-action: none;
+}
+.reaction-on { background: var(--game-green); border-color: var(--game-green); }
+.reaction-label { font-size: 1.4rem; font-weight: 800; pointer-events: none; color: var(--game-text); }
+.reaction-on .reaction-label { color: var(--game-on-color); font-size: 3rem; }
+.reaction-last { min-height: 1.5em; color: var(--game-muted); font-variant-numeric: tabular-nums; }
+.gng-stim { width: min(46vw, 34dvh); height: min(46vw, 34dvh); pointer-events: none; }
+.gng-go { background: var(--game-green); border-radius: 50%; }
+.gng-nogo { background: var(--game-red); border-radius: 8px; }
+
+/* N-back */
+.nb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: min(76vw, 46dvh); }
+.nb-cell {
+  aspect-ratio: 1; display: grid; place-items: center; border-radius: var(--radius-s); background: var(--game-panel); border: 1px solid var(--game-line);
+  font-size: clamp(1.6rem, 8vw, 2.6rem); color: var(--game-on-color);
+}
+.nb-cell[class*="ink-bg-red"] { background: var(--game-red); }
+.nb-cell[class*="ink-bg-blue"] { background: var(--game-blue); }
+.nb-cell[class*="ink-bg-green"] { background: var(--game-green); }
+.nb-cell[class*="ink-bg-yellow"] { background: var(--game-yellow); }
+.answer-grid-2 { width: min(420px, 100%); }
+
+/* Schulte */
+.sch-grid { display: grid; grid-template-columns: repeat(var(--size), 1fr); gap: 5px; width: min(94vw, calc(100dvh - 170px), 620px); }
+.sch-cell {
+  aspect-ratio: 1; display: grid; place-items: center; padding: 0; border-radius: var(--radius-s); background: var(--game-panel); border: 1px solid var(--game-line);
+  color: var(--game-text); font: inherit; font-weight: 800; font-size: clamp(.95rem, 4.4vw, 1.5rem); font-variant-numeric: tabular-nums; cursor: pointer; touch-action: manipulation;
+}
+.sch-done { color: var(--game-muted); background: transparent; }
+
+/* Логика */
+.lg-board { flex: 1; width: 100%; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+.lg-terms { font-size: clamp(1.5rem, 7vw, 2.6rem); font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
+.lg-matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: min(70vw, 40dvh); margin: 8px auto 0; }
+.lg-cell { display: grid; place-items: center; aspect-ratio: 1; background: var(--game-panel); border: 1px solid var(--game-line); border-radius: var(--radius-s); }
+.lg-cell svg { display: block; width: 86%; height: 86%; }
+.lg-solid { fill: var(--game-text); stroke: var(--game-text); stroke-width: 3; }
+.lg-line { fill: none; stroke: var(--game-text); stroke-width: 4; }
+.lg-missing { font-size: 2rem; font-weight: 800; color: var(--game-muted); border-style: dashed; }
+.lg-option { min-height: 72px; font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.lg-option .lg-cell { width: 58px; border: 0; background: none; }
+
+/* Легнал телефон: елементите застават един до друг */
+@media (orientation: landscape) and (max-height: 500px) {
+  .game-board { flex-direction: row; flex-wrap: wrap; }
+  .stroop-stim { min-height: 60px; }
+  .stroop-word { font-size: 2.2rem; }
+  .answer-grid { width: 46%; }
+  .answer-btn { min-height: 54px; }
+  .nb-grid { width: min(44vw, 62dvh); }
+  .sch-grid { width: min(70vw, calc(100dvh - 84px)); }
+  .game-board:has(.sch-grid) { flex-wrap: nowrap; }
+  .game-board:has(.sch-grid) .stroop-cue { width: auto; white-space: nowrap; }
+  .lg-board { flex-direction: row; flex-wrap: wrap; }
+  .lg-matrix { width: min(36vw, 64dvh); }
+  .stroop-cue { width: 100%; min-height: 0; }
+}
+
+/* Демонстрации */
+.demo-box {
+  position: relative; min-height: 150px; padding: 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px;
+  border-radius: var(--radius-m); background: var(--game-bg); border: 1px solid var(--game-line); color: var(--game-text); overflow: hidden;
+}
+.demo-word { font-size: 2rem; font-weight: 800; }
+.demo-pick {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--game-line); border-radius: var(--radius-m); font-weight: 700;
+  animation: demo-pulse 2.4s infinite;
+}
+@keyframes demo-pulse { 0%, 40% { box-shadow: none; } 55%, 80% { box-shadow: 0 0 0 3px var(--game-green); } 100% { box-shadow: none; } }
+.demo-lamp { width: 72px; height: 72px; border-radius: 50%; background: var(--game-panel); animation: demo-lamp 2.4s infinite; }
+@keyframes demo-lamp { 0%, 40% { background: var(--game-panel); } 45%, 75% { background: var(--game-green); } 80%, 100% { background: var(--game-panel); } }
+.demo-tap {
+  position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; margin: -27px; border: 2px solid var(--game-text); border-radius: 50%; opacity: 0;
+  animation: demo-tap 2.4s infinite;
+}
+@keyframes demo-tap { 0%, 50% { opacity: 0; transform: scale(.6); } 58% { opacity: 1; transform: scale(.9); } 78%, 100% { opacity: 0; transform: scale(1.4); } }
+.demo-gng { gap: 40px; }
+.demo-go, .demo-nogo { width: 60px; height: 60px; }
+.demo-go { background: var(--game-green); border-radius: 50%; }
+.demo-nogo { background: var(--game-red); border-radius: 8px; position: relative; }
+.demo-gng .demo-tap { left: calc(50% - 50px); }
+.nb-grid-demo { width: 110px; gap: 4px; }
+.demo-nb-lit { animation: demo-nb 2.4s infinite; }
+@keyframes demo-nb { 0%, 18% { background: var(--game-blue); } 20%, 48% { background: var(--game-panel); } 50%, 68% { background: var(--game-blue); box-shadow: 0 0 0 2px var(--game-green); } 70%, 100% { background: var(--game-panel); } }
+.demo-nb-label { font-weight: 600; font-size: .9rem; max-width: 170px; }
+.demo-schulte .sch-grid { width: 130px; gap: 3px; }
+.demo-schulte .sch-cell { font-size: .95rem; }
+.demo-sch-1 { animation: demo-sch 3s infinite 0s; }
+.demo-sch-2 { animation: demo-sch 3s infinite .6s; }
+.demo-sch-3 { animation: demo-sch 3s infinite 1.2s; }
+@keyframes demo-sch { 0%, 8% { background: var(--game-green); color: var(--game-on-color); } 20%, 100% { background: var(--game-panel); color: var(--game-text); } }
+.demo-logic { gap: 8px; }
+.demo-logic-answer { color: var(--game-green); animation: demo-logic 2.4s infinite; }
+@keyframes demo-logic { 0%, 45% { opacity: 0; } 55%, 100% { opacity: 1; } }
+
+/* Диагностика */
+.diag-value { font-variant-numeric: tabular-nums; }
+.diag-ua { font-size: .8rem; overflow-wrap: anywhere; }
+.diag-pad {
+  min-height: 130px; display: grid; place-items: center; border: 1px dashed var(--accent); border-radius: var(--radius-m); font-weight: 700;
+  touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer;
+}
+.diag-report { width: 100%; font: 500 .78rem/1.45 var(--font); padding: 10px; color: var(--text); background: var(--panel-solid); border: 1px solid var(--panel-border); border-radius: var(--radius-s); resize: vertical; }

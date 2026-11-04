@@ -4,13 +4,13 @@ import { confirmDialog, h, mount, toast } from '../core/dom.js';
 import { creatureIndex, subLabel } from '../core/evolution.js';
 import { mergeData } from '../core/merge.js';
 import { activeSkills } from '../core/registry.js';
-import { loadState, saveSettings, state } from '../core/store.js';
+import { loadState, saveSettings, state, syncActiveSkills } from '../core/store.js';
 import { applyTheme } from '../core/theme.js';
 import { activeSkin, formatXP, fullName } from './ui.js';
 import { canInstall, promptInstall } from '../install.js';
 
 const THEMES = [['auto', 'Като системата'], ['dark', 'Тъмна'], ['light', 'Светла']];
-const APP_VERSION = '0.5.0';
+export const APP_VERSION = '0.6.0';
 const TAPS_FOR_TEST_MODE = 7;
 
 async function exportBackup() {
@@ -56,6 +56,7 @@ function askImportMode(local, incoming) {
         h('thead', {}, h('tr', {}, h('th', {}, ''), h('th', {}, 'Устройство'), h('th', {}, 'Файл'), h('th', {}, 'Резултат'))),
         h('tbody', {}, SUMMARY_ROWS.map(([label, read], i) => h('tr', {},
           h('th', { scope: 'row' }, label), h('td', {}, read(localSummary)), h('td', {}, read(fileSummary)), cells[i])))),
+      h('p', { class: 'muted small compare-note' }, 'Ако си тренирал на двете устройства между два преноса, по-малкият принос няма да се добави.'),
       h('div', { class: 'dialog-actions' },
         h('button', { class: 'btn', onclick: () => dialog.close('') }, 'Отказ'),
         h('button', { class: 'btn btn-primary', onclick: () => dialog.close(dialog.querySelector('input:checked').value) }, 'Зареди')));
@@ -84,6 +85,7 @@ async function importBackup(file, rerender) {
     if (!result) return;
     await applyBackup(result);
     await loadState();
+    await syncActiveSkills();
     applyTheme(state.settings.theme);
     toast('Данните са възстановени.');
     rerender();

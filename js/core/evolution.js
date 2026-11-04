@@ -39,17 +39,42 @@ export function requiredLevel(step) {
 export function canReach(profile, step, active = SKILLS) {
   if (step >= TOTAL_STEPS) return false;
   if (profile.totalXP < CUMULATIVE_XP[step]) return false;
-  const need = requiredLevel(step);
-  return active.every((s) => levelFromXP(profile.skillXP[s]) >= need);
+  return active.every((s) => levelFromXP(profile.skillXP[s]) >= requirementFor(profile, s, step));
+}
+
+// Стъпката, на която способността е станала активна. Без запис: става активна точно сега.
+export const activationOf = (profile, skill) => {
+  const recorded = profile.activationSteps ? profile.activationSteps[skill] : undefined;
+  return recorded === undefined ? profile.step : recorded;
+};
+
+// Мек преход: късно активирана способност започва от нула и расте нормално оттам.
+export function requirementFor(profile, skill, step) {
+  return Math.max(0, requiredLevel(step) - requiredLevel(activationOf(profile, skill)));
+}
+
+// Записва стъпка на активиране за новите активни способности. Старите записи не се пипат.
+export function syncActivation(profile, activeFor) {
+  const active = activeFor(profile.step);
+  const known = profile.activationSteps || {};
+  const missing = active.filter((s) => known[s] === undefined);
+  if (!missing.length && profile.activationSteps) return profile;
+  const activationSteps = { ...known };
+  for (const s of missing) activationSteps[s] = profile.step;
+  return { ...profile, activationSteps };
 }
 
 // Стъпката само расте: нов модул добавя изисквания за следващите стъпки, но не отнема достигнатите.
 // activeFor(step) връща активните способности при дадена стъпка.
-export function advancedStep(profile, activeFor = () => SKILLS) {
-  let step = profile.step;
-  while (canReach(profile, step + 1, activeFor(step))) step += 1;
-  return step;
+export function advance(profile, activeFor = () => SKILLS) {
+  let current = syncActivation(profile, activeFor);
+  while (canReach(current, current.step + 1, activeFor(current.step))) {
+    current = syncActivation({ ...current, step: current.step + 1 }, activeFor);
+  }
+  return current;
 }
+
+export const advancedStep = (profile, activeFor) => advance(profile, activeFor).step;
 
 export function applyXP(profile, xp, skills, activeFor) {
   const valid = skills.filter((s) => SKILLS.includes(s));
@@ -58,9 +83,8 @@ export function applyXP(profile, xp, skills, activeFor) {
   for (const s of valid) {
     skillXP[s] = Math.round((skillXP[s] + amount / valid.length) * 100) / 100;
   }
-  const next = { ...profile, totalXP: profile.totalXP + amount, skillXP };
   const from = profile.step;
-  next.step = advancedStep(next, activeFor);
+  const next = advance({ ...profile, totalXP: profile.totalXP + amount, skillXP }, activeFor);
   return { profile: next, from, to: next.step };
 }
 
@@ -78,17 +102,18 @@ export const difficultyCeiling = (step) => 3 + creatureIndex(step) * 2;
 // Всичко, което началният екран трябва да знае за следващата стъпка.
 export function nextStepInfo(profile, active = SKILLS) {
   const next = profile.step + 1;
-  const skills = (need) => SKILLS.map((skill) => {
+  const skills = (step) => SKILLS.map((skill) => {
     const level = levelFromXP(profile.skillXP[skill]);
-    return { skill, level, required: need, ok: level >= need, active: active.includes(skill) };
+    const required = step === null ? 0 : requirementFor(profile, skill, step);
+    return { skill, level, required, ok: level >= required, active: active.includes(skill) };
   });
   if (next >= TOTAL_STEPS) {
-    return { isMax: true, next: null, xpInto: 0, xpCost: 0, fraction: 1, xpReady: true, gates: skills(0), blocked: [] };
+    return { isMax: true, next: null, xpInto: 0, xpCost: 0, fraction: 1, xpReady: true, gates: skills(null), blocked: [] };
   }
   const base = CUMULATIVE_XP[profile.step];
   const xpCost = CUMULATIVE_XP[next] - base;
   const xpInto = Math.max(0, profile.totalXP - base);
-  const gates = skills(requiredLevel(next));
+  const gates = skills(next);
   return {
     isMax: false,
     next,

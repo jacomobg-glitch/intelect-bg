@@ -19,6 +19,23 @@
 :root {
   --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
+  /* Форми на буквите. "locl" 0 изключва българските форми. За да ги върнеш: смени с normal */
+  --font-features: "locl" 0;
+
+  /* Цветове на игрите: еднакви в двете теми, защото игрите са на тъмен фон.
+     Стойностите се проверяват в тестовете за контраст и за цветна слепота. */
+  --game-bg: #0b1512;
+  --game-grid: #12221c;
+  --game-text: #eef5f0;
+  --game-muted: #9db3a6;
+  --game-panel: #15281f;
+  --game-line: #2b4638;
+  --game-red: #f4574a;
+  --game-blue: #8f9bff;
+  --game-green: #1bd1a5;
+  --game-yellow: #ffe56b;
+  --game-on-color: #0b1512;
+
   --radius-s: 10px;
   --radius-m: 16px;
   --radius-l: 24px;

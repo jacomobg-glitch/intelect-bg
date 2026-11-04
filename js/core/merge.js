@@ -1,6 +1,6 @@
 // Сливане на данни от две устройства. Чисти функции: нищо не се записва тук.
 import { SKILLS } from './config.js';
-import { advancedStep } from './evolution.js';
+import { advance } from './evolution.js';
 
 const newerDate = (a, b) => {
   if (!a) return b || null;
@@ -17,15 +17,20 @@ export function realProfile(data) {
 export function mergeProfiles(a, b, activeFor) {
   const skillXP = Object.fromEntries(SKILLS.map((s) => [s, Math.max(a.skillXP[s], b.skillXP[s])]));
   const sum = SKILLS.reduce((acc, s) => acc + skillXP[s], 0);
-  const merged = {
+  // При активирането печели по-ранната стъпка: то е станало, когато е станало на първото устройство.
+  const activationSteps = {};
+  for (const s of SKILLS) {
+    const known = [a, b].map((p) => (p.activationSteps ? p.activationSteps[s] : undefined)).filter((x) => x !== undefined);
+    if (known.length) activationSteps[s] = Math.min(...known);
+  }
+  // Вече достигнатата стъпка не се отнема; слетите данни могат само да я вдигнат.
+  return advance({
     key: 'profile',
     skillXP,
     totalXP: Math.max(sum, a.totalXP, b.totalXP),
-    // Вече достигнатата стъпка не се отнема; слетите данни могат само да я вдигнат.
     step: Math.max(a.step, b.step),
-  };
-  merged.step = advancedStep(merged, activeFor);
-  return merged;
+    activationSteps,
+  }, activeFor);
 }
 
 export function mergeRecord(a, b) {

@@ -1,8 +1,9 @@
 // Обвивка на всяка игра: въведение, отброяване, игра, резултат. Работи само през общия интерфейс.
 import { h, mount } from '../core/dom.js';
 import { getGame, isUnlocked } from '../core/registry.js';
-import { completeSession, markDemoSeen, maxDifficulty, recordOf, state } from '../core/store.js';
+import { completeSession, markDemoSeen, maxDifficulty, recordOf, saveSettings, state } from '../core/store.js';
 import { showEvolution } from './evolution.js';
+import { startGameMonitor } from './perf.js';
 
 export function renderPlay(root, id) {
   const game = getGame(id);
@@ -13,18 +14,21 @@ export function renderPlay(root, id) {
 
   let countdownTimer = null;
   let active = false;
+  let stopMonitor = null;
 
   const leaveGame = () => {
     clearInterval(countdownTimer);
     if (active) game.stop();
     active = false;
+    if (stopMonitor) stopMonitor();
+    stopMonitor = null;
     document.body.classList.remove('playing');
     document.removeEventListener('visibilitychange', onVisibility);
   };
 
   // Скрит екран изкривява времената, затова опитът се прекратява, без нищо да се губи.
   const onVisibility = () => {
-    if (document.hidden) {
+    if (document.hidden && !game.allowHidden) {
       leaveGame();
       showIntro('Опитът беше прекъснат и не се брои. Натрупаното си остава.');
     }
@@ -38,6 +42,7 @@ export function renderPlay(root, id) {
       notice ? h('p', { class: 'notice' }, notice) : null,
       h('p', {}, game.description),
       demo,
+      game.introOptions ? game.introOptions({ settings: state.settings, save: saveSettings }) : null,
       rec.bestScore > 0 ? h('p', { class: 'muted' }, `Личен рекорд: ${rec.bestScore}`) : null,
       h('button', { class: 'btn btn-primary btn-big', onclick: startCountdown }, 'Старт'),
       h('a', { class: 'btn', href: '#/train' }, 'Назад'),
@@ -54,7 +59,8 @@ export function renderPlay(root, id) {
       onclick: () => { leaveGame(); location.hash = '#/train'; },
     }, 'Изход');
     document.body.classList.add('playing');
-    mount(root, h('div', { class: 'game-wrap' }, stage, exit, number));
+    const wrap = h('div', { class: 'game-wrap' }, stage, exit, number);
+    mount(root, wrap);
     document.addEventListener('visibilitychange', onVisibility);
 
     countdownTimer = setInterval(() => {
@@ -65,9 +71,10 @@ export function renderPlay(root, id) {
       }
       clearInterval(countdownTimer);
       number.remove();
-      game.init({ container: stage, difficulty: recordOf(game.id).lastDifficulty, maxDifficulty: maxDifficulty(), onEnd: finish });
+      game.init({ container: stage, difficulty: recordOf(game.id).lastDifficulty, maxDifficulty: maxDifficulty(), settings: state.settings, onEnd: finish });
       active = true;
       game.start();
+      stopMonitor = startGameMonitor(game.id, wrap);
     }, 800);
   }
 

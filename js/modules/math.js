@@ -134,7 +134,8 @@ const math = {
 
   xpReward() {
     if (this.credit <= 0) return 0;
-    return sessionXP({ activeMs: this.activeMs, quality: this.credit / this.total });
+    // Поне 1 XP: кратка сесия с верни отговори не бива да се закръгля до нула.
+    return Math.max(1, sessionXP({ activeMs: this.activeMs, quality: this.credit / this.total }));
   },
 
   stats() {

@@ -8,6 +8,7 @@ import { h, mount, toast } from '../core/dom.js';
 import { activeSkills } from '../core/registry.js';
 import { saveProfile, state } from '../core/store.js';
 import { showEvolution } from '../views/evolution.js';
+import { updateDevice } from '../views/perf.js';
 import { fullName } from '../views/ui.js';
 
 async function enter() {
@@ -55,6 +56,7 @@ export function renderSimulator(slot, rerender) {
   mount(slot, h('section', { class: 'group test-panel' },
     h('h2', {}, 'Тестов режим'),
     h('p', { class: 'muted small' }, 'Промените тук са временни. „Излез“ връща реалния прогрес.'),
+    h('a', { class: 'btn', href: '#/diagnostics', onclick: () => updateDevice({ diagnostics: true }) }, 'Диагностика'),
     h('p', { class: 'small' }, `${fullName(state.profile.step)}, ${Math.floor(state.profile.totalXP)} XP. ${levels}.`),
     h('div', { class: 'row' },
       h('button', { class: 'btn', onclick: () => after(() => give(600, SKILLS)) }, '+600 XP (всички)'),

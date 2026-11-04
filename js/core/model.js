@@ -10,12 +10,14 @@ export const defaultProfile = () => ({
   totalXP: 0,
   skillXP: Object.fromEntries(SKILLS.map((s) => [s, 0])),
   step: 0,
+  activationSteps: {}, // способност → стъпка, на която е станала активна
 });
 
 export const defaultSettings = () => ({
   key: 'settings',
   theme: 'auto',   // auto | dark | light
   skin: 'nature',  // визуална тема на стълбата; механиката не зависи от нея
+  stroopVariant: 'color', // color | shape: вариант на Stroop без цветове
 });
 
 export const defaultRecord = (id) => ({
@@ -40,7 +42,12 @@ export function cleanProfile(raw) {
     if (!isCount(raw.skillXP[s])) return null;
     skillXP[s] = raw.skillXP[s];
   }
-  return { key: 'profile', totalXP: raw.totalXP, skillXP, step: raw.step };
+  const activationSteps = {};
+  const rawSteps = raw.activationSteps && typeof raw.activationSteps === 'object' ? raw.activationSteps : {};
+  for (const s of SKILLS) {
+    if (Number.isInteger(rawSteps[s]) && rawSteps[s] >= 0 && rawSteps[s] < TOTAL_STEPS) activationSteps[s] = rawSteps[s];
+  }
+  return { key: 'profile', totalXP: raw.totalXP, skillXP, step: raw.step, activationSteps };
 }
 
 export function cleanSettings(raw) {
@@ -48,6 +55,7 @@ export function cleanSettings(raw) {
   if (!raw || typeof raw !== 'object') return base;
   if (['auto', 'dark', 'light'].includes(raw.theme)) base.theme = raw.theme;
   if (typeof raw.skin === 'string' && /^[a-z0-9-]{1,32}$/.test(raw.skin)) base.skin = raw.skin;
+  if (['color', 'shape'].includes(raw.stroopVariant)) base.stroopVariant = raw.stroopVariant;
   return base;
 }
 

@@ -1,14 +1,15 @@
 // Входна точка: зарежда данните, регистрира модулите и управлява навигацията.
 import { h } from './core/dom.js';
 import { registerGames } from './core/registry.js';
-import { loadState, requestPersistence, state } from './core/store.js';
+import { loadState, requestPersistence, state, syncActiveSkills } from './core/store.js';
 import { applyTheme } from './core/theme.js';
 import games from './modules/index.js';
 import './install.js';
 import { renderGallery } from './views/gallery.js';
 import { renderHome } from './views/home.js';
 import { renderMathHome, renderMathSession, renderSubtopic } from './views/math.js';
-import { watchFrameRate } from './views/perf.js';
+import { renderDiagnostics } from './views/diagnostics.js';
+import { flushNotice, initPerf } from './views/perf.js';
 import { renderPlay } from './views/play.js';
 import { renderProfile } from './views/profile.js';
 import { renderSettings } from './views/settings.js';
@@ -30,6 +31,7 @@ function route() {
   else if (name === 'gallery') renderGallery(view);
   else if (name === 'profile') renderProfile(view);
   else if (name === 'settings') renderSettings(view);
+  else if (name === 'diagnostics') cleanup = renderDiagnostics(view) || null;
   else if (name === 'play' && arg) cleanup = renderPlay(view, arg) || null;
   else if (name === 'math' && arg && mode) cleanup = renderMathSession(view, arg, mode) || null;
   else if (name === 'math' && arg) renderSubtopic(view, arg);
@@ -37,6 +39,7 @@ function route() {
   else renderHome(view);
 
   renderShell(name, arg);
+  flushNotice();
 }
 
 function registerServiceWorker() {
@@ -60,13 +63,14 @@ async function boot() {
   }
   applyTheme(state.settings.theme);
   registerGames(games);
+  await syncActiveSkills();
   initShell();
   window.addEventListener('hashchange', route);
   route();
   document.body.classList.add('ready');
   requestPersistence();
   registerServiceWorker();
-  watchFrameRate();
+  initPerf();
 }
 
 boot();

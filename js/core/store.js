@@ -1,7 +1,7 @@
 // Състояние в паметта плюс запис в IndexedDB. Изгледите четат оттук.
 import { CONFIG } from './config.js';
 import { getAll, getOne, writeAll } from './db.js';
-import { applyXP, difficultyCeiling } from './evolution.js';
+import { applyXP, difficultyCeiling, syncActivation } from './evolution.js';
 import { activeSkills } from './registry.js';
 import {
   cleanProfile, cleanRecord, cleanSettings, cleanTopic, defaultProfile, defaultRecord, defaultSettings, defaultTopic,
@@ -22,6 +22,12 @@ export async function loadState() {
   state.simSnapshot = snap ? cleanProfile(snap.profile) : null;
   state.records = new Map((await getAll('records')).map(cleanRecord).filter(Boolean).map((r) => [r.id, r]));
   state.topics = new Map((await getAll('topics')).map(cleanTopic).filter(Boolean).map((t) => [t.id, t]));
+}
+
+// Вика се, след като модулите са регистрирани: новите способности започват да се броят от тази стъпка.
+export async function syncActiveSkills() {
+  const synced = syncActivation(state.profile, activeSkills);
+  if (synced !== state.profile) await saveProfile(synced);
 }
 
 export const recordOf = (id) => state.records.get(id) || defaultRecord(id);
