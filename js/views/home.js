@@ -1,21 +1,32 @@
 // Начален екран: hero с текущото същество, трите подстепени и шестте способности.
 import { CONFIG, SKILL_LABELS } from '../core/config.js';
 import { h, mount } from '../core/dom.js';
-import { creatureIndex, nextStepInfo, subIndex } from '../core/evolution.js';
-import { activeSkills, moduleForSkill } from '../core/registry.js';
+import { creatureIndex, nearestObstacle, subIndex } from '../core/evolution.js';
+import { activeSkills, allGames, isUnlocked, moduleForSkill } from '../core/registry.js';
 import { state } from '../core/store.js';
 import { icon } from './icons.js';
 import { dueSubtopics } from './math.js';
 import { activeSkin, avatarEl, creatureAt, formatXP, fullName, meter } from './ui.js';
 
 const SUB_NAMES = ['I', 'II', 'III'];
-const joinSkills = (skills) => skills.map((s) => SKILL_LABELS[s]).join(', ');
 
-function hintFor(info) {
-  if (info.isMax) return 'Това е върхът на стълбата.';
-  if (!info.xpReady) return `${formatXP(info.xpInto)} от ${formatXP(info.xpCost)} XP до ${fullName(info.next)}`;
-  if (!info.blocked.length) return `Готово за ${fullName(info.next)}.`;
-  return `XP е събран. Остава практика в: ${joinSkills(info.blocked)}.`;
+// Най-близкото препятствие с думи. Изоставащата способност е конкретна: „още 40 XP Памет“.
+export function obstacleText(obstacle) {
+  if (obstacle.kind === 'max') return 'Това е върхът на стълбата.';
+  if (obstacle.kind === 'ready') return `Готово за ${fullName(obstacle.step)}.`;
+  if (obstacle.kind === 'skill') {
+    return `За ${fullName(obstacle.step)} ти трябват още ${formatXP(obstacle.xp)} XP ${SKILL_LABELS[obstacle.skill]}`;
+  }
+  return `За ${fullName(obstacle.step)} ти трябват още ${formatXP(obstacle.xp)} XP`;
+}
+
+// Подходящата игра за препятствието: най-рано отключената, която тренира точно тази способност.
+// Без способност (остава само общ XP) води към списъка с модули.
+export function gameForObstacle(obstacle, step) {
+  if (obstacle.kind !== 'skill') return null;
+  return allGames()
+    .filter((g) => g.skills.includes(obstacle.skill) && isUnlocked(g, step))
+    .sort((a, b) => a.unlockStep - b.unlockStep)[0] || null;
 }
 
 function nextLine(step) {
@@ -40,8 +51,10 @@ function substeps(step) {
 export function renderHome(root) {
   const { profile } = state;
   const creature = creatureAt(profile.step);
-  const info = nextStepInfo(profile, activeSkills(profile.step));
+  const obstacle = nearestObstacle(profile, activeSkills(profile.step));
+  const info = obstacle.info;
   const due = dueSubtopics().length;
+  const target = gameForObstacle(obstacle, profile.step);
 
   mount(root,
     state.simSnapshot ? h('p', { class: 'badge badge-test' }, 'Тестов режим: реалният прогрес е запазен') : null,
@@ -53,10 +66,13 @@ export function renderHome(root) {
         h('p', { class: 'hero-trait' }, creature.trait),
         h('div', { class: 'next-step' },
           info.isMax ? null : meter(info.fraction, 'Напредък до следващата стъпка'),
-          h('p', { class: 'next-hint', 'aria-live': 'polite' }, hintFor(info))),
-        h('a', { class: 'btn btn-pill', href: '#/train' }, 'Продължи тренировката', icon('arrow-up-right'))),
+          h('p', { class: 'next-hint', 'aria-live': 'polite' }, obstacleText(obstacle))),
+        target
+          ? h('a', { class: 'btn btn-pill', href: target.route || `#/play/${target.id}` }, `Тренирай ${target.title}`, icon('arrow-up-right'))
+          : h('a', { class: 'btn btn-pill', href: '#/train' }, 'Продължи тренировката', icon('arrow-up-right'))),
       substeps(profile.step)),
     due ? h('a', { class: 'review-link', href: '#/math' }, `Готови за преговор: ${due}`) : null,
+    h('a', { class: 'btn surprise-link', href: '#/surprise' }, icon('sparkles'), 'Изненадай ме'),
     h('h2', { class: 'section-title' }, 'Шестте способности'),
     h('section', { class: 'skills', 'aria-label': 'Шестте способности' },
       info.gates.map((g) => h('div', { class: `skill ${g.active ? (g.ok ? 'skill-ok' : '') : 'skill-inactive'}` },

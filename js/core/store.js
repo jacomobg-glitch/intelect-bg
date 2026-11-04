@@ -4,7 +4,8 @@ import { getAll, getOne, writeAll } from './db.js';
 import { applyXP, difficultyCeiling, syncActivation } from './evolution.js';
 import { activeSkills } from './registry.js';
 import {
-  cleanProfile, cleanRecord, cleanSettings, cleanTopic, defaultProfile, defaultRecord, defaultSettings, defaultTopic,
+  FEELS, cleanProfile, cleanRecord, cleanSettings, cleanTopic,
+  defaultProfile, defaultRecord, defaultSettings, defaultTopic,
 } from './model.js';
 
 export const state = {
@@ -49,6 +50,14 @@ export async function saveTopic(topic) {
   await writeAll([{ store: 'topics', value: topic }]);
 }
 
+// „Лесно / Точно / Трудно“ след игра. По желание, без напомняне, само последната оценка.
+export async function saveFeel(id, feel) {
+  if (!FEELS.includes(feel)) return;
+  const rec = { ...recordOf(id), feel };
+  state.records.set(id, rec);
+  await writeAll([{ store: 'records', value: rec }]);
+}
+
 export async function markDemoSeen(id) {
   const rec = { ...recordOf(id), demoSeen: true };
   state.records.set(id, rec);
@@ -71,6 +80,7 @@ export async function completeSession(game) {
     lastDifficulty: Math.max(1, game.difficulty),
     plays: prev.plays + 1,
     demoSeen: true,
+    feel: null, // оценката важи за точно една сесия; тази вече я ползва
   };
   const { profile, from, to } = applyXP(state.profile, xp, game.skills, activeSkills);
 

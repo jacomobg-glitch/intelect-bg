@@ -1,6 +1,8 @@
 // „Светулки“: първият истински модул. Доказва общия интерфейс и дава реален XP.
-// Докосваш светулките и не пипаш осите. Трудността следва правилото 2 верни нагоре, 1 грешка надолу.
-import { h } from '../core/dom.js';
+// Докосваш светулките и не пипаш осите. Трудността следва общия staircase (CONFIG.STAIRCASE_UP верни нагоре, 1 грешка надолу).
+// Всички цветове идват от styles/tokens.css, за да е една системата с останалите игри.
+import { CONFIG } from '../core/config.js';
+import { cssVar, h } from '../core/dom.js';
 import { sessionXP } from '../core/evolution.js';
 
 const RUN_MS = 60000;
@@ -46,6 +48,16 @@ const game = {
       this.canvas,
     );
     this.g = this.canvas.getContext('2d');
+    // Цветовете се четат веднъж на сесия: темата не се сменя по време на игра.
+    this.colors = {
+      grid: cssVar('--game-grid'),
+      core: cssVar('--game-fly-core'),
+      hot: cssVar('--game-fly-hot'),
+      glow: cssVar('--game-fly-glow'),
+      edge: cssVar('--game-fly-edge'),
+      wasp: cssVar('--game-wasp'),
+      stripe: cssVar('--game-on-color'),
+    };
     this.resize = () => {
       const r = this.canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
@@ -147,7 +159,7 @@ const game = {
     if (correct) {
       this.correct += 1;
       this.correctRun += 1;
-      if (this.correctRun >= 2) {
+      if (this.correctRun >= CONFIG.STAIRCASE_UP) {
         this.difficulty = Math.min(this.difficulty + 1, this.ctx.maxDifficulty || 3);
         this.correctRun = 0;
       }
@@ -174,14 +186,14 @@ const game = {
     if (s.type === 'firefly') {
       const pulse = 1 + 0.08 * Math.sin(now / 90);
       const glow = g.createRadialGradient(s.x, s.y, s.r * 0.2, s.x, s.y, s.r * 1.5 * pulse);
-      glow.addColorStop(0, 'rgba(238,245,240,0.95)');
-      glow.addColorStop(0.55, 'rgba(143,220,154,0.5)');
-      glow.addColorStop(1, 'rgba(143,220,154,0)');
+      glow.addColorStop(0, this.colors.hot);
+      glow.addColorStop(0.55, this.colors.glow);
+      glow.addColorStop(1, this.colors.edge);
       g.fillStyle = glow;
       g.beginPath();
       g.arc(s.x, s.y, s.r * 1.5 * pulse, 0, Math.PI * 2);
       g.fill();
-      g.fillStyle = '#c8f0b0';
+      g.fillStyle = this.colors.core;
       g.beginPath();
       g.arc(s.x, s.y, s.r * 0.5, 0, Math.PI * 2);
       g.fill();
@@ -191,9 +203,9 @@ const game = {
       g.translate(s.x, s.y);
       g.rotate(Math.PI / 4);
       const a = s.r * 0.95;
-      g.fillStyle = '#ff8a6b';
+      g.fillStyle = this.colors.wasp;
       g.fillRect(-a, -a, a * 2, a * 2);
-      g.fillStyle = '#0b1512';
+      g.fillStyle = this.colors.stripe;
       g.fillRect(-a, -a * 0.45, a * 2, a * 0.35);
       g.fillRect(-a, a * 0.2, a * 2, a * 0.35);
       g.restore();
@@ -203,7 +215,7 @@ const game = {
   // Същата мрежа като фона на приложението.
   drawGrid(g) {
     const STEP = 56;
-    g.strokeStyle = '#12221c';
+    g.strokeStyle = this.colors.grid;
     g.lineWidth = 1;
     g.beginPath();
     for (let x = STEP; x < this.w; x += STEP) { g.moveTo(x, 0); g.lineTo(x, this.h); }

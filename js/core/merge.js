@@ -42,6 +42,9 @@ export function mergeRecord(a, b) {
     lastDifficulty: Math.max(a.lastDifficulty, b.lastDifficulty),
     plays: Math.max(a.plays, b.plays),
     demoSeen: a.demoSeen || b.demoSeen,
+    // Оценката важи за следващата сесия на това устройство; при сливане се изчиства,
+    // защото „по-новата“ не е определима без дата, а дати съзнателно не пазим.
+    feel: null,
   };
 }
 

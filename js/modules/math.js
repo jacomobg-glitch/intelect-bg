@@ -1,6 +1,7 @@
 // Математиката като модул с общия интерфейс. Логиката на сесията е без DOM, а екраните са в views/math.js.
 import { makeTask, checkAnswer, MAX_LEVEL } from '../content/math/generators.js';
 import { MASTERY_PERCENT } from '../content/math/topics.js';
+import { CONFIG } from '../core/config.js';
 import { sessionXP } from '../core/evolution.js';
 import { gradeFromPercent, reviewUpdate } from '../core/sm2.js';
 
@@ -114,7 +115,7 @@ const math = {
     if (this.mode !== 'practice') return;
     if (wentWell) {
       this.correctRun += 1;
-      if (this.correctRun >= 2) {
+      if (this.correctRun >= CONFIG.STAIRCASE_UP) {
         this.difficulty = Math.min(this.difficulty + 1, this.ceiling, MAX_LEVEL);
         this.correctRun = 0;
       }

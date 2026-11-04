@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import {
   ATTRIBUTES, SEQUENCE_RULES, isValidExtension, makeLogicTask, makeMatrixTask, makeSequenceTask, possibleNext,
 } from '../js/content/logic/generators.js';
-import { SKILLS } from '../js/core/config.js';
+import { CONFIG, SKILLS } from '../js/core/config.js';
 import { LowFpsDetector, buildReport, frameStats, latencyStats, mean, sd } from '../js/core/stats.js';
 import { activeSkills, registerGames, validateGame } from '../js/core/registry.js';
 import { cleanSettings } from '../js/core/model.js';
@@ -12,7 +12,7 @@ import games from '../js/modules/index.js';
 import { makeGoNoGoTrial, goNoGoParams } from '../js/modules/go-nogo.js';
 import { COLORS, makeNbackSequence, nbackParams, nextNbackLevel } from '../js/modules/nback.js';
 import { makeTable, nextSchulteLevel, tableSize } from '../js/modules/schulte.js';
-import { TrialLog, isValidReaction, reactionMs, trialPoints } from '../js/modules/shared/trial-log.js';
+import { TrialLog, isValidReaction, reactionMs, staircaseTarget, trialPoints } from '../js/modules/shared/trial-log.js';
 import { reactionParams } from '../js/modules/simple-reaction.js';
 import { COLOR_SET, SHAPE_SET, makeStroopTrial, stroopParams } from '../js/modules/stroop.js';
 
@@ -64,19 +64,29 @@ test('точки: трудност × 10, плюс бонус за бързин�
   assert.equal(trialPoints(3), 15);
 });
 
-test('staircase: 2 верни нагоре, 1 грешка надолу, в рамките на тавана', () => {
+test('staircase: CONFIG.STAIRCASE_UP верни нагоре, 1 грешка надолу, в рамките на тавана', () => {
+  assert.equal(CONFIG.STAIRCASE_UP, 3);
   const log = new TrialLog({ startLevel: 1, maxLevel: 3 });
   log.correct();
-  assert.equal(log.level, 1);
+  log.correct();
+  assert.equal(log.level, 1, 'две верни още не вдигат трудността');
   log.correct();
   assert.equal(log.level, 2);
   log.correct();
+  log.correct();
   log.error();
-  assert.equal(log.level, 1);
+  assert.equal(log.level, 1, 'една грешка нулира серията и сваля трудността');
   log.error();
   assert.equal(log.level, 1);
   for (let i = 0; i < 20; i += 1) log.correct();
   assert.equal(log.level, 3);
+});
+
+test('целевият успех на staircase е в зоната 75–80%', () => {
+  assert.ok(Math.abs(staircaseTarget(2) - 0.7071) < 0.001);
+  assert.ok(Math.abs(staircaseTarget(3) - 0.7937) < 0.001);
+  const target = staircaseTarget();
+  assert.ok(target >= 0.75 && target <= 0.80, `цел ${target}`);
 });
 
 test('начална трудност над тавана се ограничава', () => {

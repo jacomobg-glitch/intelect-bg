@@ -121,7 +121,8 @@ export function renderSubtopic(root, id) {
 
 const MODE_TITLES = { practice: 'Упражнения', test: 'Тест за овладяване', review: 'Преговор' };
 
-export function renderMathSession(root, id, mode) {
+// options.next по желание сменя бутоните на резултата с продължение (ползва се от „Изненадай ме“).
+export function renderMathSession(root, id, mode, options = {}) {
   const subtopic = findSubtopic(id);
   if (!subtopic || !isOpen(subtopic) || !SESSION_SIZE[mode]) {
     location.hash = '#/math';
@@ -132,12 +133,14 @@ export function renderMathSession(root, id, mode) {
     const percent = math.percent();
     const result = await completeSession(math);
     await saveTopic(applyOutcome(topicOf(id), { mode, percent, level: math.difficulty }, todayISO()));
+    if (options.onFinish) options.onFinish(result);
     if (result.to > result.from) await showEvolution(result.from, result.to);
     showResult(result, percent);
   };
 
   function showResult({ xp, stats }, percent) {
     const topic = topicOf(id);
+    const kicker = options.kicker ? h('p', { class: 'muted small' }, options.kicker) : null;
     let message = 'Практиката е записана.';
     if (mode === 'test') {
       message = percent >= MASTERY_PERCENT
@@ -146,6 +149,7 @@ export function renderMathSession(root, id, mode) {
     }
     if (mode === 'review') message = 'Преговорът е записан. Следващият идва тихо, когато му дойде времето.';
     mount(root,
+      kicker,
       h('h1', { class: 'page-title' }, subtopic.title),
       h('div', { class: 'result' },
         h('p', { class: 'result-score' }, `${percent}%`),
@@ -153,8 +157,10 @@ export function renderMathSession(root, id, mode) {
         masteredBadge(topic),
         h('p', { class: 'result-xp', 'aria-live': 'polite' }, xp > 0 ? `+${xp} XP` : 'Този път без XP: нямаше верен отговор.')),
       h('dl', { class: 'stats' }, stats.rows.map(([k, v]) => h('div', {}, h('dt', {}, k), h('dd', {}, v)))),
-      h('button', { class: 'btn btn-primary btn-big', onclick: start }, 'Още веднъж'),
-      h('a', { class: 'btn', href: `#/math/${id}` }, 'Към темата'));
+      options.next
+        ? h('button', { class: 'btn btn-primary btn-big', onclick: options.next.onClick }, options.next.label)
+        : h('button', { class: 'btn btn-primary btn-big', onclick: start }, 'Още веднъж'),
+      options.next ? null : h('a', { class: 'btn', href: `#/math/${id}` }, 'Към темата'));
   }
 
   function showTask() {
@@ -240,10 +246,11 @@ export function renderMathSession(root, id, mode) {
     actions.replaceChildren(...(mode === 'practice' ? [hintBtn] : []));
 
     mount(root,
+      options.kicker ? h('p', { class: 'muted small' }, options.kicker) : null,
       h('p', { class: 'muted small' }, `${MODE_TITLES[mode]} · ${subtopic.title} · задача ${math.index + 1} от ${math.total}`),
       h('p', { class: 'task-prompt' }, task.prompt),
       answerArea, feedback, hintBox, actions,
-      h('a', { class: 'btn btn-quiet', href: `#/math/${id}` }, 'Изход'));
+      h('a', { class: 'btn btn-quiet', href: options.back || `#/math/${id}` }, 'Изход'));
   }
 
   function start() {

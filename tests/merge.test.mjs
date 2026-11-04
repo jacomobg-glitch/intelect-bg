@@ -145,11 +145,11 @@ test('сливане: достигната стъпка никога не пад
   assert.ok(m.step < TOTAL_STEPS);
 });
 
-test('сливане: рекордите вземат по-доброто', () => {
-  const a = { ...defaultRecord('x'), bestScore: 10, bestMeanRT: 300, plays: 2, demoSeen: true };
+test('сливане: рекордите вземат по-доброто, а оценката „как беше“ се изчиства', () => {
+  const a = { ...defaultRecord('x'), bestScore: 10, bestMeanRT: 300, plays: 2, demoSeen: true, feel: 'hard' };
   const b = { ...defaultRecord('x'), bestScore: 50, bestMeanRT: 450, plays: 7, lastDifficulty: 4 };
   assert.deepEqual(mergeRecord(a, b), {
-    id: 'x', bestScore: 50, bestMeanRT: 300, lastDifficulty: 4, plays: 7, demoSeen: true,
+    id: 'x', bestScore: 50, bestMeanRT: 300, lastDifficulty: 4, plays: 7, demoSeen: true, feel: null,
   });
   assert.equal(mergeRecord(defaultRecord('x'), { ...defaultRecord('x'), bestMeanRT: 400 }).bestMeanRT, 400);
 });

@@ -35,6 +35,19 @@
   --game-green: #1bd1a5;
   --game-yellow: #ffe56b;
   --game-on-color: #0b1512;
+  --game-accent: #8fdc9a;
+  --game-accent-2: #c8f0b0;
+  --game-track: #1c3128;
+  --game-exit-bg: rgba(20, 40, 32, .8);
+  --game-exit-line: rgba(140, 220, 170, .3);
+  --game-glass-line: rgba(140, 220, 170, .18);
+
+  /* „Светулки“: платното не може да ползва var(), затова цветовете се четат оттук с cssVar(). */
+  --game-fly-core: #c8f0b0;
+  --game-fly-hot: rgba(238, 245, 240, .95);
+  --game-fly-glow: rgba(143, 220, 154, .5);
+  --game-fly-edge: rgba(143, 220, 154, 0);
+  --game-wasp: #ff8a6b;
 
   --radius-s: 10px;
   --radius-m: 16px;

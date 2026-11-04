@@ -38,6 +38,46 @@ function profileAtStep(step) {
   return { ...state.profile, totalXP: CUMULATIVE_XP[step], skillXP, step };
 }
 
+// Плъзгач за прага SKILL_SHARE_THRESHOLD: показва на живо какво би било изискването за
+// следващите 5 стъпки. Само предварителен изглед: реалният прогрес се смята с числото от конфигурацията.
+function thresholdPreview() {
+  const [lo, hi] = CONFIG.SKILL_SHARE_RANGE;
+  const real = CONFIG.SKILL_SHARE_THRESHOLD;
+  const steps = Array.from({ length: 5 }, (_, i) => state.profile.step + 1 + i).filter((s) => s < TOTAL_STEPS);
+  const value = h('output', { class: 'thr-value' }, `${Math.round(real * 100)}%`);
+  const body = h('tbody', {});
+  const paint = (t) => {
+    value.textContent = `${Math.round(t * 100)}%`;
+    body.replaceChildren(...steps.map((step) => h('tr', {},
+      h('th', { scope: 'row' }, fullName(step)),
+      h('td', {}, String(requiredLevel(step, real))),
+      h('td', {}, String(requiredLevel(step, t))))));
+  };
+  const slider = h('input', {
+    type: 'range',
+    class: 'thr-slider',
+    min: String(Math.round(lo * 100)),
+    max: String(Math.round(hi * 100)),
+    step: '1',
+    value: String(Math.round(real * 100)),
+    'aria-label': 'Дял от справедливия дял XP за всяка способност',
+    oninput: (e) => paint(Number(e.target.value) / 100),
+  });
+  paint(real);
+  return h('div', { class: 'thr' },
+    h('p', { class: 'small' }, 'Праг за всяка способност: ', value),
+    slider,
+    steps.length
+      ? h('table', { class: 'compare' },
+        h('thead', {}, h('tr', {},
+          h('th', {}, 'Стъпка'),
+          h('th', {}, `Сега (${Math.round(real * 100)}%)`),
+          h('th', {}, 'С плъзгача'))),
+        body)
+      : h('p', { class: 'muted small' }, 'Няма следващи стъпки.'),
+    h('p', { class: 'muted small' }, 'Плъзгачът не пипа прогреса. Окончателната стойност се сменя в js/core/config.js.'));
+}
+
 export function renderSimulator(slot, rerender) {
   const after = async (action) => {
     await action();
@@ -77,6 +117,7 @@ export function renderSimulator(slot, rerender) {
           if (to > from) await showEvolution(from, to);
         }),
       }, 'Скочи')),
+    thresholdPreview(),
     h('div', { class: 'row' },
       h('button', {
         class: 'btn',

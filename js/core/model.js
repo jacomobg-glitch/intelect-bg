@@ -1,5 +1,5 @@
 // Модел на данните. Съзнателно няма полета за дати на активност, серии или история на влизания.
-import { SKILLS } from './config.js';
+import { CONFIG, SKILLS } from './config.js';
 import { TOTAL_STEPS } from './evolution.js';
 import { isISODate } from './sm2.js';
 
@@ -27,7 +27,18 @@ export const defaultRecord = (id) => ({
   lastDifficulty: 1,
   plays: 0,
   demoSeen: false,
+  feel: null,        // последната оценка „Лесно / Точно / Трудно“, без история
 });
+
+export const FEELS = Object.freeze(['easy', 'right', 'hard']);
+export const FEEL_LABELS = Object.freeze({ easy: 'Лесно', right: 'Точно', hard: 'Трудно' });
+
+// „Лесно“ вдига началната трудност с една стъпка, „Трудно“ я сваля, „Точно“ не мести нищо.
+export const feelShift = (feel) => (feel === 'easy' ? CONFIG.FEEL_SHIFT : feel === 'hard' ? -CONFIG.FEEL_SHIFT : 0);
+
+// Начална трудност за следващата сесия: докъдето е стигнал staircase, преместена с последната оценка.
+// Оценката важи за точно една следваща сесия, затова completeSession я изчиства след употреба.
+export const startDifficulty = (record) => Math.max(1, record.lastDifficulty + feelShift(record.feel));
 
 const isCount = (x) => typeof x === 'number' && Number.isFinite(x) && x >= 0;
 const ID_PATTERN = /^[a-z0-9-]{1,64}$/;
@@ -67,6 +78,7 @@ export function cleanRecord(raw) {
   if (isCount(raw.lastDifficulty) && raw.lastDifficulty >= 1) rec.lastDifficulty = raw.lastDifficulty;
   if (isCount(raw.plays)) rec.plays = raw.plays;
   rec.demoSeen = raw.demoSeen === true;
+  if (FEELS.includes(raw.feel)) rec.feel = raw.feel;
   return rec;
 }
 

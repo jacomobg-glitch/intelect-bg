@@ -1,14 +1,5 @@
 // Интерактивни SVG визуализации. Всяка е функция (host) => void и сама си пази състоянието.
-import { h, mount } from '../core/dom.js';
-
-const NS = 'http://www.w3.org/2000/svg';
-
-function s(tag, attrs = {}, text) {
-  const el = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
-  if (text !== undefined) el.textContent = String(text);
-  return el;
-}
+import { h, mount, svgEl as s } from '../core/dom.js';
 
 const svgRoot = (w, height, label) => s('svg', { viewBox: `0 0 ${w} ${height}`, class: 'viz-svg', role: 'img', 'aria-label': label });
 

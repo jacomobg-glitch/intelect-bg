@@ -3,6 +3,7 @@ import { CATEGORIES, SKILL_LABELS } from '../core/config.js';
 import { h, mount } from '../core/dom.js';
 import { allGames, isUnlocked } from '../core/registry.js';
 import { recordOf, state } from '../core/store.js';
+import { icon } from './icons.js';
 import { fullName } from './ui.js';
 
 const CATEGORY_NOTES = {
@@ -29,6 +30,11 @@ export function renderTrain(root, categoryId) {
   mount(root,
     h('h1', { class: 'page-title' }, categoryId ? categories[0].label : 'Тренирай'),
     h('p', { class: 'muted' }, 'Избери каквото искаш, за колкото време искаш.'),
+    categoryId ? null : h('a', { class: 'card card-link surprise-card', href: '#/surprise' },
+      icon('sparkles'),
+      h('span', { class: 'module-text' },
+        h('strong', {}, 'Изненадай ме'),
+        h('span', {}, 'Една тема по математика и две игри, около 5 до 10 минути.'))),
     categories.map((cat) => {
       const list = games.filter((g) => g.category === cat.id);
       return h('section', { class: 'group' },

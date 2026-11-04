@@ -1,7 +1,13 @@
 // Общо за всички игри: дневник на опитите, staircase, точкуване. Без DOM, за да се тества в Node.
+import { CONFIG } from '../../core/config.js';
 import { mean, sd } from '../../core/stats.js';
 
 export const MIN_VALID_RT = 100; // реакции под 100 ms се отхвърлят като преждевременни
+
+// Целевият успех на staircase „N верни нагоре, 1 грешка надолу“.
+// Трудността стои на място, когато изкачването и спадането са равновероятни: p^N = 1 − p^N,
+// тоест p = 0.5^(1/N). При N = 3 това са около 79% успех: предизвикателство, но не разочарование.
+export const staircaseTarget = (up = CONFIG.STAIRCASE_UP) => 0.5 ** (1 / Math.max(1, up));
 
 // Времето идва от момента на самото докосване (pointerdown), а не от обработката му.
 export const reactionMs = (event, onset) => (event.timeStamp || performance.now()) - onset;
@@ -15,11 +21,12 @@ export function trialPoints(level, rt = null, limit = null) {
 }
 
 export class TrialLog {
-  // adapt: true значи staircase „2 верни нагоре, 1 грешка надолу“. Така успеваемостта клони към около 71%.
-  constructor({ startLevel = 1, maxLevel = 3, adapt = true } = {}) {
+  // adapt: true значи staircase „STAIRCASE_UP верни нагоре, 1 грешка надолу“ (виж staircaseTarget).
+  constructor({ startLevel = 1, maxLevel = 3, adapt = true, up = CONFIG.STAIRCASE_UP } = {}) {
     this.maxLevel = Math.max(1, maxLevel);
     this.level = Math.min(Math.max(1, Math.round(startLevel) || 1), this.maxLevel);
     this.adapt = adapt;
+    this.up = Math.max(1, up);
     this.points = 0;
     this.rts = [];
     this.correctCount = 0;
@@ -35,7 +42,7 @@ export class TrialLog {
     if (rt !== null) this.rts.push(rt);
     if (!this.adapt) return;
     this.run += 1;
-    if (this.run >= 2) {
+    if (this.run >= this.up) {
       this.level = Math.min(this.level + 1, this.maxLevel);
       this.run = 0;
     }

@@ -13,6 +13,7 @@ import { flushNotice, initPerf } from './views/perf.js';
 import { renderPlay } from './views/play.js';
 import { renderProfile } from './views/profile.js';
 import { renderSettings } from './views/settings.js';
+import { renderSurprise } from './views/surprise.js';
 import { initShell, renderShell } from './views/shell.js';
 import { renderTrain } from './views/train.js';
 
@@ -30,6 +31,7 @@ function route() {
   else if (name === 'reflex') renderTrain(view, 'reflex');
   else if (name === 'gallery') renderGallery(view);
   else if (name === 'profile') renderProfile(view);
+  else if (name === 'surprise') cleanup = renderSurprise(view) || null;
   else if (name === 'settings') renderSettings(view);
   else if (name === 'diagnostics') cleanup = renderDiagnostics(view) || null;
   else if (name === 'play' && arg) cleanup = renderPlay(view, arg) || null;

@@ -48,14 +48,19 @@ export function makeStroopTrial(level, random, set = COLOR_SET) {
 }
 
 const nextGap = () => 300 + Math.random() * 600;
+export const RULE_WARNING = 'Внимание: правилото се сменя';
+const WARN_MS = 1800;  // колко дълго стои предупреждението преди първата смяна на правилото
 
-function present(g) {
+// Показва вече подготвения опит. Времето тече от кадъра, в който стимулът е на екрана.
+function reveal(g) {
   const { set, stim, cue } = g.state;
-  const trial = { ...makeStroopTrial(g.log.level, Math.random, set), onset: null };
+  const trial = g.state.pending;
+  g.state.pending = null;
   g.state.trial = trial;
   const word = set.find((s) => s.id === trial.word).word;
   cue.textContent = trial.rule === 'word' ? 'Отговори по ДУМАТА' : (g.state.variant === 'shape' ? 'Отговори по ФОРМАТА' : 'Отговори по ЦВЕТА');
   cue.classList.toggle('stroop-cue-switch', trial.rule === 'word');
+  cue.classList.remove('stroop-cue-warn');
   if (g.state.variant === 'shape') {
     stim.replaceChildren(shapeEl(trial.ink), h('span', { class: 'stroop-caption' }, word));
     stim.className = 'stroop-stim';
@@ -66,10 +71,27 @@ function present(g) {
   g.markOnset(trial);
 }
 
+// Подготвя следващия опит. Преди ПЪРВАТА смяна на правилото изчаква с кратко предупреждение:
+// смяната трябва да е трудна, а не капан. После смените идват без предупреждение.
+function present(g, now) {
+  g.state.pending = { ...makeStroopTrial(g.log.level, Math.random, g.state.set), onset: null };
+  if (g.state.pending.rule === 'word' && !g.state.warned) {
+    g.state.warned = true;
+    g.state.stim.replaceChildren();
+    g.state.stim.className = 'stroop-stim';
+    g.state.cue.textContent = RULE_WARNING;
+    g.state.cue.classList.add('stroop-cue-warn');
+    g.state.revealAt = now + WARN_MS;
+    return;
+  }
+  reveal(g);
+}
+
 function settle(g) {
   g.state.trial = null;
   g.state.stim.replaceChildren();
   g.state.stim.className = 'stroop-stim';
+  g.state.pending = null;
   g.state.nextAt = performance.now() + nextGap();
   g.updateLevel();
 }
@@ -104,12 +126,19 @@ export default createGame({
     h('span', {}, s.label),
     h('kbd', {}, String(i + 1)))));
     stage.append(cue, stim, buttons);
-    g.state = { variant, set, cue, stim, trial: null, nextAt: performance.now() + nextGap() };
+    g.state = {
+      variant, set, cue, stim, trial: null, pending: null, warned: false, revealAt: 0,
+      nextAt: performance.now() + nextGap(),
+    };
   },
 
   frame(g, now) {
-    const { trial, nextAt } = g.state;
-    if (!trial && now >= nextAt) present(g);
+    const { trial, pending, nextAt } = g.state;
+    if (pending) {
+      if (now >= g.state.revealAt) reveal(g);
+      return;
+    }
+    if (!trial && now >= nextAt) present(g, now);
     else if (trial && trial.onset !== null && now - trial.onset > trial.limit) {
       g.log.error('miss');
       settle(g);

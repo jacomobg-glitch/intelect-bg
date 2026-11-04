@@ -27,11 +27,15 @@ export const subLabel = (step) => SUB_LABELS[subIndex(step)];
 
 export const levelFromXP = (xp) => Math.floor(Math.sqrt(Math.max(0, xp) / CONFIG.LEVEL_K));
 
+// Обратното на levelFromXP: най-малкият XP, при който способността е на ниво L.
+export const xpForLevel = (level) => CONFIG.LEVEL_K * Math.max(0, level) ** 2;
+
 // Минимално ниво във ВСЯКА способност за достигане на дадена стъпка.
-export function requiredLevel(step) {
+// threshold е делът от „справедливия дял“ XP; реалният прогрес винаги ползва стойността от конфигурацията.
+export function requiredLevel(step, threshold = CONFIG.SKILL_SHARE_THRESHOLD) {
   if (step <= 0) return 0;
   const fairShare = CUMULATIVE_XP[step] / SKILLS.length;
-  return Math.max(1, levelFromXP(CONFIG.BALANCE * fairShare));
+  return Math.max(1, levelFromXP(threshold * fairShare));
 }
 
 // Активна способност е тази, за която има поне един отключен модул.
@@ -49,8 +53,8 @@ export const activationOf = (profile, skill) => {
 };
 
 // Мек преход: късно активирана способност започва от нула и расте нормално оттам.
-export function requirementFor(profile, skill, step) {
-  return Math.max(0, requiredLevel(step) - requiredLevel(activationOf(profile, skill)));
+export function requirementFor(profile, skill, step, threshold = CONFIG.SKILL_SHARE_THRESHOLD) {
+  return Math.max(0, requiredLevel(step, threshold) - requiredLevel(activationOf(profile, skill), threshold));
 }
 
 // Записва стъпка на активиране за новите активни способности. Старите записи не се пипат.
@@ -124,4 +128,20 @@ export function nextStepInfo(profile, active = SKILLS) {
     gates,
     blocked: gates.filter((g) => g.active && !g.ok).map((g) => g.skill),
   };
+}
+
+// Най-близкото препятствие към следващата стъпка. Изоставаща способност е по-близо от общия XP,
+// защото тренировката ѝ носи и двете: XP за способността и XP за стъпката.
+// Връща { kind: 'max' | 'ready' | 'skill' | 'xp', skill, xp, step, info }.
+export function nearestObstacle(profile, active = SKILLS) {
+  const info = nextStepInfo(profile, active);
+  if (info.isMax) return { kind: 'max', skill: null, xp: 0, step: null, info };
+  const gaps = info.gates
+    .filter((g) => g.active && !g.ok)
+    .map((g) => ({ skill: g.skill, xp: Math.max(1, Math.ceil(xpForLevel(g.required) - profile.skillXP[g.skill])) }))
+    .sort((a, b) => a.xp - b.xp || SKILLS.indexOf(a.skill) - SKILLS.indexOf(b.skill));
+  if (gaps.length) return { kind: 'skill', ...gaps[0], step: info.next, info };
+  const left = Math.ceil(info.xpCost - info.xpInto);
+  if (left > 0) return { kind: 'xp', skill: null, xp: left, step: info.next, info };
+  return { kind: 'ready', skill: null, xp: 0, step: info.next, info };
 }
