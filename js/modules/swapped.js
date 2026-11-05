@@ -62,6 +62,8 @@ export default createGame({
   unlockStep: 4,
   skills: ['memory'],
   description: 'Запомни подредбата. Две неща си сменят местата: намери едно от тях.',
+  keys: 'стрелките местят курсора, Enter избира',
+  gridKeys: true,
   runMs: RUN_MS,
 
   setup(g, stage) {

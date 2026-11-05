@@ -54,6 +54,7 @@ export default createGame({
   unlockStep: 12,
   skills: ['logic', 'speed'],
   description: 'Приборът показва наклон и накъде гледа носът. Избери кое описание му отговаря.',
+  keys: 'цифрите 1–4 избират отговор',
   runMs: RUN_MS,
   levelText: (level) => `Трудност ${level} · ${instrumentParams(level).pairs ? 'наклон и нос' : 'една ос'}`,
 

@@ -53,6 +53,7 @@ export default createGame({
   unlockStep: 5,
   skills: ['speed', 'math'],
   description: 'Сметни и избери отговора, преди да изтече времето.',
+  keys: 'цифрите 1–4 избират отговор',
   runMs: RUN_MS,
   levelText: (level) => `Трудност ${level} · ${(quickParams(level).limitMs / 1000).toFixed(1)} с`,
 

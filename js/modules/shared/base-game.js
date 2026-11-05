@@ -4,6 +4,44 @@ import { h } from '../../core/dom.js';
 import { sessionXP } from '../../core/evolution.js';
 import { TrialLog, isValidReaction, reactionMs } from './trial-log.js';
 
+// Цифрите 1–9 избират n-тия бутон с отговор. Стои тук, а не във всяка игра поотделно,
+// защото е един и същ жест навсякъде, където отговорът е бутон.
+function pressDigit(game, event, spec) {
+  const index = Number(event.key) - 1;
+  if (!Number.isInteger(index) || index < 0 || index > 8 || !spec.onAnswer) return false;
+  const button = game.stage.querySelectorAll('[data-answer]')[index];
+  if (!button) return false;
+  spec.onAnswer(game, button.dataset.answer, event);
+  return true;
+}
+
+// Клавиатурен курсор за игрите с мрежа: стрелките местят, Enter или интервал избира.
+// Броят колони се чете от --size на самата мрежа, затова важи за всяка мрежа без настройка.
+function gridColumns(buttons) {
+  const parent = buttons[0].parentElement;
+  const size = parent ? Number.parseInt(getComputedStyle(parent).getPropertyValue('--size'), 10) : NaN;
+  return Number.isInteger(size) && size > 0 ? size : buttons.length;
+}
+
+function moveCursor(game, event, spec) {
+  const buttons = [...game.stage.querySelectorAll('[data-answer]')];
+  if (!buttons.length || !spec.onAnswer) return false;
+  const columns = gridColumns(buttons);
+  const step = {
+    ArrowLeft: -1, ArrowRight: 1, ArrowUp: -columns, ArrowDown: columns,
+  }[event.code];
+  const at = Math.min(game.cursor || 0, buttons.length - 1);
+  if (step !== undefined) {
+    game.cursor = Math.min(buttons.length - 1, Math.max(0, at + step));
+    for (const b of buttons) b.classList.remove('kb-cursor');
+    buttons[game.cursor].classList.add('kb-cursor');
+    return true;
+  }
+  if (event.code !== 'Enter' && event.code !== 'Space') return false;
+  spec.onAnswer(game, buttons[at].dataset.answer, event);
+  return true;
+}
+
 export function createGame(spec) {
   return {
     id: spec.id,
@@ -12,6 +50,8 @@ export function createGame(spec) {
     unlockStep: spec.unlockStep,
     skills: spec.skills,
     description: spec.description,
+    // Какво върши клавиатурата: показва се във въведението преди играта.
+    keys: spec.keys || null,
     allowHidden: Boolean(spec.allowHidden),
     demo: spec.demo,
     introOptions: spec.introOptions,
@@ -47,9 +87,12 @@ export function createGame(spec) {
         else if (spec.onTap) spec.onTap(this, e);
       };
       this.stage.addEventListener('pointerdown', this.onPointer);
+      this.cursor = 0;
       this.onKeyDown = (e) => {
-        if (!this.running || e.repeat || !spec.onKey) return;
-        if (spec.onKey(this, e)) e.preventDefault();
+        if (!this.running || e.repeat) return;
+        if (spec.onKey && spec.onKey(this, e)) { e.preventDefault(); return; }
+        if (spec.digitKeys && pressDigit(this, e, spec)) { e.preventDefault(); return; }
+        if (spec.gridKeys && moveCursor(this, e, spec)) e.preventDefault();
       };
       document.addEventListener('keydown', this.onKeyDown);
 

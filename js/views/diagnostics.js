@@ -1,13 +1,16 @@
 // Скрит екран „Диагностика“ за проверка на истински телефон. Отключва се от тестовия режим.
 import { h, mount, toast } from '../core/dom.js';
-import { LowFpsDetector, buildReport, frameStats, latencyStats } from '../core/stats.js';
+import { LowFpsDetector, buildReport, frameStats, inputLine, latencyStats, summarizeInput } from '../core/stats.js';
 import { deviceSettings, fallbackStatus, resetFallback, updateDevice, watchFrames } from './perf.js';
 import { APP_VERSION } from './settings.js';
 
 const MEASURE_MS = 10000;
 const num = (x, d = 0) => (x === null || x === undefined ? '–' : x.toFixed(d));
 
-function collect(tap) {
+// taps е списък от { kind, ms }: пробната зона също помни с какво е натисната.
+function collect(taps) {
+  const samples = {};
+  for (const { kind, ms } of taps) (samples[kind] ||= []).push(ms);
   return {
     version: APP_VERSION,
     userAgent: navigator.userAgent,
@@ -15,7 +18,8 @@ function collect(tap) {
     viewport: `${window.innerWidth}×${window.innerHeight}`,
     dpr: window.devicePixelRatio,
     fallback: fallbackStatus(),
-    tap: latencyStats(tap),
+    tap: latencyStats(taps.map((t) => t.ms)),
+    tapInput: summarizeInput(samples),
     games: deviceSettings().games || {},
   };
 }
@@ -43,19 +47,30 @@ export function renderDiagnostics(root) {
   const report = h('textarea', { class: 'diag-report', readonly: true, rows: '10', 'aria-label': 'Текст на отчета' });
   const paintReport = () => { report.value = buildReport(collect(taps)); };
 
-  const tapOut = h('p', { class: 'diag-value' }, 'Още няма докосвания.');
+  const tapOut = h('p', { class: 'diag-value' }, 'Още няма опити.');
+  const record = (kind, ms) => {
+    taps.push({ kind, ms });
+    const samples = {};
+    for (const t of taps) (samples[t.kind] ||= []).push(t.ms);
+    tapOut.textContent = inputLine(summarizeInput(samples));
+    paintReport();
+  };
+  // Зоната приема и клавиатура: на лаптоп повечето отговори идват оттам.
   const pad = h('div', {
     class: 'diag-pad',
     role: 'button',
-    'aria-label': 'Зона за докосване',
+    tabindex: '0',
+    'aria-label': 'Зона за проба: натискай с мишка, пръст или клавиш',
     onpointerdown: (e) => {
       e.preventDefault();
-      taps.push(performance.now() - e.timeStamp);
-      const s = latencyStats(taps);
-      tapOut.textContent = `Средно ${num(s.mean, 1)} ms, разсейване ${num(s.sd, 1)} ms, ${s.count} докосвания`;
-      paintReport();
+      record(e.pointerType || 'mouse', performance.now() - e.timeStamp);
     },
-  }, 'Докосвай тук няколко пъти');
+    onkeydown: (e) => {
+      if (e.repeat || (e.code !== 'Space' && e.code !== 'Enter')) return;
+      e.preventDefault();
+      record('keyboard', performance.now() - e.timeStamp);
+    },
+  }, 'Натискай тук: с мишка, с пръст или с интервал');
 
   const fpsOut = h('p', { class: 'diag-value' }, 'Натисни „Замери“ и не пипай екрана.');
   const measure = h('button', {
@@ -112,16 +127,17 @@ export function renderDiagnostics(root) {
         h('span', {}, 'Показвай FPS на живо по време на игра'))),
 
     h('section', { class: 'group' },
-      h('h2', {}, 'Забавяне при докосване'),
-      h('p', { class: 'muted small' }, 'Времето от събитието pointerdown до обработката му. Не включва забавянето на самия сензор на екрана.'),
+      h('h2', {}, 'Забавяне при натискане'),
+      h('p', { class: 'muted small' }, 'Времето от събитието до обработката му, поотделно за мишка, докосване, писалка и клавиатура. Не включва забавянето на самия сензор или клавиш.'),
       pad, tapOut),
 
     h('section', { class: 'group' },
       h('h2', {}, 'Изиграни игри'),
       Object.keys(games).length
-        ? Object.entries(games).map(([id, g]) => h('div', { class: 'profile-row' },
+        ? Object.entries(games).map(([id, g]) => h('div', { class: 'profile-row diag-game' },
           h('strong', {}, id),
-          h('span', { class: 'small muted' }, `${num(g.avg)} FPS, 1% ${num(g.low1)}, докосване ${num(g.tapMean, 1)} ms`)))
+          h('span', { class: 'small muted' }, `${num(g.avg)} FPS, 1% ${num(g.low1)}`),
+          h('span', { class: 'small muted diag-input' }, g.input ? inputLine(g.input) : `докосване ${num(g.tapMean, 1)} ms`)))
         : h('p', { class: 'muted small' }, 'Изиграй игра до края и се върни тук.')),
 
     h('section', { class: 'group' },

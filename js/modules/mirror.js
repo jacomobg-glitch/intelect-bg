@@ -60,6 +60,8 @@ export default createGame({
   unlockStep: 8,
   skills: ['logic'],
   description: 'Една фигура е същата, само завъртяна. Останалите са огледални. Без бързане.',
+  keys: 'цифрите 1–4 избират фигура',
+  digitKeys: true,
   allowHidden: true,
   reportsRT: false,
 

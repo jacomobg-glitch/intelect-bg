@@ -44,6 +44,7 @@ export default createGame({
   unlockStep: 3,
   skills: ['attention'],
   description: 'Натисни при зелен кръг. При червен квадрат се въздържи.',
+  keys: 'интервал натиска при зелен кръг',
   runMs: RUN_MS,
 
   setup(g, stage) {

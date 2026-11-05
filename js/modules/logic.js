@@ -69,6 +69,8 @@ export default createGame({
   unlockStep: 0,
   skills: ['logic'],
   description: 'Намери правилото и избери какво следва. Без бързане.',
+  keys: 'цифрите 1–4 избират отговор',
+  digitKeys: true,
   allowHidden: true,
   reportsRT: false,
 

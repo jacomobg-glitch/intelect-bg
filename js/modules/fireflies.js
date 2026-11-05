@@ -23,6 +23,7 @@ const game = {
   unlockStep: 0,
   skills: ['speed', 'attention'],
   description: 'Докосвай светулките, преди да угаснат. Осите не пипай.',
+  keys: 'интервал хваща светулката',
   difficulty: 1,
   stim: null,
 
@@ -73,6 +74,12 @@ const game = {
 
     this.onPointer = (e) => this.handleTap(e);
     this.canvas.addEventListener('pointerdown', this.onPointer);
+    this.onKeyDown = (e) => {
+      if (!this.running || e.repeat || e.code !== 'Space') return;
+      e.preventDefault();
+      this.press(e.timeStamp || performance.now());
+    };
+    document.addEventListener('keydown', this.onKeyDown);
     this.updateLevel();
   },
 
@@ -93,6 +100,7 @@ const game = {
     cancelAnimationFrame(this.raf);
     this.observer?.disconnect();
     this.canvas?.removeEventListener('pointerdown', this.onPointer);
+    document.removeEventListener('keydown', this.onKeyDown);
   },
 
   tick(now) {
@@ -136,9 +144,21 @@ const game = {
     }
     const b = this.canvas.getBoundingClientRect();
     const dist = Math.hypot(e.clientX - b.left - s.x, e.clientY - b.top - s.y);
+    // Встрани от стимула: нито вярно, нито грешно – просто не е докоснат.
     if (dist > s.r + TOUCH_MARGIN) return;
+    this.press(e.timeStamp || performance.now());
+  },
 
-    const rt = (e.timeStamp || performance.now()) - s.onset;
+  // Самото решение „хващам ли това“ – еднакво за пръст, мишка и клавиш.
+  // С клавиатура отпада само прицелването: на екрана има най-много един стимул.
+  press(at) {
+    const s = this.stim;
+    if (!this.running) return;
+    if (!s || s.onset === null) {
+      this.premature += 1;
+      return;
+    }
+    const rt = at - s.onset;
     if (rt < MIN_VALID_RT) {
       this.premature += 1;
       return;

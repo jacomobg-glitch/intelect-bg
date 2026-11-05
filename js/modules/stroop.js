@@ -112,6 +112,7 @@ export default createGame({
   unlockStep: 0,
   skills: ['attention', 'flexibility'],
   description: 'Думата казва едно, цветът друго. Отговаряй по цвета.',
+  keys: 'цифрите 1–4 избират отговор',
   runMs: RUN_MS,
 
   setup(g, stage) {

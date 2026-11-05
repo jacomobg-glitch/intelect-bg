@@ -59,6 +59,7 @@ export default createGame({
   unlockStep: 15,
   skills: ['attention', 'speed'],
   description: 'Дръж знака си върху движещата се цел. Пръстът или стрелките го местят.',
+  keys: 'стрелките местят знака',
   runMs: RUN_MS,
   reportsRT: false,
   levelText: (level) => `Трудност ${level} · допуск ${Math.round(trackingParams(level).tolerance * 100)}%`,

@@ -42,6 +42,8 @@ export default createGame({
   unlockStep: 2,
   skills: ['attention'],
   description: 'Една фигура не е като другите. Докосни я.',
+  keys: 'стрелките местят курсора, Enter избира',
+  gridKeys: true,
   runMs: RUN_MS,
 
   setup(g, stage) {

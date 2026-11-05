@@ -517,6 +517,9 @@ body.playing .view { max-width: none; padding: 0; height: 100dvh; margin: 0; }
 
 .compare-note { margin-top: 10px; }
 
+/* Клавиатурен курсор в мрежите: вижда се само когато се ползват стрелките. */
+.kb-cursor { outline: 3px solid var(--game-accent); outline-offset: 2px; }
+
 /* Общо за игрите */
 .game-board {
   flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
@@ -871,6 +874,8 @@ body.playing .view { max-width: none; padding: 0; height: 100dvh; margin: 0; }
 @keyframes demo-logic { 0%, 45% { opacity: 0; } 55%, 100% { opacity: 1; } }
 
 /* Диагностика */
+.diag-game { flex-wrap: wrap; }
+.diag-input { flex-basis: 100%; }
 .diag-value { font-variant-numeric: tabular-nums; }
 .diag-ua { font-size: .8rem; overflow-wrap: anywhere; }
 .diag-pad {

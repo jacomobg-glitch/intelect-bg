@@ -59,6 +59,8 @@ export default createGame({
   unlockStep: 9,
   skills: ['flexibility'],
   description: 'Сложи картата в верния кош. Правилото не е казано и се сменя без предупреждение.',
+  keys: 'цифрите 1–3 избират кош',
+  digitKeys: true,
   runMs: RUN_MS,
 
   setup(g, stage) {

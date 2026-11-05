@@ -118,6 +118,7 @@ export default createGame({
   unlockStep: 0,
   skills: ['memory'],
   description: 'Натисни, когато позицията или цветът съвпадат с показаните преди N стъпки.',
+  keys: 'A за същото място, L за същия цвят',
   adapt: false,
   levelText: (level) => `Трудност ${level} · ${nbackParams(level).n} назад`,
 

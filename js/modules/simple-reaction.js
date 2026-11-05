@@ -47,6 +47,7 @@ export default createGame({
   unlockStep: 0,
   skills: ['speed'],
   description: 'Изчакай да светне и натисни веднага.',
+  keys: 'интервал натиска подложката',
   runMs: RUN_MS,
 
   setup(g, stage) {

@@ -55,6 +55,7 @@ export default createGame({
   unlockStep: 17,
   skills: ['logic', 'memory'],
   description: 'Завърти фигурата наум на казаното и избери как изглежда след това.',
+  keys: 'цифрите 1–4 избират отговор',
   runMs: RUN_MS,
   levelText: (level) => `Трудност ${level} · мрежа ${rotationParams(level).grid}×${rotationParams(level).grid}`,
 

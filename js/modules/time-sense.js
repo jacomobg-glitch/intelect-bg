@@ -71,6 +71,7 @@ export default createGame({
   unlockStep: 14,
   skills: ['attention', 'memory'],
   description: 'Показва се отрязък от време. Отмери същия наум, без брояч.',
+  keys: 'интервал започва и спира отмерването',
   runMs: RUN_MS,
   reportsRT: false,
   levelText: (level) => `Трудност ${level} · допуск ±${Math.round(timeSenseParams(level).tolerance * 100)}%`,

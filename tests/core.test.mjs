@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { BackupError, parseBackup, APP_ID } from '../js/core/backup.js';
+import { BackupError, formatMoment, parseBackup, APP_ID } from '../js/core/backup.js';
 import { CONFIG, SKILLS } from '../js/core/config.js';
 import {
   CUMULATIVE_XP, STEP_COSTS, TARGET_TOTAL_XP, TOTAL_STEPS, applyXP, canReach, creatureIndex,
@@ -167,4 +167,13 @@ test('приложението не съдържа известия, серии 
 test('precache-manifest.js е актуален (иначе: npm run precache)', () => {
   const onDisk = readFileSync(new URL('../precache-manifest.js', import.meta.url), 'utf8');
   assert.equal(onDisk, render(buildManifest()));
+});
+
+// Тихото поле „Последен експорт“ в Настройки: само информация, без напомняне.
+test('последен експорт: показва се четимо, а повредена стойност не чупи екрана', () => {
+  // Сравнението е с местно време от двете страни, затова тестът не зависи от часовата зона.
+  const at = new Date(2026, 10, 5, 9, 7);
+  assert.equal(formatMoment(at.toISOString()), '5.11.2026, 09:07');
+  assert.equal(formatMoment(new Date(2026, 0, 1, 23, 59).toISOString()), '1.1.2026, 23:59');
+  for (const bad of ['', 'вчера', null, undefined, 42, {}]) assert.equal(formatMoment(bad), null, String(bad));
 });

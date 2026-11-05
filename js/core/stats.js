@@ -24,6 +24,48 @@ export function latencyStats(samples) {
   return { mean: mean(samples), sd: sd(samples), count: samples.length };
 }
 
+const num = (x, digits = 0) => (x === null || x === undefined ? '–' : x.toFixed(digits));
+
+// Видове вход. Времената от мишка, пръст, писалка и клавиатура не се смесват: един и същ
+// човек на едно и също устройство дава различни числа с различен вход, а сравнението
+// е само със себе си. Затова всяка сесия помни с какво е играна.
+export const INPUT_LABELS = Object.freeze({
+  mouse: 'мишка',
+  touch: 'докосване',
+  pen: 'писалка',
+  keyboard: 'клавиатура',
+});
+
+export const INPUT_KINDS = Object.freeze(Object.keys(INPUT_LABELS));
+
+// Само видовете с поне един запис, подредени от най-ползвания надолу.
+export const inputKinds = (input) => Object.entries(input || {})
+  .filter(([kind, v]) => INPUT_KINDS.includes(kind) && v && v.count > 0)
+  .sort((a, b) => b[1].count - a[1].count);
+
+// Водещият вход на сесията: по него се решава дали две сесии изобщо са сравними.
+export const mainInput = (input) => {
+  const top = inputKinds(input)[0];
+  return top ? top[0] : null;
+};
+
+// Обобщава видовете вход от събрани времена: { mouse: [12, 9], keyboard: [6] } → статистика.
+export function summarizeInput(samples) {
+  const out = {};
+  for (const kind of INPUT_KINDS) {
+    const list = samples[kind];
+    if (!list || !list.length) continue;
+    const s = latencyStats(list);
+    out[kind] = { count: s.count, mean: s.mean, sd: s.sd };
+  }
+  return out;
+}
+
+export function inputLine(input) {
+  const parts = inputKinds(input).map(([kind, v]) => `${INPUT_LABELS[kind]} ${v.count} × ${num(v.mean, 1)} ms ±${num(v.sd, 1)}`);
+  return parts.length ? parts.join(', ') : 'няма записан вход';
+}
+
 // Сработва, когато средните FPS за целия прозорец са под прага. Дълга пауза между кадрите значи
 // скрит екран или заспал телефон, а не бавно устройство, затова прозорецът започва отначало.
 export class LowFpsDetector {
@@ -44,23 +86,23 @@ export class LowFpsDetector {
   }
 }
 
-const num = (x, digits = 0) => (x === null || x === undefined ? '–' : x.toFixed(digits));
-
 // Отчетът за копиране: само техническа информация, без прогрес и без дати.
-export function buildReport({ version, userAgent, screen, viewport, dpr, fallback, games, tap }) {
+export function buildReport({ version, userAgent, screen, viewport, dpr, fallback, games, tap = {}, tapInput }) {
   const lines = [
     `Еволюция на ума, диагностика, версия ${version}`,
     `Браузър: ${userAgent}`,
     `Екран: ${screen}; прозорец: ${viewport}; devicePixelRatio: ${dpr}`,
     `Плътен фон: ${fallback.active ? 'включен' : 'изключен'}${fallback.reason ? ` (${fallback.reason})` : ''}`,
-    `Докосване, пробна зона: средно ${num(tap.mean, 1)} ms, разсейване ${num(tap.sd, 1)} ms, ${tap.count} докосвания`,
+    `Пробна зона: ${tapInput ? inputLine(tapInput) : `средно ${num(tap.mean, 1)} ms, разсейване ${num(tap.sd, 1)} ms, ${tap.count} опита`}`,
     'Игри:',
   ];
   const ids = Object.keys(games);
   if (!ids.length) lines.push('  (още няма изиграни игри с тази версия)');
   for (const id of ids) {
     const g = games[id];
-    lines.push(`  ${id}: FPS средно ${num(g.avg)}, минимум ${num(g.min)}, 1% low ${num(g.low1)}, кадри ${g.frames}; докосване средно ${num(g.tapMean, 1)} ms, разсейване ${num(g.tapSd, 1)} ms, ${g.tapCount} докосвания`);
+    lines.push(`  ${id}: FPS средно ${num(g.avg)}, минимум ${num(g.min)}, 1% low ${num(g.low1)}, кадри ${g.frames}`);
+    // Отделен ред: с какво е играна сесията. Стари записи нямат този разрез.
+    lines.push(`    вход: ${g.input ? inputLine(g.input) : `докосване средно ${num(g.tapMean, 1)} ms, ${g.tapCount} докосвания`}`);
   }
   return lines.join('\n');
 }

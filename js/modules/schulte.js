@@ -55,7 +55,9 @@ function tap(g, value, event) {
     return;
   }
   g.log.correct({ rt, limit: TAP_LIMIT_MS });
-  event.target.closest('button').classList.add('sch-done');
+  // Клетката се намира по стойността, а не по event.target: от клавиатурата събитието
+  // идва от документа и няма клетка под себе си.
+  s.grid.querySelector(`[data-answer="${n}"]`)?.classList.add('sch-done');
   s.next += 1;
   s.find.textContent = `Търси: ${s.next}`;
   if (s.next > s.size * s.size) {
@@ -72,6 +74,8 @@ export default createGame({
   unlockStep: 6,
   skills: ['attention', 'speed'],
   description: 'Докосвай числата по ред, от 1 нагоре.',
+  keys: 'стрелките местят курсора, Enter избира',
+  gridKeys: true,
   runMs: RUN_MS,
   adapt: false,
   levelText: (level) => `Трудност ${level} · ${tableSize(level)}×${tableSize(level)}`,

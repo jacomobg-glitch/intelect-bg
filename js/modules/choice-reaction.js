@@ -77,6 +77,7 @@ export default createGame({
   unlockStep: 1,
   skills: ['speed', 'attention'],
   description: 'Светва една посока. Натисни точно нейния бутон, не друг.',
+  keys: 'стрелките ← ↑ ↓ → отговарят',
   runMs: RUN_MS,
   levelText: (level) => `Трудност ${level} · ${choiceParams(level).options} посоки`,
 

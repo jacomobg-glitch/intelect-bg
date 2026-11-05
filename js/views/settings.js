@@ -1,17 +1,18 @@
 // Настройки: тема, резервно копие, инсталиране. Тестовият режим се зарежда само при нужда.
-import { applyBackup, BackupError, buildBackup, normalizeData, parseBackup, readAllData, summarize } from '../core/backup.js';
+import { applyBackup, BackupError, buildBackup, formatMoment, normalizeData, parseBackup, readAllData, summarize } from '../core/backup.js';
 import { confirmDialog, h, mount, toast } from '../core/dom.js';
 import { creatureIndex, subLabel } from '../core/evolution.js';
 import { mergeData } from '../core/merge.js';
 import { activeSkills } from '../core/registry.js';
 import { loadState, saveSettings, state, syncActiveSkills } from '../core/store.js';
 import { applyTheme } from '../core/theme.js';
+import { deviceSettings, updateDevice } from './perf.js';
 import { activeSkin, formatXP, fullName } from './ui.js';
 import { canInstall, promptInstall } from '../install.js';
 
 const THEMES = [['auto', 'Като системата'], ['dark', 'Тъмна'], ['light', 'Светла']];
 const COLOR_MODES = [[false, 'С цветове'], [true, 'С форми']];
-export const APP_VERSION = '0.9.0';
+export const APP_VERSION = '0.10.0';
 const TAPS_FOR_TEST_MODE = 7;
 
 async function exportBackup() {
@@ -23,6 +24,9 @@ async function exportBackup() {
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
+  // Кога за последно е изтеглено копие: стои при настройките на устройството, а не в базата,
+  // защото важи само за този компютър и не бива да пътува с копието.
+  updateDevice({ lastExport: backup.exportedAt });
   toast('Копието е изтеглено.');
 }
 
@@ -150,9 +154,12 @@ export function renderSettings(root) {
       h('h2', {}, 'Резервно копие'),
       h('p', { class: 'muted small' }, 'Всичко се пази само на това устройство. За пренос между лаптопа и телефона изтегли копие тук и го зареди там.'),
       h('div', { class: 'row' },
-        h('button', { class: 'btn', onclick: exportBackup }, 'Изтегли копие'),
+        h('button', { class: 'btn', onclick: async () => { await exportBackup(); rerender(); } }, 'Изтегли копие'),
         h('button', { class: 'btn', onclick: () => fileInput.click() }, 'Зареди копие'),
-        fileInput)),
+        fileInput),
+      // Тихо поле: само информация. Без напомняне, без известие и без оцветяване,
+      // колкото и отдавна да е било.
+      h('p', { class: 'muted small' }, `Последен експорт: ${formatMoment(deviceSettings().lastExport) || 'още няма'}`)),
     canInstall()
       ? h('section', { class: 'group' },
         h('h2', {}, 'Инсталиране'),

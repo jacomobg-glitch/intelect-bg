@@ -1,6 +1,6 @@
 // Генериран файл: не се редактира на ръка. Обновява се с `npm run precache`.
 self.PRECACHE = {
-  "version": "4600bd903fce",
+  "version": "550f562afab4",
   "files": [
     "./",
     "./icons/LUCIDE-LICENSE.txt",

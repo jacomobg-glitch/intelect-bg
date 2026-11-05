@@ -5,7 +5,10 @@ import {
   ATTRIBUTES, SEQUENCE_RULES, isValidExtension, makeLogicTask, makeMatrixTask, makeSequenceTask, possibleNext,
 } from '../js/content/logic/generators.js';
 import { CONFIG, SKILLS } from '../js/core/config.js';
-import { LowFpsDetector, buildReport, frameStats, latencyStats, mean, sd } from '../js/core/stats.js';
+import {
+  INPUT_KINDS, LowFpsDetector, buildReport, frameStats, inputKinds, inputLine, latencyStats,
+  mainInput, mean, sd, summarizeInput,
+} from '../js/core/stats.js';
 import { activeSkills, registerGames, validateGame } from '../js/core/registry.js';
 import { cleanSettings } from '../js/core/model.js';
 import games from '../js/modules/index.js';
@@ -411,6 +414,79 @@ test('fallback: кратък спад не го включва, а скрит е
   d.add(t);
   frames(60, 2);
   assert.equal(hit, null);
+});
+
+// Лаптопът е основното устройство: игра, която иска мишка, просто не се играе там.
+test('всяка игра се играе и от клавиатура, а въведението го казва', () => {
+  // Математиката не е игра на стадий: отговорът се пише в поле и клавиатурата е самият вход.
+  const played = games.filter((g) => g.id !== 'math');
+  for (const g of played) {
+    assert.ok(g.keys && g.keys.length > 8, `${g.id}: липсва описание на клавишите`);
+    const src = readFileSync(new URL(`../js/modules/${g.id}.js`, import.meta.url), 'utf8');
+    const wired = /onKey/.test(src) || /digitKeys: true/.test(src) || /gridKeys: true/.test(src);
+    assert.ok(wired, `${g.id}: няма клавиатурно управление`);
+    assert.match(g.keys, /интервал|стрелк|цифр|Enter|A за/, `${g.id}: ${g.keys}`);
+  }
+  // Въведението преди играта показва клавишите, иначе никой няма да ги открие.
+  const play = readFileSync(new URL('../js/views/play.js', import.meta.url), 'utf8');
+  assert.match(play, /game\.keys/);
+  assert.match(play, /Клавиатура/);
+});
+
+test('общата обвивка носи цифрите и курсора, за да не се преписват във всяка игра', () => {
+  const base = readFileSync(new URL('../js/modules/shared/base-game.js', import.meta.url), 'utf8');
+  assert.match(base, /function pressDigit/);
+  assert.match(base, /function moveCursor/);
+  // Собственият onKey на играта има предимство пред общото поведение.
+  assert.match(base, /spec\.onKey && spec\.onKey\(this, e\)/);
+});
+
+test('вход: времената се държат разделени по вид, а водещият се вижда', () => {
+  assert.deepEqual(INPUT_KINDS, ['mouse', 'touch', 'pen', 'keyboard']);
+  const input = summarizeInput({ mouse: [10, 12, 14], keyboard: [6, 6], touch: [], unknown: [1, 2] });
+  // Празните видове и непознатите имена не влизат.
+  assert.deepEqual(Object.keys(input).sort(), ['keyboard', 'mouse']);
+  assert.equal(input.mouse.count, 3);
+  assert.equal(input.mouse.mean, 12);
+  assert.equal(input.keyboard.mean, 6);
+  // Подредбата е по брой: водещият вход е този, с който наистина е играно.
+  assert.deepEqual(inputKinds(input).map(([k]) => k), ['mouse', 'keyboard']);
+  assert.equal(mainInput(input), 'mouse');
+  assert.equal(mainInput({}), null);
+  assert.equal(mainInput(undefined), null);
+  const line = inputLine(input);
+  assert.match(line, /мишка 3 × 12\.0 ms/);
+  assert.match(line, /клавиатура 2 × 6\.0 ms/);
+  assert.equal(inputLine({}), 'няма записан вход');
+});
+
+test('отчет: казва с какво е играна всяка сесия', () => {
+  const input = summarizeInput({ mouse: [10, 12], keyboard: [5] });
+  const text = buildReport({
+    version: '0.10.0',
+    userAgent: 'UA',
+    screen: '1920×1080',
+    viewport: '1200×800',
+    dpr: 1,
+    fallback: { active: false, reason: null },
+    tapInput: input,
+    games: { rotation: { avg: 60, min: 50, low1: 52, frames: 3000, input } },
+  });
+  assert.match(text, /Пробна зона: мишка 2/);
+  assert.match(text, /вход: мишка 2 × 11\.0 ms/);
+  assert.match(text, /клавиатура 1/);
+  // Стар запис без разрез по вход не чупи отчета.
+  const old = buildReport({
+    version: '0.9.0',
+    userAgent: 'UA',
+    screen: 'x',
+    viewport: 'x',
+    dpr: 1,
+    fallback: { active: false, reason: null },
+    tap: latencyStats([3, 5]),
+    games: { stroop: { avg: 60, min: 50, low1: 52, frames: 3000, tapMean: 4, tapSd: 1, tapCount: 2 } },
+  });
+  assert.match(old, /вход: докосване средно 4\.0 ms/);
 });
 
 test('отчет: съдържа устройството и мерките, но нито прогрес, нито дати', () => {

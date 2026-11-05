@@ -1,7 +1,7 @@
 // Наблюдение на кадрите и докосването. Настройките на устройството са в localStorage, а не в базата:
 // не влизат в експорта, защото важат само за този телефон или лаптоп.
 import { toast } from '../core/dom.js';
-import { LowFpsDetector, frameStats, latencyStats } from '../core/stats.js';
+import { INPUT_KINDS, LowFpsDetector, frameStats, latencyStats, summarizeInput } from '../core/stats.js';
 
 const KEY = 'evolyutsiya-device';
 const STARTUP_WATCH_MS = 12000;
@@ -90,8 +90,20 @@ export function initPerf() {
 export function startGameMonitor(gameId, host) {
   const deltas = [];
   const taps = [];
-  const onDown = (e) => { if (taps.length < MAX_SAMPLES) taps.push(performance.now() - e.timeStamp); };
+  // Времената се държат разделени по вид вход: мишка, пръст, писалка, клавиатура.
+  const samples = Object.fromEntries(INPUT_KINDS.map((kind) => [kind, []]));
+  const add = (kind, ms) => {
+    const list = samples[kind] || samples.mouse;
+    if (list.length < MAX_SAMPLES) list.push(ms);
+  };
+  const onDown = (e) => {
+    if (taps.length < MAX_SAMPLES) taps.push(performance.now() - e.timeStamp);
+    add(e.pointerType || 'mouse', performance.now() - e.timeStamp);
+  };
+  // Задържан клавиш не е нова реакция, затова повторенията не се броят.
+  const onKey = (e) => { if (!e.repeat) add('keyboard', performance.now() - e.timeStamp); };
   document.addEventListener('pointerdown', onDown, true);
+  document.addEventListener('keydown', onKey, true);
 
   const live = readDevice().liveFps ? document.createElement('div') : null;
   let sinceRepaint = 0;
@@ -115,12 +127,20 @@ export function startGameMonitor(gameId, host) {
   return () => {
     stopFrames();
     document.removeEventListener('pointerdown', onDown, true);
+    document.removeEventListener('keydown', onKey, true);
     live?.remove();
     if (deltas.length < 30) return;
     const f = frameStats(deltas);
     const t = latencyStats(taps);
     writeDevice({
-      games: { ...(readDevice().games || {}), [gameId]: { avg: f.avg, min: f.min, low1: f.low1, frames: f.frames, tapMean: t.mean, tapSd: t.sd, tapCount: t.count } },
+      games: {
+        ...(readDevice().games || {}),
+        [gameId]: {
+          avg: f.avg, min: f.min, low1: f.low1, frames: f.frames,
+          tapMean: t.mean, tapSd: t.sd, tapCount: t.count,
+          input: summarizeInput(samples),
+        },
+      },
     });
   };
 }

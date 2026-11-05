@@ -87,6 +87,7 @@ export default createGame({
   unlockStep: 11,
   skills: ['attention', 'speed'],
   description: 'Гледай цифрата в средата. Знакът светва за миг встрани: покажи къде беше.',
+  keys: 'цифрите 1–8 посочват мястото',
   runMs: RUN_MS,
   levelText: (level) => `Трудност ${level} · ${peripheralParams(level).slots} места`,
 

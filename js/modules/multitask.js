@@ -101,6 +101,7 @@ export default createGame({
   unlockStep: 18,
   skills: ['flexibility', 'attention'],
   description: 'Отговаряй на стрелките и в същото време не оставяй резервоара да пресъхне.',
+  keys: 'стрелките ← → отговарят, интервал пълни резервоара',
   runMs: RUN_MS,
   levelText: (level) => `Трудност ${level} · изтича ${Math.round(multitaskParams(level).drainPerSec * 100)}%/с`,
 

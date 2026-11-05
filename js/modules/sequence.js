@@ -52,6 +52,8 @@ export default createGame({
   unlockStep: 7,
   skills: ['memory'],
   description: 'Редицата светва една по една. Повтори я в същия ред.',
+  keys: 'цифрите 1–4 натискат полетата',
+  digitKeys: true,
   runMs: RUN_MS,
   levelText: (level) => `Трудност ${level} · ${simonParams(level).length} стъпки`,
 

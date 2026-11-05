@@ -62,6 +62,8 @@ export function renderPlay(root, id, options = {}) {
       notice ? h('p', { class: 'notice' }, notice) : null,
       h('p', {}, game.description),
       demo,
+      // Лаптопът е основното устройство: как се играе с клавиатура се вижда още тук.
+      game.keys ? h('p', { class: 'muted small keys-hint' }, `Клавиатура: ${game.keys}`) : null,
       game.introOptions ? game.introOptions({ settings: state.settings, save: saveSettings }) : null,
       rec.bestScore > 0 ? h('p', { class: 'muted' }, `Личен рекорд: ${rec.bestScore}`) : null,
       h('button', { class: 'btn btn-primary btn-big', onclick: startCountdown }, 'Старт'),

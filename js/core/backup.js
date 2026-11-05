@@ -36,6 +36,16 @@ export async function readAllData() {
   return data;
 }
 
+// „Последен експорт“ в Настройки: дата и час по местно време, без секунди.
+// Празен или повреден запис дава null, за да може изгледът да каже „още няма“.
+export function formatMoment(iso) {
+  if (typeof iso !== 'string' || !iso) return null;
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return null;
+  const time = `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`;
+  return `${at.getDate()}.${at.getMonth() + 1}.${at.getFullYear()}, ${time}`;
+}
+
 export async function buildBackup() {
   return { app: APP_ID, schema: SCHEMA_VERSION, exportedAt: new Date().toISOString(), data: await readAllData() };
 }
