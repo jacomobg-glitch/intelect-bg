@@ -910,6 +910,40 @@ body.playing .view { max-width: none; padding: 0; height: 100dvh; margin: 0; }
 .demo-logic-answer { color: var(--game-green); animation: demo-logic 2.4s infinite; }
 @keyframes demo-logic { 0%, 45% { opacity: 0; } 55%, 100% { opacity: 1; } }
 
+/* Моят свят: визитки с картинка, за да се избира с поглед */
+.world-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+.world-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-l);
+  color: var(--text); font: inherit; text-align: center; cursor: pointer;
+  transition: border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+.world-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.world-card-on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.world-art { width: 64px; }
+
+/* Създай своя герой */
+.hero-stage { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 8px 0 4px; }
+.hero-preview { width: min(180px, 48vw); }
+.hero-big { width: 100%; }
+.hero-name-line { font-weight: 800; font-size: 1.2rem; }
+.hero-group { margin-top: 14px; }
+.hero-choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.hero-choice {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-m);
+  color: var(--text); font: inherit; cursor: pointer;
+}
+.hero-choice-on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.hero-swatch { width: 22px; height: 22px; border-radius: 50%; flex: none; }
+
+/* Магазин: само украса, затова е спокоен на вид */
+.shop-purse { display: flex; flex-direction: column; gap: 4px; }
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.shop-item { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.shop-item-own { border-color: var(--accent); }
+.result-coins { font-weight: 700; color: var(--accent); }
+
 /* Диагностика */
 .diag-game { flex-wrap: wrap; }
 .diag-input { flex-basis: 100%; }

@@ -2,6 +2,7 @@
 // Плюс настройваемият праг и оценката „Лесно / Точно / Трудно“.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { TEXTS } from '../js/content/texts.js';
 import { test } from 'node:test';
 import { CONFIG, SKILLS } from '../js/core/config.js';
 import {
@@ -310,9 +311,16 @@ test('по-малко от две игри: планът не се чупи', ()
 
 test('профилът не говори за слабо и силно, а за практика', () => {
   const code = readFileSync(new URL('../js/views/profile.js', import.meta.url), 'utf8');
-  assert.ok(code.includes('най-много практика'));
-  assert.ok(code.includes('място за растеж'));
+  // Текстовете живеят в js/content/texts.js (стандартен и детски), затова се четат оттам.
+  assert.match(TEXTS['profile.most'].standard, /практика/);
+  assert.match(TEXTS['profile.grow'].standard, /растеж/);
+  assert.match(TEXTS['profile.most'].kid, /упражнявал/);
   assert.doesNotMatch(code, /слаб|силн|добър|лош|IQ/i);
+  // Нито един текст, нито стандартен, нито детски, не оценява човека.
+  for (const [key, entry] of Object.entries(TEXTS)) {
+    assert.doesNotMatch(entry.standard, /слаб|силн|гениал|тъп|глупав|IQ/i, key);
+    assert.doesNotMatch(entry.kid, /слаб|силн|гениал|тъп|глупав|IQ/i, key);
+  }
 });
 
 test('Етап 5 не внася дати, серии или история по дни', () => {

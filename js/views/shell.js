@@ -13,6 +13,7 @@ const NAV = [
   { route: 'reflex', href: '#/reflex', label: 'Рефлекси', icon: 'zap' },
   { route: 'gallery', href: '#/gallery', label: 'Еволюция', icon: 'dna' },
   { route: 'profile', href: '#/profile', label: 'Профил', icon: 'user' },
+  { route: 'shop', href: '#/shop', label: 'Магазин', icon: 'archive' },
 ];
 
 const CATEGORY_ROUTE = { math: 'math', cognitive: 'games', reflex: 'reflex' };

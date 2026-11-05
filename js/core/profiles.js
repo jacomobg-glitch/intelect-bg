@@ -1,6 +1,7 @@
 // Профили: кой тренира, каква роля има и как стои заключен. Чиста логика без DOM,
 // за да се тества директно. Самото шифроване е в crypto.js, записът — в db.js.
 import { KDF_ITERATIONS, deriveKey, encryptJson, generateDataKey, newSalt, wrapDataKey } from './crypto.js';
+import { DEFAULT_WORLD, WORLD_IDS } from '../content/worlds/index.js';
 import { cleanProfile, cleanRecord, cleanSettings, cleanTopic, defaultProfile, defaultSettings } from './model.js';
 
 export const ROLES = Object.freeze(['admin', 'person', 'child']);
@@ -41,6 +42,9 @@ export const emptyPayload = () => ({
 export const cardOf = (payload) => ({
   step: payload.profile.step,
   totalXP: payload.profile.totalXP,
+  // Светът стои в картата, защото „Кой тренира?“ показва аватара от него,
+  // а съдържанието на профила е заключено. Това е външен вид, не тайна.
+  world: payload.settings.world,
 });
 
 export function defaultProfileEntry({ id = newProfileId(), name = 'Профил', role = 'person', order = 0 } = {}) {
@@ -100,7 +104,8 @@ function cleanCard(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const step = Number.isInteger(raw.step) && raw.step >= 0 ? raw.step : 0;
   const totalXP = typeof raw.totalXP === 'number' && raw.totalXP >= 0 ? raw.totalXP : 0;
-  return { step, totalXP };
+  const world = WORLD_IDS.includes(raw.world) ? raw.world : DEFAULT_WORLD;
+  return { step, totalXP, world };
 }
 
 // Съдържанието на един профил: същите проверки, които пазят и единичния прогрес.

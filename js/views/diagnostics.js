@@ -1,6 +1,7 @@
 // Скрит екран „Диагностика“ за проверка на истински телефон. Отключва се от тестовия режим.
 import { h, mount, toast } from '../core/dom.js';
 import { LowFpsDetector, buildReport, frameStats, inputLine, latencyStats, summarizeInput } from '../core/stats.js';
+import { requestPersistence, storageStatus } from '../core/store.js';
 import { deviceSettings, fallbackStatus, resetFallback, updateDevice, watchFrames } from './perf.js';
 import { APP_VERSION } from './settings.js';
 
@@ -98,6 +99,19 @@ export function renderDiagnostics(root) {
   const status = fallbackStatus();
   const games = deviceSettings().games || {};
 
+  // Колко място ползваме и трайно ли е хранилището. Числата са от браузъра, не наши.
+  const storageOut = h('p', { class: 'diag-value' }, 'Проверявам…');
+  const mb = (bytes) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  const paintStorage = async () => {
+    const info = await storageStatus();
+    const persisted = info.persisted === null ? 'не се знае' : (info.persisted ? 'да' : 'не');
+    const space = info.usage === null
+      ? 'браузърът не казва колко място ползваме'
+      : `ползвани ${mb(info.usage)} от ${info.quota ? mb(info.quota) : '—'}`;
+    storageOut.textContent = `Трайно хранилище: ${persisted}. ${space}.`;
+  };
+  paintStorage();
+
   mount(root,
     h('a', { class: 'back', href: '#/settings' }, '← Настройки'),
     h('h1', { class: 'page-title' }, 'Диагностика'),
@@ -107,6 +121,18 @@ export function renderDiagnostics(root) {
       h('h2', {}, 'Устройство'),
       h('p', { class: 'diag-value diag-ua' }, navigator.userAgent),
       h('p', { class: 'diag-value' }, `Екран ${window.screen.width}×${window.screen.height}, прозорец ${window.innerWidth}×${window.innerHeight}, devicePixelRatio ${window.devicePixelRatio}`)),
+
+    h('section', { class: 'group' },
+      h('h2', {}, 'Хранилище'),
+      storageOut,
+      h('button', {
+        class: 'btn', type: 'button',
+        onclick: async () => {
+          const ok = await requestPersistence();
+          toast(ok ? 'Браузърът обеща да не трие данните.' : 'Браузърът не даде трайно хранилище.');
+          paintStorage();
+        },
+      }, 'Поискай трайно хранилище')),
 
     h('section', { class: 'group' },
       h('h2', {}, 'Плътен фон'),

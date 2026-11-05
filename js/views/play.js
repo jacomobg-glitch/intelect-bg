@@ -8,18 +8,19 @@ import {
 } from '../core/store.js';
 import { showEvolution } from './evolution.js';
 import { startGameMonitor } from './perf.js';
+import { t, xpName } from './ui.js';
 
 // Едно докосване по желание след играта. Без задължение, без напомняне и без история:
 // пази се само последната оценка и тя мести началната трудност на следващата сесия с най-много 1.
 export function feelRow(gameId) {
   const row = h('div', { class: 'feel-row' });
-  const note = h('p', { class: 'muted small feel-note', 'aria-live': 'polite' }, 'Как беше? Отговорът е по желание.');
+  const note = h('p', { class: 'muted small feel-note', 'aria-live': 'polite' }, t('feel.ask'));
   const buttons = FEELS.map((feel) => h('button', {
     class: 'btn btn-small', type: 'button',
     onclick: async () => {
       await saveFeel(gameId, feel);
       for (const b of buttons) b.disabled = true;
-      note.textContent = 'Записано. Следващият път ще започне съобразено с това.';
+      note.textContent = t('feel.saved');
     },
   }, FEEL_LABELS[feel]));
   row.append(...buttons);
@@ -53,7 +54,7 @@ export function renderPlay(root, id, options = {}) {
   const onVisibility = () => {
     if (document.hidden && !game.allowHidden) {
       leaveGame();
-      showIntro('Опитът беше прекъснат и не се брои. Натрупаното си остава.');
+      showIntro(t('play.interrupted'));
     }
   };
 
@@ -69,7 +70,7 @@ export function renderPlay(root, id, options = {}) {
       // Лаптопът е основното устройство: как се играе с клавиатура се вижда още тук.
       game.keys ? h('p', { class: 'muted small keys-hint' }, `Клавиатура: ${game.keys}`) : null,
       game.introOptions ? game.introOptions({ settings: state.settings, save: saveSettings }) : null,
-      rec.bestScore > 0 ? h('p', { class: 'muted' }, `Личен рекорд: ${rec.bestScore}`) : null,
+      rec.bestScore > 0 ? h('p', { class: 'muted' }, t('play.record', { score: rec.bestScore })) : null,
       h('button', { class: 'btn btn-primary btn-big', onclick: startCountdown }, 'Старт'),
       options.back === null ? null : h('a', { class: 'btn', href: options.back || '#/train' }, 'Назад'),
     );
@@ -121,18 +122,19 @@ export function renderPlay(root, id, options = {}) {
     showResult(result);
   }
 
-  function showResult({ score, xp, isRecord, stats }) {
+  function showResult({ score, xp, coins = 0, isRecord, stats }) {
     mount(root,
       h('h1', { class: 'page-title' }, game.title),
       h('div', { class: 'result' },
         h('p', { class: 'result-score' }, String(score)),
-        isRecord ? h('p', { class: 'result-record' }, 'Нов личен рекорд') : h('p', { class: 'muted' }, `Личен рекорд: ${recordOf(game.id).bestScore}`),
-        h('p', { class: 'result-xp', 'aria-live': 'polite' }, xp > 0 ? `+${xp} XP` : 'Този път без XP: нямаше вярна реакция.')),
+        isRecord ? h('p', { class: 'result-record' }, t('play.newRecord')) : h('p', { class: 'muted' }, t('play.record', { score: recordOf(game.id).bestScore })),
+        h('p', { class: 'result-xp', 'aria-live': 'polite' }, xp > 0 ? `+${xp} ${xpName()}` : t('play.noXP', { xp: xpName() })),
+        coins > 0 ? h('p', { class: 'result-coins' }, `+${coins} ${coins === 1 ? 'монета' : 'монети'}`) : null),
       stats.rows ? h('dl', { class: 'stats' }, stats.rows.map(([k, v]) => h('div', {}, h('dt', {}, k), h('dd', {}, v)))) : null,
       feelRow(game.id),
       options.next
         ? h('button', { class: 'btn btn-primary btn-big', onclick: options.next.onClick }, options.next.label)
-        : h('button', { class: 'btn btn-primary btn-big', onclick: startCountdown }, 'Още веднъж'),
+        : h('button', { class: 'btn btn-primary btn-big', onclick: startCountdown }, t('play.again')),
       options.next ? null : h('a', { class: 'btn', href: '#/' }, 'Към началото'),
     );
   }

@@ -7,7 +7,7 @@ import { levelFromXP } from '../core/evolution.js';
 import { activeSkills, allGames, isUnlocked, moduleForSkill } from '../core/registry.js';
 import { recordOf, state, topicOf } from '../core/store.js';
 import { icon } from './icons.js';
-import { formatXP, fullName } from './ui.js';
+import { formatXP, fullName, t } from './ui.js';
 
 const CX = 160;
 const CY = 136;
@@ -58,8 +58,8 @@ export function practiceNote(skill, levels, active) {
   const top = Math.max(...activeLevels);
   const low = Math.min(...activeLevels);
   if (top === low) return 'натрупана практика';
-  if (level === top) return 'най-много практика';
-  if (level === low) return 'място за растеж';
+  if (level === top) return t('profile.most');
+  if (level === low) return t('profile.grow');
   return 'натрупана практика';
 }
 

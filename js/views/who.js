@@ -2,8 +2,9 @@
 // Екранът не сравнява никого с никого: показва само името, съществото и стъпката.
 import { confirmDialog, h, mount, toast } from '../core/dom.js';
 import { ROLE_LABELS, checkSecret, defaultProfileEntry, lockProfile } from '../core/profiles.js';
-import { addEntry, openProfile, state, waitingMs } from '../core/store.js';
+import { addEntry, openProfile, requestPersistence, state, waitingMs } from '../core/store.js';
 import { icon } from './icons.js';
+import { worldOf } from '../content/worlds/index.js';
 import { avatarEl, creatureAt, fullName } from './ui.js';
 
 const seconds = (ms) => Math.ceil(ms / 1000);
@@ -73,13 +74,15 @@ function unlockPanel(entry, rerender) {
 }
 
 function profileCard(entry, onPick) {
-  const creature = creatureAt(entry.card.step);
+  // Светът стои в картата: затова се вижда правилният аватар, без да се отключва профилът.
+  const world = worldOf(entry.card.world);
+  const creature = creatureAt(entry.card.step, world);
   return h('button', {
     class: 'who-card', type: 'button', onclick: () => onPick(entry),
   },
   avatarEl(creature, 'who-avatar'),
   h('span', { class: 'who-name' }, entry.name),
-  h('span', { class: 'who-step muted small' }, fullName(entry.card.step)),
+  h('span', { class: 'who-step muted small' }, fullName(entry.card.step, world)),
   h('span', { class: 'who-role small muted' },
     entry.lock ? icon('lock') : null,
     h('span', {}, ROLE_LABELS[entry.role])));
@@ -104,6 +107,8 @@ function firstProfileForm(rerender) {
     let entry = defaultProfileEntry({ name: name.value, role: 'admin', order: 0 });
     if (secret) entry = await lockProfile(entry, secret);
     await addEntry(entry);
+    // Точно тук браузърът е най-склонен да каже „да“: човекът току-що е направил нещо свое.
+    await requestPersistence();
     if (secret) {
       message.textContent = '';
       await confirmDialog({

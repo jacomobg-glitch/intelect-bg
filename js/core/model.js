@@ -1,6 +1,9 @@
 // Модел на данните. Съзнателно няма полета за дати на активност, серии или история на влизания.
 import { CONFIG, SKILLS } from './config.js';
 import { TOTAL_STEPS } from './evolution.js';
+import { DEFAULT_HERO, cleanHero } from '../content/hero.js';
+import { itemOf } from '../content/shop.js';
+import { DEFAULT_WORLD, WORLD_IDS } from '../content/worlds/index.js';
 import { isISODate } from './sm2.js';
 
 export const SCHEMA_VERSION = 2;
@@ -11,12 +14,16 @@ export const defaultProfile = () => ({
   skillXP: Object.fromEntries(SKILLS.map((s) => [s, 0])),
   step: 0,
   activationSteps: {}, // способност → стъпка, на която е станала активна
+  coins: 0,            // печелят се с практика и НЕ изгарят при пауза
+  owned: [],           // купена украса; нищо от нея не дава предимство
 });
 
 export const defaultSettings = () => ({
   key: 'settings',
-  theme: 'auto',   // auto | dark | light
-  skin: 'nature',  // визуална тема на стълбата; механиката не зависи от нея
+  theme: 'auto',          // auto | dark | light
+  world: DEFAULT_WORLD,   // кой свят облича стълбата; механиката не зависи от него
+  hero: { ...DEFAULT_HERO }, // цвят, шапка, инструмент и име на героя
+  background: null,       // купен фон, ако има такъв
   stroopVariant: 'color', // color | shape: вариант на Stroop без цветове
   colorFree: false,       // true: игрите с цветове минават на форми (цветна слепота)
 });
@@ -59,14 +66,23 @@ export function cleanProfile(raw) {
   for (const s of SKILLS) {
     if (Number.isInteger(rawSteps[s]) && rawSteps[s] >= 0 && rawSteps[s] < TOTAL_STEPS) activationSteps[s] = rawSteps[s];
   }
-  return { key: 'profile', totalXP: raw.totalXP, skillXP, step: raw.step, activationSteps };
+  // Монетите и покупките са част от прогреса: пътуват с копието и се сливат.
+  const coins = isCount(raw.coins) ? Math.min(1e6, Math.round(raw.coins)) : 0;
+  const owned = Array.isArray(raw.owned)
+    ? [...new Set(raw.owned.filter((id) => typeof id === 'string' && itemOf(id)))]
+    : [];
+  return { key: 'profile', totalXP: raw.totalXP, skillXP, step: raw.step, activationSteps, coins, owned };
 }
 
 export function cleanSettings(raw) {
   const base = defaultSettings();
   if (!raw || typeof raw !== 'object') return base;
   if (['auto', 'dark', 'light'].includes(raw.theme)) base.theme = raw.theme;
-  if (typeof raw.skin === 'string' && /^[a-z0-9-]{1,32}$/.test(raw.skin)) base.skin = raw.skin;
+  // `skin` е старото име на същото поле: копие отпреди световете продължава да работи.
+  const world = raw.world || raw.skin;
+  if (WORLD_IDS.includes(world)) base.world = world;
+  base.hero = cleanHero(raw.hero, Array.isArray(raw.owned) ? raw.owned : []);
+  if (typeof raw.background === 'string' && itemOf(raw.background)) base.background = raw.background;
   if (['color', 'shape'].includes(raw.stroopVariant)) base.stroopVariant = raw.stroopVariant;
   base.colorFree = raw.colorFree === true;
   return base;

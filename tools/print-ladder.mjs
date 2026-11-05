@@ -1,7 +1,7 @@
 // Отпечатва таблицата с праговете в Markdown за docs/ARCHITECTURE.md.
 import { CONFIG } from '../js/core/config.js';
 import { CUMULATIVE_XP, STEP_COSTS, TOTAL_STEPS, creatureIndex, requiredLevel, subLabel } from '../js/core/evolution.js';
-import nature from '../js/content/skins/nature.js';
+import nature from '../js/content/worlds/nature.json' with { type: 'json' };
 
 console.log('| # | Стъпка | Цена, XP | Време за стъпката | Общо XP | Общо време | Мин. ниво във всяка способност |');
 console.log('|---|---|---:|---:|---:|---:|---:|');

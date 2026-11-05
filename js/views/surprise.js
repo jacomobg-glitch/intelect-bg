@@ -3,6 +3,7 @@
 import { ALL_SUBTOPICS } from '../content/math/topics.js';
 import { SKILL_LABELS } from '../core/config.js';
 import { h, mount } from '../core/dom.js';
+import { xpName } from './ui.js';
 import { allGames, isUnlocked } from '../core/registry.js';
 import { isDue, todayISO } from '../core/sm2.js';
 import { planSurprise } from '../core/surprise.js';
@@ -77,12 +78,12 @@ export function renderSurprise(root) {
       h('h1', { class: 'page-title' }, 'Сесията приключи'),
       h('div', { class: 'result' },
         h('p', { class: 'result-score' }, `+${Math.round(totals.xp)}`),
-        h('p', { class: 'muted' }, 'XP от тази сесия')),
+        h('p', { class: 'muted' }, `${xpName()} от тази сесия`)),
       rows.length
         ? h('dl', { class: 'stats' }, rows.map(([skill, xp]) => h('div', {},
           h('dt', {}, SKILL_LABELS[skill]),
-          h('dd', {}, `+${Math.round(xp)} XP`))))
-        : h('p', { class: 'muted small' }, 'Този път без XP: нямаше верен отговор.'),
+          h('dd', {}, `+${Math.round(xp)} ${xpName()}`))))
+        : h('p', { class: 'muted small' }, `Този път без ${xpName()}: нямаше верен отговор.`),
       totals.records.length
         ? h('p', { class: 'result-record' }, `Нов личен рекорд: ${totals.records.join(', ')}`)
         : null,

@@ -1,0 +1,214 @@
+{
+  "id": "garden",
+  "name": "Градина",
+  "tagline": "Расте бавно и не бърза за никъде",
+  "xp": {
+    "word": "капки",
+    "long": "вода",
+    "drop": true
+  },
+  "unlockWord": "Порасна:",
+  "calm": "Градината чака, колкото трябва. Нищо не изсъхва и нищо не умира, когато те няма.",
+  "hero": {
+    "key": "kapka",
+    "name": "Капка",
+    "note": "Пазителят на лейката. Полива по малко, но всеки път.",
+    "base": "<path class=\"av-b\" d=\"M50 10c14 20 22 30 22 42a22 22 0 0 1-44 0c0-12 8-22 22-42Z\"/>\n      <circle class=\"av-e\" cx=\"42\" cy=\"46\" r=\"4\"/><circle class=\"av-e\" cx=\"58\" cy=\"46\" r=\"4\"/>\n      <path class=\"av-d\" d=\"M42 60q8 6 16 0\" fill=\"none\" stroke=\"var(--av-d)\" stroke-width=\"3\" stroke-linecap=\"round\"/>\n      <path class=\"av-a\" d=\"M34 76h32v10a6 6 0 0 1-6 6H40a6 6 0 0 1-6-6Z\"/>"
+  },
+  "companions": [
+    {
+      "key": "zhuzhi",
+      "name": "Жужи",
+      "note": "Пчела-помощник. Знае кое цвете кога е готово.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse class=\"av-w\" cx=\"30\" cy=\"38\" rx=\"18\" ry=\"9\" transform=\"rotate(-20 30 38)\"/><ellipse class=\"av-w\" cx=\"70\" cy=\"38\" rx=\"18\" ry=\"9\" transform=\"rotate(20 70 38)\"/><ellipse class=\"av-b\" cx=\"50\" cy=\"58\" rx=\"16\" ry=\"24\"/><g class=\"av-d\"><rect x=\"34\" y=\"48\" width=\"32\" height=\"6\"/><rect x=\"34\" y=\"62\" width=\"32\" height=\"6\"/></g><circle class=\"av-a\" cx=\"50\" cy=\"28\" r=\"11\"/><circle class=\"av-d\" cx=\"46\" cy=\"27\" r=\"2.6\"/><circle class=\"av-d\" cx=\"54\" cy=\"27\" r=\"2.6\"/></svg>"
+    },
+    {
+      "key": "oblachko",
+      "name": "Облачко",
+      "note": "Дъждовен облак. Идва, когато е нужно, и си тръгва.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><g class=\"av-a\"><circle cx=\"34\" cy=\"44\" r=\"16\"/><circle cx=\"54\" cy=\"36\" r=\"20\"/><circle cx=\"72\" cy=\"46\" r=\"14\"/><rect x=\"34\" y=\"44\" width=\"38\" height=\"16\" rx=\"8\"/></g><g class=\"av-b\"><path d=\"M36 68c3 5 5 7 5 10a5 5 0 0 1-10 0c0-3 2-5 5-10Z\"/><path d=\"M52 74c3 5 5 7 5 10a5 5 0 0 1-10 0c0-3 2-5 5-10Z\"/><path d=\"M68 68c3 5 5 7 5 10a5 5 0 0 1-10 0c0-3 2-5 5-10Z\"/></g></svg>"
+    }
+  ],
+  "creatures": [
+    {
+      "key": "seed",
+      "name": "Семенце",
+      "trait": "основи, първи стъпки",
+      "colors": [
+        "#b08968",
+        "#d9c3a5"
+      ],
+      "can": "Семенцето изглежда като нищо, а в него вече има цяло растение.",
+      "you": "Първите стъпки. Започваш от основите, без да бързаш и без да се сравняваш с никого.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><ellipse class=\"av-b\" cx=\"50\" cy=\"74\" rx=\"12\" ry=\"9\" transform=\"rotate(-18 50 74)\"/><path class=\"av-l\" d=\"M44 70q6-4 12 0\" opacity=\".6\"/></svg>"
+    },
+    {
+      "key": "sprout",
+      "name": "Кълнче",
+      "trait": "първа промяна",
+      "colors": [
+        "#a7c957",
+        "#d6e8a8"
+      ],
+      "can": "Кълнчето пробива пръстта за една нощ, след като е чакало дълго.",
+      "you": "Първата промяна се вижда. Чакането преди нея също е било работа.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><path class=\"av-l av-thick\" d=\"M50 86V62\"/><path class=\"av-a\" d=\"M50 62c12 -2 16 -10 14 -18-10 0-16 8-14 18Z\"/></svg>"
+    },
+    {
+      "key": "leaflet",
+      "name": "Листенце",
+      "trait": "растеж",
+      "colors": [
+        "#8ac926",
+        "#c3e58a"
+      ],
+      "can": "Листото лови светлина и я превръща в храна. Малко лист, малко храна.",
+      "you": "Всяко упражнение е още малко светлина.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><path class=\"av-l av-thick\" d=\"M50 86V52\"/><path class=\"av-a\" d=\"M50 56c12 -2 16 -10 14 -18-10 0-16 8-14 18Z\"/><g transform=\"translate(100 0) scale(-1 1)\"><path class=\"av-a\" d=\"M50 64c12 -2 16 -10 14 -18-10 0-16 8-14 18Z\"/></g></svg>"
+    },
+    {
+      "key": "stalk",
+      "name": "Стръкче",
+      "trait": "устойчивост",
+      "colors": [
+        "#6a994e",
+        "#a7c957"
+      ],
+      "can": "Стръкчето се огъва от вятъра и пак се изправя.",
+      "you": "Пропуснат ден не те чупи: връщаш се и продължаваш.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><path class=\"av-l av-thick\" d=\"M50 86V38q0-6 4-10\"/><path class=\"av-a\" d=\"M50 50c12 -2 16 -10 14 -18-10 0-16 8-14 18Z\"/><g transform=\"translate(100 0) scale(-1 1)\"><path class=\"av-a\" d=\"M50 62c12 -2 16 -10 14 -18-10 0-16 8-14 18Z\"/></g><path class=\"av-a\" d=\"M52 40c12 -2 16 -10 14 -18-10 0-16 8-14 18Z\"/></svg>"
+    },
+    {
+      "key": "flower",
+      "name": "Цвете",
+      "trait": "първи плод от труда",
+      "colors": [
+        "#ff8fab",
+        "#ffc2d1"
+      ],
+      "can": "Цветето е покана: ела, има нещо готово.",
+      "you": "Виждаш първия резултат от упоритостта си.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><path class=\"av-l av-thick\" d=\"M50 86V44\"/><g transform=\"translate(100 0) scale(-1 1)\"><path class=\"av-a\" d=\"M50 62c12 -2 16 -10 14 -18-10 0-16 8-14 18Z\"/></g><g class=\"av-b\"><circle cx=\"50\" cy=\"28\" r=\"9\"/><circle cx=\"36\" cy=\"36\" r=\"9\"/><circle cx=\"64\" cy=\"36\" r=\"9\"/><circle cx=\"41\" cy=\"50\" r=\"9\"/><circle cx=\"59\" cy=\"50\" r=\"9\"/></g><circle class=\"av-e\" cx=\"50\" cy=\"39\" r=\"8\"/></svg>"
+    },
+    {
+      "key": "bush",
+      "name": "Храстче",
+      "trait": "плътност",
+      "colors": [
+        "#52b788",
+        "#9fd9bd"
+      ],
+      "can": "Храстът е много клонки наведнъж. Никоя сама не е силна.",
+      "you": "Много малки навици, събрани заедно.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><circle class=\"av-b\" cx=\"36\" cy=\"62\" r=\"18\"/><circle class=\"av-b\" cx=\"64\" cy=\"62\" r=\"18\"/><circle class=\"av-a\" cx=\"50\" cy=\"50\" r=\"20\"/><path class=\"av-l\" d=\"M50 86V66\"/></svg>"
+    },
+    {
+      "key": "berry",
+      "name": "Ягодов храст",
+      "trait": "първа реколта",
+      "colors": [
+        "#e63946",
+        "#f4989c"
+      ],
+      "can": "Ягодите узряват по няколко наведнъж, а не всички в един ден.",
+      "you": "Нещата, които си научил, започват да се отплащат.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><circle class=\"av-a\" cx=\"50\" cy=\"56\" r=\"24\"/><g class=\"av-b\"><circle cx=\"38\" cy=\"62\" r=\"7\"/><circle cx=\"58\" cy=\"52\" r=\"7\"/><circle cx=\"62\" cy=\"68\" r=\"6\"/></g><path class=\"av-l\" d=\"M50 86V74\"/></svg>"
+    },
+    {
+      "key": "sunflower",
+      "name": "Слънчоглед",
+      "trait": "посока",
+      "colors": [
+        "#ffb703",
+        "#ffd87d"
+      ],
+      "can": "Слънчогледът се обръща към светлината през целия ден.",
+      "you": "Знаеш накъде вървиш и се връщаш натам.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><path class=\"av-l av-thick\" d=\"M50 86V46\"/><g transform=\"translate(100 0) scale(-1 1)\"><path class=\"av-a\" d=\"M50 64c12 -2 16 -10 14 -18-10 0-16 8-14 18Z\"/></g><path class=\"av-a\" d=\"M50 74c12 -2 16 -10 14 -18-10 0-16 8-14 18Z\"/><g class=\"av-b\"><circle cx=\"50\" cy=\"32\" r=\"10\"/><circle cx=\"34\" cy=\"32\" r=\"8\"/><circle cx=\"66\" cy=\"32\" r=\"8\"/><circle cx=\"42\" cy=\"20\" r=\"8\"/><circle cx=\"58\" cy=\"20\" r=\"8\"/><circle cx=\"42\" cy=\"44\" r=\"8\"/><circle cx=\"58\" cy=\"44\" r=\"8\"/></g><circle class=\"av-d\" cx=\"50\" cy=\"32\" r=\"9\"/></svg>"
+    },
+    {
+      "key": "sapling",
+      "name": "Младо дърво",
+      "trait": "стебло",
+      "colors": [
+        "#7f5539",
+        "#b08968"
+      ],
+      "can": "Младото дърво вече има стебло: държи се само, без подпора.",
+      "you": "Основата ти е здрава и носи новото отгоре.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><path class=\"av-b\" d=\"M46 86V46h8v40Z\"/><circle class=\"av-a\" cx=\"50\" cy=\"36\" r=\"22\"/><path class=\"av-l\" d=\"M50 56 38 44M50 48l12-12\" opacity=\".5\"/></svg>"
+    },
+    {
+      "key": "apple",
+      "name": "Ябълка с плодове",
+      "trait": "даване",
+      "colors": [
+        "#d62828",
+        "#f59a9a"
+      ],
+      "can": "Дървото с плодове дава на другите, без да обеднява.",
+      "you": "Можеш да обясниш на някого това, което знаеш.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><path class=\"av-b\" d=\"M46 86V50h8v36Z\"/><circle class=\"av-a\" cx=\"50\" cy=\"40\" r=\"26\"/><g class=\"av-e\"><circle cx=\"38\" cy=\"36\" r=\"6\"/><circle cx=\"58\" cy=\"30\" r=\"6\"/><circle cx=\"60\" cy=\"50\" r=\"6\"/></g></svg>"
+    },
+    {
+      "key": "tree",
+      "name": "Голямо дърво",
+      "trait": "сянка за другите",
+      "colors": [
+        "#40916c",
+        "#95d5b2"
+      ],
+      "can": "Голямото дърво прави сянка, в която растат други неща.",
+      "you": "Това, което знаеш, вече помага и на някой друг.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><path class=\"av-b\" d=\"M44 86V54h12v32Z\"/><circle class=\"av-a\" cx=\"50\" cy=\"40\" r=\"30\"/><circle class=\"av-a\" cx=\"28\" cy=\"52\" r=\"16\"/><circle class=\"av-a\" cx=\"72\" cy=\"52\" r=\"16\"/></svg>"
+    },
+    {
+      "key": "orchard",
+      "name": "Овощна градина",
+      "trait": "много наведнъж",
+      "colors": [
+        "#74c69d",
+        "#b7e4c7"
+      ],
+      "can": "Градината е много дървета, подредени така, че всяко да има светлина.",
+      "you": "Държиш няколко умения наведнъж и ги караш да си помагат.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><g><path class=\"av-b\" d=\"M22 86V62h6v24Z\"/><circle class=\"av-a\" cx=\"25\" cy=\"54\" r=\"14\"/></g><g><path class=\"av-b\" d=\"M47 86V58h6v28Z\"/><circle class=\"av-a\" cx=\"50\" cy=\"48\" r=\"17\"/></g><g><path class=\"av-b\" d=\"M72 86V62h6v24Z\"/><circle class=\"av-a\" cx=\"75\" cy=\"54\" r=\"14\"/></g></svg>"
+    },
+    {
+      "key": "grove",
+      "name": "Горичка",
+      "trait": "общност",
+      "colors": [
+        "#2d6a4f",
+        "#74c69d"
+      ],
+      "can": "В горичката дърветата се пазят едно друго от вятъра.",
+      "you": "Уменията ти се подкрепят: слабото място го държат другите.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><g class=\"av-a\"><circle cx=\"24\" cy=\"56\" r=\"16\"/><circle cx=\"50\" cy=\"44\" r=\"20\"/><circle cx=\"76\" cy=\"56\" r=\"16\"/><circle cx=\"36\" cy=\"66\" r=\"13\"/><circle cx=\"64\" cy=\"66\" r=\"13\"/></g><g class=\"av-b\"><rect x=\"22\" y=\"70\" width=\"5\" height=\"16\"/><rect x=\"47\" y=\"64\" width=\"6\" height=\"22\"/><rect x=\"73\" y=\"70\" width=\"5\" height=\"16\"/></g></svg>"
+    },
+    {
+      "key": "forest",
+      "name": "Гора",
+      "trait": "цяла система",
+      "colors": [
+        "#1b4332",
+        "#52b788"
+      ],
+      "can": "Гората има свой въздух, своя вода и свое време. Тя е система, не сбор от дървета.",
+      "you": "Виждаш цялата система, а не само отделната задача.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><g class=\"av-b\"><path d=\"M18 78 30 40l12 38Z\"/><path d=\"M42 78 56 30l14 48Z\"/><path d=\"M66 78 78 44l12 34Z\"/></g><g class=\"av-a\"><path d=\"M20 62 30 34l10 28Z\"/><path d=\"M44 58 56 24l12 34Z\"/><path d=\"M68 64 78 38l10 26Z\"/></g></svg>"
+    },
+    {
+      "key": "oak",
+      "name": "Вековен дъб",
+      "trait": "търпение и време",
+      "colors": [
+        "#8fdc9a",
+        "#c8f0b0"
+      ],
+      "can": "Вековният дъб е израснал само с едно: продължавал е.",
+      "you": "Това, което знаеш, вече е свързано в едно цяло и ще остане.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><path class=\"av-b\" d=\"M40 86V46h20v40Z\"/><path class=\"av-b\" d=\"M44 58 26 42M56 54l20-16\"/><circle class=\"av-a\" cx=\"50\" cy=\"34\" r=\"30\"/><circle class=\"av-a\" cx=\"22\" cy=\"46\" r=\"15\"/><circle class=\"av-a\" cx=\"78\" cy=\"46\" r=\"15\"/></svg>"
+    }
+  ]
+}

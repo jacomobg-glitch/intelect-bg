@@ -1,0 +1,225 @@
+{
+  "id": "builder",
+  "name": "Строител",
+  "tagline": "Свят от кубчета",
+  "xp": {
+    "word": "XP",
+    "long": "опит",
+    "drop": false
+  },
+  "unlockWord": "Отключи",
+  "hero": {
+    "key": "blocky",
+    "name": "Блоки",
+    "note": "Кубичен изследовател. Строи, преди да обяснява.",
+    "base": "<rect class=\"av-b\" x=\"34\" y=\"36\" width=\"32\" height=\"30\" rx=\"3\"/>\n      <rect class=\"av-a\" x=\"36\" y=\"12\" width=\"28\" height=\"24\" rx=\"3\"/>\n      <rect class=\"av-d\" x=\"42\" y=\"22\" width=\"5\" height=\"5\"/><rect class=\"av-d\" x=\"53\" y=\"22\" width=\"5\" height=\"5\"/>\n      <rect class=\"av-b\" x=\"26\" y=\"40\" width=\"8\" height=\"20\" rx=\"2\"/><rect class=\"av-b\" x=\"66\" y=\"40\" width=\"8\" height=\"20\" rx=\"2\"/>\n      <rect class=\"av-a\" x=\"38\" y=\"66\" width=\"9\" height=\"20\" rx=\"2\"/><rect class=\"av-a\" x=\"53\" y=\"66\" width=\"9\" height=\"20\" rx=\"2\"/>"
+  },
+  "companions": [
+    {
+      "key": "tuf",
+      "name": "Туф",
+      "note": "Кубично куче. Намира пътя обратно.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect class=\"av-b\" x=\"30\" y=\"46\" width=\"40\" height=\"26\" rx=\"4\"/><rect class=\"av-a\" x=\"56\" y=\"32\" width=\"24\" height=\"22\" rx=\"4\"/><rect class=\"av-d\" x=\"62\" y=\"40\" width=\"4\" height=\"4\"/><rect class=\"av-b\" x=\"54\" y=\"26\" width=\"8\" height=\"10\" rx=\"2\"/><rect class=\"av-b\" x=\"74\" y=\"26\" width=\"8\" height=\"10\" rx=\"2\"/><rect class=\"av-a\" x=\"34\" y=\"70\" width=\"8\" height=\"14\" rx=\"2\"/><rect class=\"av-a\" x=\"58\" y=\"70\" width=\"8\" height=\"14\" rx=\"2\"/><path class=\"av-l\" d=\"M30 50 18 40\"/></svg>"
+    },
+    {
+      "key": "gayka",
+      "name": "Гайка",
+      "note": "Робот-майстор. Поправя, вместо да изхвърля.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect class=\"av-b\" x=\"32\" y=\"40\" width=\"36\" height=\"34\" rx=\"4\"/><rect class=\"av-a\" x=\"36\" y=\"16\" width=\"28\" height=\"22\" rx=\"6\"/><circle class=\"av-e\" cx=\"45\" cy=\"27\" r=\"4\"/><circle class=\"av-e\" cx=\"57\" cy=\"27\" r=\"4\"/><path class=\"av-l\" d=\"M50 16V8\"/><circle class=\"av-a\" cx=\"50\" cy=\"6\" r=\"4\"/><rect class=\"av-a\" x=\"22\" y=\"44\" width=\"10\" height=\"8\" rx=\"2\"/><rect class=\"av-a\" x=\"68\" y=\"44\" width=\"10\" height=\"8\" rx=\"2\"/><rect class=\"av-d\" x=\"40\" y=\"54\" width=\"20\" height=\"6\" rx=\"2\"/></svg>"
+    },
+    {
+      "key": "listo",
+      "name": "Листо",
+      "note": "Добро растение-пазач. Стои будно през нощта.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect class=\"av-b\" x=\"38\" y=\"52\" width=\"24\" height=\"32\" rx=\"4\"/><path class=\"av-a\" d=\"M50 52C30 48 24 32 32 20c14-2 22 10 18 32Z\"/><path class=\"av-a\" d=\"M50 52c20-4 26-20 18-32-14-2-22 10-18 32Z\"/><circle class=\"av-d\" cx=\"44\" cy=\"64\" r=\"3\"/><circle class=\"av-d\" cx=\"56\" cy=\"64\" r=\"3\"/></svg>"
+    },
+    {
+      "key": "svetko",
+      "name": "Светко",
+      "note": "Летящо кубче-фенерче. Свети, където е тъмно.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect class=\"av-a\" x=\"34\" y=\"34\" width=\"32\" height=\"32\" rx=\"4\"/><rect class=\"av-e\" x=\"42\" y=\"42\" width=\"16\" height=\"16\" rx=\"2\"/><g class=\"av-l\"><path d=\"M50 22v-8M50 86v-8M22 50h-8M86 50h-8M30 30 24 24M70 30l6-6M30 70l-6 6M70 70l6 6\"/></g></svg>"
+    }
+  ],
+  "creatures": [
+    {
+      "key": "block",
+      "name": "Кубче",
+      "trait": "основи, първи стъпки",
+      "colors": [
+        "#6fa8dc",
+        "#9fc7ea"
+      ],
+      "can": "Едно кубче не е много, но от него започва всичко: то има форма, тежест и място.",
+      "you": "Първите стъпки. Започваш от основите, без да бързаш и без да се сравняваш с никого.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"50,33 68,42 50,51 32,42\"/> <polygon class=\"av-b\" points=\"32,42 50,51 50,69 32,60\"/> <polygon class=\"av-a\" points=\"68,42 50,51 50,69 68,60\"/></svg>"
+    },
+    {
+      "key": "pile",
+      "name": "Купчинка",
+      "trait": "повторение",
+      "colors": [
+        "#7fb069",
+        "#a8cf94"
+      ],
+      "can": "Три кубчета едно до друго вече държат нещо. Купчинката е повторение, не случайност.",
+      "you": "Повтаряш едно и също достатъчно пъти, за да стане лесно.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"34,50.5 45,56 34,61.5 23,56\"/> <polygon class=\"av-b\" points=\"23,56 34,61.5 34,72.5 23,67\"/> <polygon class=\"av-a\" points=\"45,56 34,61.5 34,72.5 45,67\"/> <polygon class=\"av-e\" points=\"56,50.5 67,56 56,61.5 45,56\"/> <polygon class=\"av-b\" points=\"45,56 56,61.5 56,72.5 45,67\"/> <polygon class=\"av-a\" points=\"67,56 56,61.5 56,72.5 67,67\"/> <polygon class=\"av-e\" points=\"45,34.5 56,40 45,45.5 34,40\"/> <polygon class=\"av-b\" points=\"34,40 45,45.5 45,56.5 34,51\"/> <polygon class=\"av-a\" points=\"56,40 45,45.5 45,56.5 56,51\"/></svg>"
+    },
+    {
+      "key": "wall",
+      "name": "Стена",
+      "trait": "ред",
+      "colors": [
+        "#c8703c",
+        "#e39a6b"
+      ],
+      "can": "Стената държи, защото всяко кубче ляга върху две отдолу. Редът е цялата тайна.",
+      "you": "Подреждаш наученото: всяко ново нещо стъпва върху две стари.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"28,56.5 39,62 28,67.5 17,62\"/> <polygon class=\"av-b\" points=\"17,62 28,67.5 28,78.5 17,73\"/> <polygon class=\"av-a\" points=\"39,62 28,67.5 28,78.5 39,73\"/> <polygon class=\"av-e\" points=\"50,56.5 61,62 50,67.5 39,62\"/> <polygon class=\"av-b\" points=\"39,62 50,67.5 50,78.5 39,73\"/> <polygon class=\"av-a\" points=\"61,62 50,67.5 50,78.5 61,73\"/> <polygon class=\"av-e\" points=\"72,56.5 83,62 72,67.5 61,62\"/> <polygon class=\"av-b\" points=\"61,62 72,67.5 72,78.5 61,73\"/> <polygon class=\"av-a\" points=\"83,62 72,67.5 72,78.5 83,73\"/> <polygon class=\"av-e\" points=\"39,42.5 50,48 39,53.5 28,48\"/> <polygon class=\"av-b\" points=\"28,48 39,53.5 39,64.5 28,59\"/> <polygon class=\"av-a\" points=\"50,48 39,53.5 39,64.5 50,59\"/> <polygon class=\"av-e\" points=\"61,42.5 72,48 61,53.5 50,48\"/> <polygon class=\"av-b\" points=\"50,48 61,53.5 61,64.5 50,59\"/> <polygon class=\"av-a\" points=\"72,48 61,53.5 61,64.5 72,59\"/></svg>"
+    },
+    {
+      "key": "hut",
+      "name": "Колиба",
+      "trait": "първо скривалище",
+      "colors": [
+        "#b08968",
+        "#d9b38c"
+      ],
+      "can": "Четири стени и покрив. Колибата не е красива, но пази от дъжд.",
+      "you": "Имаш вече нещо свое, което работи. Красотата идва после.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"32,60.5 43,66 32,71.5 21,66\"/> <polygon class=\"av-b\" points=\"21,66 32,71.5 32,82.5 21,77\"/> <polygon class=\"av-a\" points=\"43,66 32,71.5 32,82.5 43,77\"/> <polygon class=\"av-e\" points=\"54,60.5 65,66 54,71.5 43,66\"/> <polygon class=\"av-b\" points=\"43,66 54,71.5 54,82.5 43,77\"/> <polygon class=\"av-a\" points=\"65,66 54,71.5 54,82.5 65,77\"/> <polygon class=\"av-e\" points=\"43,46.5 54,52 43,57.5 32,52\"/> <polygon class=\"av-b\" points=\"32,52 43,57.5 43,68.5 32,63\"/> <polygon class=\"av-a\" points=\"54,52 43,57.5 43,68.5 54,63\"/><path class=\"av-d\" d=\"M22 48 43 32l21 16Z\"/></svg>"
+    },
+    {
+      "key": "house",
+      "name": "Къщичка",
+      "trait": "подредено място",
+      "colors": [
+        "#e0a458",
+        "#f0c48a"
+      ],
+      "can": "В къщичката всяко нещо си има място: врата, прозорец, покрив.",
+      "you": "Вече не трупаш, а подреждаш. Знаеш кое къде отива.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"32,58.5 43,64 32,69.5 21,64\"/> <polygon class=\"av-b\" points=\"21,64 32,69.5 32,80.5 21,75\"/> <polygon class=\"av-a\" points=\"43,64 32,69.5 32,80.5 43,75\"/> <polygon class=\"av-e\" points=\"54,58.5 65,64 54,69.5 43,64\"/> <polygon class=\"av-b\" points=\"43,64 54,69.5 54,80.5 43,75\"/> <polygon class=\"av-a\" points=\"65,64 54,69.5 54,80.5 65,75\"/> <polygon class=\"av-e\" points=\"43,44.5 54,50 43,55.5 32,50\"/> <polygon class=\"av-b\" points=\"32,50 43,55.5 43,66.5 32,61\"/> <polygon class=\"av-a\" points=\"54,50 43,55.5 43,66.5 54,61\"/> <polygon class=\"av-e\" points=\"65,44.5 76,50 65,55.5 54,50\"/> <polygon class=\"av-b\" points=\"54,50 65,55.5 65,66.5 54,61\"/> <polygon class=\"av-a\" points=\"76,50 65,55.5 65,66.5 76,61\"/><path class=\"av-d\" d=\"M20 46 44 28l24 18Z\"/><rect class=\"av-e\" x=\"38\" y=\"60\" width=\"12\" height=\"16\" rx=\"1\"/></svg>"
+    },
+    {
+      "key": "garden-house",
+      "name": "Къща с градина",
+      "trait": "грижа",
+      "colors": [
+        "#7fb069",
+        "#bfe0a8"
+      ],
+      "can": "Около къщата расте нещо. За градината трябва търпение, не сила.",
+      "you": "Връщаш се към стари теми и ги поливаш, докато не станат твои.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"38,56.5 49,62 38,67.5 27,62\"/> <polygon class=\"av-b\" points=\"27,62 38,67.5 38,78.5 27,73\"/> <polygon class=\"av-a\" points=\"49,62 38,67.5 38,78.5 49,73\"/> <polygon class=\"av-e\" points=\"60,56.5 71,62 60,67.5 49,62\"/> <polygon class=\"av-b\" points=\"49,62 60,67.5 60,78.5 49,73\"/> <polygon class=\"av-a\" points=\"71,62 60,67.5 60,78.5 71,73\"/> <polygon class=\"av-e\" points=\"49,42.5 60,48 49,53.5 38,48\"/> <polygon class=\"av-b\" points=\"38,48 49,53.5 49,64.5 38,59\"/> <polygon class=\"av-a\" points=\"60,48 49,53.5 49,64.5 60,59\"/><path class=\"av-d\" d=\"M26 44 49 28l23 16Z\"/><path class=\"av-l\" d=\"M20 78v-12\"/><circle class=\"av-a\" cx=\"20\" cy=\"60\" r=\"9\"/><path class=\"av-l\" d=\"M80 78v-10\"/><circle class=\"av-a\" cx=\"80\" cy=\"62\" r=\"7\"/></svg>"
+    },
+    {
+      "key": "tower",
+      "name": "Кула",
+      "trait": "височина",
+      "colors": [
+        "#8e7cc3",
+        "#b9aede"
+      ],
+      "can": "Кулата вижда надалеч, защото стои високо. Но високото иска здрава основа.",
+      "you": "Качваш се по-нагоре в трудността, а основата отдолу те държи.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"50,68.5 61,74 50,79.5 39,74\"/> <polygon class=\"av-b\" points=\"39,74 50,79.5 50,90.5 39,85\"/> <polygon class=\"av-a\" points=\"61,74 50,79.5 50,90.5 61,85\"/> <polygon class=\"av-e\" points=\"50,54.5 61,60 50,65.5 39,60\"/> <polygon class=\"av-b\" points=\"39,60 50,65.5 50,76.5 39,71\"/> <polygon class=\"av-a\" points=\"61,60 50,65.5 50,76.5 61,71\"/> <polygon class=\"av-e\" points=\"50,40.5 61,46 50,51.5 39,46\"/> <polygon class=\"av-b\" points=\"39,46 50,51.5 50,62.5 39,57\"/> <polygon class=\"av-a\" points=\"61,46 50,51.5 50,62.5 61,57\"/> <polygon class=\"av-e\" points=\"50,26.5 61,32 50,37.5 39,32\"/> <polygon class=\"av-b\" points=\"39,32 50,37.5 50,48.5 39,43\"/> <polygon class=\"av-a\" points=\"61,32 50,37.5 50,48.5 61,43\"/><path class=\"av-d\" d=\"M38 28 50 16l12 12Z\"/></svg>"
+    },
+    {
+      "key": "bridge",
+      "name": "Мост",
+      "trait": "свързване",
+      "colors": [
+        "#5c9ead",
+        "#92c4cf"
+      ],
+      "can": "Мостът свързва две места, които преди това не са се срещали.",
+      "you": "Виждаш връзки между теми: това, което знаеш оттук, върши работа и там.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"20,55 30,60 20,65 10,60\"/> <polygon class=\"av-b\" points=\"10,60 20,65 20,75 10,70\"/> <polygon class=\"av-a\" points=\"30,60 20,65 20,75 30,70\"/> <polygon class=\"av-e\" points=\"80,55 90,60 80,65 70,60\"/> <polygon class=\"av-b\" points=\"70,60 80,65 80,75 70,70\"/> <polygon class=\"av-a\" points=\"90,60 80,65 80,75 90,70\"/><path class=\"av-l av-thick\" d=\"M20 52Q50 24 80 52\"/> <polygon class=\"av-e\" points=\"35,40.5 42,44 35,47.5 28,44\"/> <polygon class=\"av-b\" points=\"28,44 35,47.5 35,54.5 28,51\"/> <polygon class=\"av-a\" points=\"42,44 35,47.5 35,54.5 42,51\"/> <polygon class=\"av-e\" points=\"50,34.5 57,38 50,41.5 43,38\"/> <polygon class=\"av-b\" points=\"43,38 50,41.5 50,48.5 43,45\"/> <polygon class=\"av-a\" points=\"57,38 50,41.5 50,48.5 57,45\"/> <polygon class=\"av-e\" points=\"65,40.5 72,44 65,47.5 58,44\"/> <polygon class=\"av-b\" points=\"58,44 65,47.5 65,54.5 58,51\"/> <polygon class=\"av-a\" points=\"72,44 65,47.5 65,54.5 72,51\"/></svg>"
+    },
+    {
+      "key": "fort",
+      "name": "Крепост",
+      "trait": "устойчивост",
+      "colors": [
+        "#a0a0a0",
+        "#cfcfcf"
+      ],
+      "can": "Крепостта издържа, защото е строена бавно и проверявана често.",
+      "you": "Знанието ти издържа и когато задачата е нова.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"26,62 38,68 26,74 14,68\"/> <polygon class=\"av-b\" points=\"14,68 26,74 26,86 14,80\"/> <polygon class=\"av-a\" points=\"38,68 26,74 26,86 38,80\"/> <polygon class=\"av-e\" points=\"50,62 62,68 50,74 38,68\"/> <polygon class=\"av-b\" points=\"38,68 50,74 50,86 38,80\"/> <polygon class=\"av-a\" points=\"62,68 50,74 50,86 62,80\"/> <polygon class=\"av-e\" points=\"74,62 86,68 74,74 62,68\"/> <polygon class=\"av-b\" points=\"62,68 74,74 74,86 62,80\"/> <polygon class=\"av-a\" points=\"86,68 74,74 74,86 86,80\"/> <polygon class=\"av-e\" points=\"38,48 50,54 38,60 26,54\"/> <polygon class=\"av-b\" points=\"26,54 38,60 38,72 26,66\"/> <polygon class=\"av-a\" points=\"50,54 38,60 38,72 50,66\"/> <polygon class=\"av-e\" points=\"62,48 74,54 62,60 50,54\"/> <polygon class=\"av-b\" points=\"50,54 62,60 62,72 50,66\"/> <polygon class=\"av-a\" points=\"74,54 62,60 62,72 74,66\"/><rect class=\"av-d\" x=\"18\" y=\"34\" width=\"12\" height=\"12\"/><rect class=\"av-d\" x=\"44\" y=\"34\" width=\"12\" height=\"12\"/><rect class=\"av-d\" x=\"70\" y=\"34\" width=\"12\" height=\"12\"/></svg>"
+    },
+    {
+      "key": "castle",
+      "name": "Замък",
+      "trait": "сложна постройка",
+      "colors": [
+        "#6d7bb5",
+        "#a3add8"
+      ],
+      "can": "Замъкът е много постройки, които работят заедно: кули, стени, порта.",
+      "you": "Държиш няколко умения наведнъж и ги караш да си помагат.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"24,56 36,62 24,68 12,62\"/> <polygon class=\"av-b\" points=\"12,62 24,68 24,80 12,74\"/> <polygon class=\"av-a\" points=\"36,62 24,68 24,80 36,74\"/> <polygon class=\"av-e\" points=\"50,62 62,68 50,74 38,68\"/> <polygon class=\"av-b\" points=\"38,68 50,74 50,86 38,80\"/> <polygon class=\"av-a\" points=\"62,68 50,74 50,86 62,80\"/> <polygon class=\"av-e\" points=\"76,56 88,62 76,68 64,62\"/> <polygon class=\"av-b\" points=\"64,62 76,68 76,80 64,74\"/> <polygon class=\"av-a\" points=\"88,62 76,68 76,80 88,74\"/> <polygon class=\"av-e\" points=\"24,38 36,44 24,50 12,44\"/> <polygon class=\"av-b\" points=\"12,44 24,50 24,62 12,56\"/> <polygon class=\"av-a\" points=\"36,44 24,50 24,62 36,56\"/> <polygon class=\"av-e\" points=\"76,38 88,44 76,50 64,44\"/> <polygon class=\"av-b\" points=\"64,44 76,50 76,62 64,56\"/> <polygon class=\"av-a\" points=\"88,44 76,50 76,62 88,56\"/><path class=\"av-d\" d=\"M12 40 24 26l12 14ZM64 40 76 26l12 14Z\"/><path class=\"av-e\" d=\"M44 76v-12a6 6 0 0 1 12 0v12Z\"/></svg>"
+    },
+    {
+      "key": "village",
+      "name": "Село",
+      "trait": "много малки неща",
+      "colors": [
+        "#d98e4a",
+        "#f0bc85"
+      ],
+      "can": "Селото е много малки къщи, подредени така, че всеки да стига до всеки.",
+      "you": "Малките навици са повече от едно голямо усилие.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><polygon class=\"av-e\" points=\"22,61.5 31,66 22,70.5 13,66\"/> <polygon class=\"av-b\" points=\"13,66 22,70.5 22,79.5 13,75\"/> <polygon class=\"av-a\" points=\"31,66 22,70.5 22,79.5 31,75\"/> <polygon class=\"av-e\" points=\"50,65.5 59,70 50,74.5 41,70\"/> <polygon class=\"av-b\" points=\"41,70 50,74.5 50,83.5 41,79\"/> <polygon class=\"av-a\" points=\"59,70 50,74.5 50,83.5 59,79\"/> <polygon class=\"av-e\" points=\"78,61.5 87,66 78,70.5 69,66\"/> <polygon class=\"av-b\" points=\"69,66 78,70.5 78,79.5 69,75\"/> <polygon class=\"av-a\" points=\"87,66 78,70.5 78,79.5 87,75\"/><path class=\"av-d\" d=\"M13 62 22 52l9 10ZM41 66 50 56l9 10ZM69 62 78 52l9 10Z\"/> <polygon class=\"av-e\" points=\"36,44.5 43,48 36,51.5 29,48\"/> <polygon class=\"av-b\" points=\"29,48 36,51.5 36,58.5 29,55\"/> <polygon class=\"av-a\" points=\"43,48 36,51.5 36,58.5 43,55\"/> <polygon class=\"av-e\" points=\"64,44.5 71,48 64,51.5 57,48\"/> <polygon class=\"av-b\" points=\"57,48 64,51.5 64,58.5 57,55\"/> <polygon class=\"av-a\" points=\"71,48 64,51.5 64,58.5 71,55\"/></svg>"
+    },
+    {
+      "key": "city",
+      "name": "Град",
+      "trait": "система",
+      "colors": [
+        "#5f8dd3",
+        "#9bbbe8"
+      ],
+      "can": "Градът работи, защото улиците, водата и светлината са мислени заедно.",
+      "you": "Виждаш цялата система, а не само отделната задача.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect class=\"av-b\" x=\"16\" y=\"48\" width=\"16\" height=\"36\"/><rect class=\"av-a\" x=\"36\" y=\"34\" width=\"16\" height=\"50\"/><rect class=\"av-b\" x=\"56\" y=\"42\" width=\"16\" height=\"42\"/><rect class=\"av-a\" x=\"76\" y=\"56\" width=\"12\" height=\"28\"/><g class=\"av-e\"><rect x=\"20\" y=\"54\" width=\"4\" height=\"4\"/><rect x=\"26\" y=\"54\" width=\"4\" height=\"4\"/><rect x=\"40\" y=\"40\" width=\"4\" height=\"4\"/><rect x=\"46\" y=\"40\" width=\"4\" height=\"4\"/><rect x=\"60\" y=\"48\" width=\"4\" height=\"4\"/><rect x=\"66\" y=\"48\" width=\"4\" height=\"4\"/></g></svg>"
+    },
+    {
+      "key": "sky-island",
+      "name": "Летящ остров",
+      "trait": "смелост",
+      "colors": [
+        "#7bc8a4",
+        "#b6e3cc"
+      ],
+      "can": "Летящият остров стои горе, защото под него има здрава скала, а не магия.",
+      "you": "Пробваш неща, които доскоро са ти изглеждали невъзможни.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-b\" d=\"M22 52h56l-14 20-14 10-14-10Z\"/><path class=\"av-a\" d=\"M22 52h56v-6a10 10 0 0 0-10-8H32a10 10 0 0 0-10 8Z\"/> <polygon class=\"av-e\" points=\"40,26 48,30 40,34 32,30\"/> <polygon class=\"av-b\" points=\"32,30 40,34 40,42 32,38\"/> <polygon class=\"av-a\" points=\"48,30 40,34 40,42 48,38\"/> <polygon class=\"av-e\" points=\"58,26 66,30 58,34 50,30\"/> <polygon class=\"av-b\" points=\"50,30 58,34 58,42 50,38\"/> <polygon class=\"av-a\" points=\"66,30 58,34 58,42 66,38\"/><ellipse class=\"av-w\" cx=\"30\" cy=\"80\" rx=\"14\" ry=\"5\"/><ellipse class=\"av-w\" cx=\"68\" cy=\"86\" rx=\"10\" ry=\"4\"/></svg>"
+    },
+    {
+      "key": "sea-city",
+      "name": "Подводен град",
+      "trait": "търпение",
+      "colors": [
+        "#4f9fc4",
+        "#8fcde4"
+      ],
+      "can": "Под водата всичко се строи бавно и се проверява два пъти. Там грешките струват скъпо.",
+      "you": "Работиш внимателно и проверяваш, преди да продължиш.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-a\" d=\"M18 74a32 32 0 0 1 64 0Z\" opacity=\".55\"/> <polygon class=\"av-e\" points=\"36,57.5 45,62 36,66.5 27,62\"/> <polygon class=\"av-b\" points=\"27,62 36,66.5 36,75.5 27,71\"/> <polygon class=\"av-a\" points=\"45,62 36,66.5 36,75.5 45,71\"/> <polygon class=\"av-e\" points=\"58,57.5 67,62 58,66.5 49,62\"/> <polygon class=\"av-b\" points=\"49,62 58,66.5 58,75.5 49,71\"/> <polygon class=\"av-a\" points=\"67,62 58,66.5 58,75.5 67,71\"/><path class=\"av-l\" d=\"M18 74h64\"/><circle class=\"av-e\" cx=\"30\" cy=\"34\" r=\"4\"/><circle class=\"av-e\" cx=\"42\" cy=\"24\" r=\"3\"/><circle class=\"av-e\" cx=\"68\" cy=\"30\" r=\"5\"/></svg>"
+    },
+    {
+      "key": "world",
+      "name": "Цял свят",
+      "trait": "цялост",
+      "colors": [
+        "#8fdc9a",
+        "#c8f0b0"
+      ],
+      "can": "Светът е всички постройки накуп — и мястото между тях, по което се ходи.",
+      "you": "Това, което знаеш, вече е свързано в едно цяло.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-b\" cx=\"50\" cy=\"52\" r=\"34\"/><path class=\"av-a\" d=\"M50 18a34 34 0 0 1 0 68 34 34 0 0 1 0-68Z\" opacity=\".5\"/><g class=\"av-e\"><rect x=\"34\" y=\"34\" width=\"12\" height=\"12\"/><rect x=\"54\" y=\"42\" width=\"12\" height=\"12\"/><rect x=\"40\" y=\"56\" width=\"12\" height=\"12\"/></g><path class=\"av-l\" d=\"M16 52h68M50 18v68\" opacity=\".35\"/></svg>"
+    }
+  ]
+}

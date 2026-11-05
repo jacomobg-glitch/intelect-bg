@@ -24,12 +24,16 @@ export function mergeProfiles(a, b, activeFor) {
     if (known.length) activationSteps[s] = Math.min(...known);
   }
   // Вече достигнатата стъпка не се отнема; слетите данни могат само да я вдигнат.
+  // Монетите вземат по-голямото (не се събират: сесиите по двете устройства може
+  // да са едни и същи), а купеното се обединява — нищо платено не се губи.
   return advance({
     key: 'profile',
     skillXP,
     totalXP: Math.max(sum, a.totalXP, b.totalXP),
     step: Math.max(a.step, b.step),
     activationSteps,
+    coins: Math.max(a.coins || 0, b.coins || 0),
+    owned: [...new Set([...(a.owned || []), ...(b.owned || [])])],
   }, activeFor);
 }
 

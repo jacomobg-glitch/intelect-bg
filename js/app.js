@@ -8,6 +8,8 @@ import { applyTheme } from './core/theme.js';
 import games from './modules/index.js';
 import './install.js';
 import { renderGallery } from './views/gallery.js';
+import { renderHero } from './views/hero.js';
+import { renderShop } from './views/shop.js';
 import { renderHome } from './views/home.js';
 import { renderMathHome, renderMathSession, renderSubtopic } from './views/math.js';
 import { renderDiagnostics } from './views/diagnostics.js';
@@ -94,6 +96,8 @@ function route() {
   else if (name === 'profile') renderProfile(view);
   else if (name === 'surprise') cleanup = renderSurprise(view) || null;
   else if (name === 'settings') renderSettings(view);
+  else if (name === 'hero') renderHero(view);
+  else if (name === 'shop') renderShop(view);
   else if (name === 'diagnostics') cleanup = renderDiagnostics(view) || null;
   else if (name === 'play' && arg) cleanup = renderPlay(view, arg) || null;
   else if (name === 'math' && arg && mode) cleanup = renderMathSession(view, arg, mode) || null;

@@ -6,18 +6,19 @@ import { activeSkills, allGames, isUnlocked, moduleForSkill } from '../core/regi
 import { state } from '../core/store.js';
 import { icon } from './icons.js';
 import { dueSubtopics } from './math.js';
-import { activeSkin, avatarEl, creatureAt, formatXP, fullName, meter } from './ui.js';
+import { activeSkin, avatarEl, creatureAt, formatXP, fullName, meter, t, xpName } from './ui.js';
 
 const SUB_NAMES = ['I', 'II', 'III'];
 
 // Най-близкото препятствие с думи. Изоставащата способност е конкретна: „още 40 XP Памет“.
 export function obstacleText(obstacle) {
   if (obstacle.kind === 'max') return 'Това е върхът на стълбата.';
-  if (obstacle.kind === 'ready') return `Готово за ${fullName(obstacle.step)}.`;
+  if (obstacle.kind === 'ready') return t('home.ready', { step: fullName(obstacle.step) });
+  const xp = `${formatXP(obstacle.xp)} ${xpName()}`;
   if (obstacle.kind === 'skill') {
-    return `За ${fullName(obstacle.step)} ти трябват още ${formatXP(obstacle.xp)} XP ${SKILL_LABELS[obstacle.skill]}`;
+    return t('home.obstacle.skill', { step: fullName(obstacle.step), xp, skill: SKILL_LABELS[obstacle.skill] });
   }
-  return `За ${fullName(obstacle.step)} ти трябват още ${formatXP(obstacle.xp)} XP`;
+  return t('home.obstacle.any', { step: fullName(obstacle.step), xp });
 }
 
 // Подходящата игра за препятствието: най-рано отключената, която тренира точно тази способност.
@@ -31,7 +32,7 @@ export function gameForObstacle(obstacle, step) {
 
 function nextLine(step) {
   const next = activeSkin().creatures[creatureIndex(step) + 1];
-  return next ? `Следва: ${next.name}.` : 'Залата остава отворена.';
+  return next ? t('home.next', { name: next.name }) : 'Залата остава отворена.';
 }
 
 function substeps(step) {
@@ -62,14 +63,14 @@ export function renderHome(root) {
       h('div', { class: 'hero-art', 'aria-hidden': 'true' }, avatarEl(creature)),
       h('div', { class: 'hero-main' },
         h('div', { class: 'hero-avatar' }, avatarEl(creature)),
-        h('h1', {}, `Ти си ${fullName(profile.step)}.`, h('span', { class: 'title-sub' }, nextLine(profile.step))),
+        h('h1', {}, t('home.you', { name: fullName(profile.step) }), h('span', { class: 'title-sub' }, nextLine(profile.step))),
         h('p', { class: 'hero-trait' }, creature.trait),
         h('div', { class: 'next-step' },
           info.isMax ? null : meter(info.fraction, 'Напредък до следващата стъпка'),
           h('p', { class: 'next-hint', 'aria-live': 'polite' }, obstacleText(obstacle))),
         target
           ? h('a', { class: 'btn btn-pill', href: target.route || `#/play/${target.id}` }, `Тренирай ${target.title}`, icon('arrow-up-right'))
-          : h('a', { class: 'btn btn-pill', href: '#/train' }, 'Продължи тренировката', icon('arrow-up-right'))),
+          : h('a', { class: 'btn btn-pill', href: '#/train' }, t('home.continue'), icon('arrow-up-right'))),
       substeps(profile.step)),
     due ? h('a', { class: 'review-link', href: '#/math' }, `Готови за преговор: ${due}`) : null,
     h('a', { class: 'btn surprise-link', href: '#/surprise' }, icon('sparkles'), 'Изненадай ме'),
@@ -80,5 +81,5 @@ export function renderHome(root) {
         h('span', { class: 'skill-level' }, !g.active
           ? `Отключва се с модул ${moduleForSkill(g.skill)}`
           : (info.isMax ? `ниво ${g.level}` : `ниво ${g.level} / ${g.required}`))))),
-    h('p', { class: 'practice-note' }, 'Нивото показва натрупана практика в задачите.'));
+    h('p', { class: 'practice-note' }, t('home.levelNote')));
 }

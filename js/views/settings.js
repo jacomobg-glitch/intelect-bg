@@ -16,10 +16,12 @@ import { applyTheme } from '../core/theme.js';
 import { deviceSettings, updateDevice } from './perf.js';
 import { activeSkin, formatXP, fullName } from './ui.js';
 import { canInstall, promptInstall } from '../install.js';
+import { WORLD_LIST, creatureAt as creatureOf } from '../content/worlds/index.js';
+import { avatarEl } from './ui.js';
 
 const THEMES = [['auto', 'Като системата'], ['dark', 'Тъмна'], ['light', 'Светла']];
 const COLOR_MODES = [[false, 'С цветове'], [true, 'С форми']];
-export const APP_VERSION = '0.11.0';
+export const APP_VERSION = '0.12.0';
 const TAPS_FOR_TEST_MODE = 7;
 
 const stepLabel = (step) => `${activeSkin().creatures[creatureIndex(step)].name} ${subLabel(step)}`;
@@ -50,11 +52,12 @@ function exportProfiles(entries, suffix) {
   toast(entries.length > 1 ? 'Копието с всички профили е изтеглено.' : 'Копието е изтеглено.');
 }
 
-// Съдържанието на профил в четим вид: отвореният го дава от паметта, заключеният иска парола.
+// Съдържанието на профил в четим вид плюс ключа, с който е отворено. Ключът трябва,
+// защото слятото после се записва пак шифровано — иначе паролата щеше да се иска напразно.
 async function payloadOfEntry(entry, where) {
-  if (entry.data) return entry.data;
+  if (entry.data) return { payload: entry.data, dataKey: null };
   if (state.entry && state.entry.id === entry.id && state.keys) {
-    return cleanPayload(await decryptJson(state.keys.dataKey, entry.enc));
+    return { payload: cleanPayload(await decryptJson(state.keys.dataKey, entry.enc)), dataKey: state.keys.dataKey };
   }
   const secret = await promptDialog({
     title: `Парола за „${entry.name}“`,
@@ -68,7 +71,7 @@ async function payloadOfEntry(entry, where) {
     await confirmDialog({ title: 'Грешна парола', body: ['Профилът остава непокътнат.'], ok: 'Добре', cancel: null });
     return null;
   }
-  return cleanPayload(await decryptJson(opened.dataKey, entry.enc));
+  return { payload: cleanPayload(await decryptJson(opened.dataKey, entry.enc)), dataKey: opened.dataKey };
 }
 
 // Сравнение „устройство / файл / резултат“ за един профил.
@@ -109,22 +112,16 @@ function askMergeMode(name, local, incoming, merged) {
   });
 }
 
-// Записва ново съдържание в профил: шифрова го наново, ако профилът е заключен.
-async function writePayload(entry, payload) {
+// Записва ново съдържание в профил: шифрова го наново със същия ключ, с който е отворен.
+async function writePayload(entry, payload, dataKey = null) {
   if (!entry.lock) {
     await saveEntry({ ...entry, data: payload, enc: null, card: cardOfPayload(payload) });
     return true;
   }
-  if (state.entry && state.entry.id === entry.id && state.keys) {
-    await saveEntry({
-      ...entry,
-      enc: await encryptJson(state.keys.dataKey, payload),
-      data: null,
-      card: cardOfPayload(payload),
-    });
-    return true;
-  }
-  return false;
+  const key = dataKey || (state.entry && state.entry.id === entry.id && state.keys ? state.keys.dataKey : null);
+  if (!key) return false;
+  await saveEntry({ ...entry, enc: await encryptJson(key, payload), data: null, card: cardOfPayload(payload) });
+  return true;
 }
 
 async function importBackup(file, rerender) {
@@ -146,15 +143,17 @@ async function importBackup(file, rerender) {
       report.push(`„${incoming.name}“: добавен като нов профил.`);
       continue;
     }
-    const localPayload = await payloadOfEntry(local, 'на устройството');
-    if (!localPayload) { report.push(`„${local.name}“: пропуснат, няма парола.`); continue; }
-    const incomingPayload = await payloadOfEntry(incoming, 'във файла');
-    if (!incomingPayload) { report.push(`„${incoming.name}“: пропуснат, няма парола.`); continue; }
+    const here = await payloadOfEntry(local, 'на устройството');
+    if (!here) { report.push(`„${local.name}“: пропуснат, няма парола.`); continue; }
+    const there = await payloadOfEntry(incoming, 'във файла');
+    if (!there) { report.push(`„${incoming.name}“: пропуснат, няма парола.`); continue; }
+    const localPayload = here.payload;
+    const incomingPayload = there.payload;
 
     const merged = mergePayload(localPayload, incomingPayload, activeSkills);
     const chosen = await askMergeMode(local.name, localPayload, incomingPayload, merged);
     if (!chosen) { report.push(`„${local.name}“: отказан.`); continue; }
-    if (!await writePayload(local, chosen)) {
+    if (!await writePayload(local, chosen, here.dataKey)) {
       report.push(`„${local.name}“: не може да се запише; отвори профила и опитай пак.`);
       continue;
     }
@@ -216,8 +215,9 @@ function myProfileSection(rerender) {
       ok: 'Махни',
     });
     if (!sure) return;
-    const payload = await payloadOfEntry(entry, 'на устройството');
-    if (!payload) return;
+      const opened = await payloadOfEntry(entry, 'на устройството');
+    if (!opened) return;
+    const payload = opened.payload;
     await saveEntry({ ...entry, lock: null, enc: null, data: payload, card: cardOfPayload(payload) });
     await openProfile(entry.id);
     toast('Паролата е махната.');
@@ -353,6 +353,43 @@ function profileRow(entry, rerender) {
       : null);
 }
 
+// „Моят свят“: визитки с аватар, за да се избира с поглед, а не с четене.
+// Механиката не се променя от избора — само имената, картинките и думите.
+function worldSection(rerender) {
+  const current = state.settings.world;
+  const pick = async (id) => {
+    if (id === current) return;
+    await saveSettings({ world: id });
+    toast('Светът е сменен. Прогресът остава същият.');
+    rerender();
+  };
+  const cards = WORLD_LIST.map((world) => {
+    const creature = creatureOf(world, 14);
+    const card = h('button', {
+      type: 'button',
+      class: `world-card${world.id === current ? ' world-card-on' : ''}`,
+      'aria-pressed': String(world.id === current),
+      onclick: () => pick(world.id),
+    },
+    avatarEl(creature, 'world-art'),
+    h('strong', {}, world.name),
+    h('span', { class: 'small muted' }, world.tagline));
+    return card;
+  });
+  const world = state.settings.world;
+  return h('section', { class: 'group' },
+    h('h2', {}, 'Моят свят'),
+    h('p', { class: 'muted small' }, 'Стълбата е една и съща във всички светове: сменят се само имената, картинките и думите. Прогресът не се пипа.'),
+    h('div', { class: 'world-grid' }, cards),
+    h('div', { class: 'row' },
+      h('a', { class: 'btn', href: '#/hero' }, 'Създай своя герой'),
+      h('a', { class: 'btn', href: '#/shop' }, 'Магазин'),
+      h('span', { class: 'small muted' }, `${formatXP(state.profile.coins || 0)} монети`)),
+    world === 'garden'
+      ? h('p', { class: 'muted small' }, 'В градината XP се брои като вода. Растенията чакат търпеливо и никога не изсъхват.')
+      : null);
+}
+
 export function renderSettings(root) {
   const rerender = () => renderSettings(root);
   let taps = 0;
@@ -418,6 +455,7 @@ export function renderSettings(root) {
         },
       }, label)))),
     myProfileSection(rerender),
+    worldSection(rerender),
     isAdmin()
       ? h('section', { class: 'group' },
         h('h2', {}, 'Профили'),

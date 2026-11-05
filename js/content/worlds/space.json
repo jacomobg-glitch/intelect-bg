@@ -1,0 +1,213 @@
+{
+  "id": "space",
+  "name": "Космос",
+  "tagline": "От прашинка до вселена",
+  "xp": {
+    "word": "XP",
+    "long": "опит",
+    "drop": false
+  },
+  "unlockWord": "Отключи",
+  "hero": {
+    "key": "iskra",
+    "name": "Искра",
+    "note": "Малка светлина с голямо любопитство.",
+    "base": "<circle class=\"av-b\" cx=\"50\" cy=\"46\" r=\"22\"/>\n      <circle class=\"av-e\" cx=\"43\" cy=\"42\" r=\"4\"/><circle class=\"av-e\" cx=\"57\" cy=\"42\" r=\"4\"/>\n      <path class=\"av-d\" d=\"M43 55q7 6 14 0\" fill=\"none\" stroke=\"var(--av-d)\" stroke-width=\"3\" stroke-linecap=\"round\"/>\n      <g class=\"av-l\"><path d=\"M50 18V8M24 46H14M86 46h-10M30 26l-7-7M70 26l7-7\"/></g>\n      <path class=\"av-a\" d=\"M38 68h24l-4 20H42Z\"/>"
+  },
+  "companions": [
+    {
+      "key": "sondo",
+      "name": "Сондо",
+      "note": "Малка сонда. Отива първа и праща снимки.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect class=\"av-b\" x=\"38\" y=\"38\" width=\"24\" height=\"28\" rx=\"4\"/><rect class=\"av-a\" x=\"10\" y=\"44\" width=\"22\" height=\"14\" rx=\"2\"/><rect class=\"av-a\" x=\"68\" y=\"44\" width=\"22\" height=\"14\" rx=\"2\"/><circle class=\"av-e\" cx=\"50\" cy=\"50\" r=\"6\"/><path class=\"av-l\" d=\"M50 38V22M44 22h12\"/></svg>"
+    },
+    {
+      "key": "luni",
+      "name": "Луни",
+      "note": "Луна-спътник. Обикаля и слуша.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-b\" cx=\"50\" cy=\"52\" r=\"24\"/><g class=\"av-a\"><circle cx=\"40\" cy=\"44\" r=\"6\"/><circle cx=\"60\" cy=\"58\" r=\"7\"/></g><ellipse class=\"av-l\" cx=\"50\" cy=\"52\" rx=\"40\" ry=\"14\" transform=\"rotate(-18 50 52)\" fill=\"none\" opacity=\".6\"/></svg>"
+    }
+  ],
+  "creatures": [
+    {
+      "key": "dust",
+      "name": "Прашинка",
+      "trait": "основи, първи стъпки",
+      "colors": [
+        "#9aa5b1",
+        "#cbd2d9"
+      ],
+      "can": "Прашинката е толкова малка, че светлината я носи. И все пак от прашинки става всичко.",
+      "you": "Първите стъпки. Започваш от основите, без да бързаш и без да се сравняваш с никого.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-b\" cx=\"50\" cy=\"50\" r=\"7\"/><circle class=\"av-a\" cx=\"66\" cy=\"38\" r=\"3\"/><circle class=\"av-a\" cx=\"36\" cy=\"62\" r=\"2.5\"/></svg>"
+    },
+    {
+      "key": "pebble",
+      "name": "Камъче",
+      "trait": "първа форма",
+      "colors": [
+        "#a68a64",
+        "#d4c0a1"
+      ],
+      "can": "Камъчето вече има форма, която издържа на удар.",
+      "you": "Първата промяна се вижда.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-b\" d=\"M34 44c6-12 26-14 32-2s2 28-12 30-26-16-20-28Z\"/><circle class=\"av-a\" cx=\"44\" cy=\"48\" r=\"4\" opacity=\".6\"/><circle class=\"av-a\" cx=\"58\" cy=\"60\" r=\"3\" opacity=\".6\"/></svg>"
+    },
+    {
+      "key": "meteor",
+      "name": "Метеор",
+      "trait": "движение",
+      "colors": [
+        "#e07a5f",
+        "#f2b8a4"
+      ],
+      "can": "Метеорът свети, защото се трие в въздуха. Движението го прави видим.",
+      "you": "Работата ти вече се вижда отвън.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-a\" d=\"M12 76 44 44l12 12Z\" opacity=\".7\"/><circle class=\"av-b\" cx=\"62\" cy=\"38\" r=\"14\"/><circle class=\"av-d\" cx=\"58\" cy=\"34\" r=\"3\" opacity=\".5\"/></svg>"
+    },
+    {
+      "key": "comet",
+      "name": "Комета",
+      "trait": "редовност",
+      "colors": [
+        "#56cfe1",
+        "#9ae7f0"
+      ],
+      "can": "Кометата се връща по разписание, години наред.",
+      "you": "Връщаш се редовно, а не само когато ти е интересно.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-w\" d=\"M8 74 48 40l10 10Z\"/><circle class=\"av-b\" cx=\"62\" cy=\"34\" r=\"13\"/><g class=\"av-l\"><path d=\"M62 16v-6M80 34h6M74 22l5-5\"/></g></svg>"
+    },
+    {
+      "key": "moon",
+      "name": "Луна",
+      "trait": "постоянство",
+      "colors": [
+        "#cfd6e0",
+        "#eef1f6"
+      ],
+      "can": "Луната обикаля едно и също, без да ѝ омръзва.",
+      "you": "Постоянството ти вече е навик.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-b\" cx=\"50\" cy=\"50\" r=\"30\"/><g class=\"av-a\"><circle cx=\"38\" cy=\"40\" r=\"7\"/><circle cx=\"60\" cy=\"56\" r=\"9\"/><circle cx=\"56\" cy=\"32\" r=\"4\"/></g></svg>"
+    },
+    {
+      "key": "planet",
+      "name": "Планета",
+      "trait": "свой свят",
+      "colors": [
+        "#4895ef",
+        "#9ec5f5"
+      ],
+      "can": "Планетата има свое време, свой въздух и свои правила.",
+      "you": "Имаш свой ритъм и той работи за теб.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-b\" cx=\"50\" cy=\"50\" r=\"30\"/><path class=\"av-a\" d=\"M20 44h60M26 60h48\" opacity=\".7\"/><circle class=\"av-e\" cx=\"62\" cy=\"38\" r=\"6\" opacity=\".6\"/></svg>"
+    },
+    {
+      "key": "ringed",
+      "name": "Планета с пръстен",
+      "trait": "подреденост",
+      "colors": [
+        "#f2cc8f",
+        "#f8e3bc"
+      ],
+      "can": "Пръстенът изглежда плътен, а е от милиарди парчета, всяко по своя път.",
+      "you": "Много малки неща, подредени в едно.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-b\" cx=\"50\" cy=\"48\" r=\"24\"/><ellipse class=\"av-l av-thick\" cx=\"50\" cy=\"52\" rx=\"42\" ry=\"12\" transform=\"rotate(-16 50 52)\" fill=\"none\"/><circle class=\"av-e\" cx=\"42\" cy=\"40\" r=\"5\" opacity=\".5\"/></svg>"
+    },
+    {
+      "key": "star",
+      "name": "Звезда",
+      "trait": "собствена светлина",
+      "colors": [
+        "#ffd166",
+        "#ffe9ae"
+      ],
+      "can": "Звездата свети сама. Нищо не ѝ свети отвън.",
+      "you": "Вече не чакаш някой да ти каже какво да учиш.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-b\" d=\"M50 8 62 38l32 2-25 20 9 31-28-18-28 18 9-31L6 40l32-2Z\"/><circle class=\"av-e\" cx=\"50\" cy=\"48\" r=\"10\" opacity=\".5\"/></svg>"
+    },
+    {
+      "key": "binary",
+      "name": "Двойна звезда",
+      "trait": "заедно",
+      "colors": [
+        "#f9844a",
+        "#fbc3a3"
+      ],
+      "can": "Две звезди се въртят една около друга и се държат взаимно.",
+      "you": "Две умения се засилват едно друго.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-b\" cx=\"34\" cy=\"42\" r=\"18\"/><circle class=\"av-a\" cx=\"66\" cy=\"60\" r=\"14\"/><path class=\"av-l\" d=\"M34 42q26-18 32 18\" opacity=\".5\"/></svg>"
+    },
+    {
+      "key": "nebula",
+      "name": "Мъглявина",
+      "trait": "начало на нещо",
+      "colors": [
+        "#b185db",
+        "#d8c2f0"
+      ],
+      "can": "В мъглявината още нищо не е готово, но всичко е възможно.",
+      "you": "Държиш в главата си неща, които още не са подредени — и това е нормално.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><g class=\"av-a\" opacity=\".55\"><circle cx=\"40\" cy=\"42\" r=\"26\"/><circle cx=\"62\" cy=\"56\" r=\"22\"/><circle cx=\"54\" cy=\"34\" r=\"18\"/></g><g class=\"av-e\"><circle cx=\"38\" cy=\"38\" r=\"3\"/><circle cx=\"60\" cy=\"50\" r=\"2.5\"/><circle cx=\"50\" cy=\"66\" r=\"2\"/><circle cx=\"70\" cy=\"34\" r=\"2\"/></g></svg>"
+    },
+    {
+      "key": "cluster",
+      "name": "Звезден куп",
+      "trait": "много наведнъж",
+      "colors": [
+        "#90e0ef",
+        "#caf0f8"
+      ],
+      "can": "Купът е хиляди звезди, родени заедно.",
+      "you": "Държиш няколко умения наведнъж.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><g class=\"av-b\"><circle cx=\"50\" cy=\"50\" r=\"7\"/><circle cx=\"30\" cy=\"38\" r=\"5\"/><circle cx=\"68\" cy=\"34\" r=\"5\"/><circle cx=\"36\" cy=\"66\" r=\"5\"/><circle cx=\"70\" cy=\"62\" r=\"6\"/><circle cx=\"52\" cy=\"26\" r=\"4\"/><circle cx=\"24\" cy=\"54\" r=\"3.5\"/><circle cx=\"78\" cy=\"48\" r=\"3.5\"/></g><g class=\"av-e\"><circle cx=\"50\" cy=\"50\" r=\"3\"/><circle cx=\"70\" cy=\"62\" r=\"2.5\"/></g></svg>"
+    },
+    {
+      "key": "arm",
+      "name": "Спирален ръкав",
+      "trait": "голяма форма",
+      "colors": [
+        "#48cae4",
+        "#ade8f4"
+      ],
+      "can": "Ръкавът е път, по който звездите пътуват милиони години.",
+      "you": "Виждаш дългия път, не само следващата стъпка.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><g class=\"av-l av-thick\" fill=\"none\"><path d=\"M50 50q24 0 26 24M50 50q-24 0-26-24\"/></g><g class=\"av-a\"><circle cx=\"72\" cy=\"66\" r=\"4\"/><circle cx=\"28\" cy=\"34\" r=\"4\"/><circle cx=\"62\" cy=\"42\" r=\"3\"/></g><circle class=\"av-b\" cx=\"50\" cy=\"50\" r=\"9\"/></svg>"
+    },
+    {
+      "key": "galaxy",
+      "name": "Галактика",
+      "trait": "система",
+      "colors": [
+        "#7b2cbf",
+        "#c77dff"
+      ],
+      "can": "Галактиката се върти цяла, а не на парчета.",
+      "you": "Виждаш цялата система, а не само отделната задача.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse class=\"av-a\" cx=\"50\" cy=\"50\" rx=\"40\" ry=\"16\" transform=\"rotate(-20 50 50)\" opacity=\".5\"/><ellipse class=\"av-a\" cx=\"50\" cy=\"50\" rx=\"30\" ry=\"11\" transform=\"rotate(25 50 50)\" opacity=\".5\"/><circle class=\"av-b\" cx=\"50\" cy=\"50\" r=\"13\"/><circle class=\"av-e\" cx=\"50\" cy=\"50\" r=\"6\"/></svg>"
+    },
+    {
+      "key": "supercluster",
+      "name": "Галактичен куп",
+      "trait": "мрежа",
+      "colors": [
+        "#5a189a",
+        "#9d4edd"
+      ],
+      "can": "Купът е мрежа от галактики, държани заедно от нещо, което още се изучава.",
+      "you": "Свързваш неща, които отдалеч изглеждат различни.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><g class=\"av-l\" opacity=\".6\"><path d=\"M24 30 50 50 76 28M24 72 50 50l26 22M50 20v60\"/></g><g class=\"av-b\"><circle cx=\"24\" cy=\"30\" r=\"8\"/><circle cx=\"76\" cy=\"28\" r=\"7\"/><circle cx=\"24\" cy=\"72\" r=\"7\"/><circle cx=\"76\" cy=\"72\" r=\"8\"/><circle cx=\"50\" cy=\"50\" r=\"10\"/></g></svg>"
+    },
+    {
+      "key": "universe",
+      "name": "Вселена",
+      "trait": "цялост",
+      "colors": [
+        "#8fdc9a",
+        "#c8f0b0"
+      ],
+      "can": "Вселената е всичко, което съществува — и мястото между него.",
+      "you": "Това, което знаеш, вече е свързано в едно цяло.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-b\" cx=\"50\" cy=\"50\" r=\"34\" opacity=\".35\"/><g class=\"av-a\"><circle cx=\"36\" cy=\"36\" r=\"9\"/><circle cx=\"66\" cy=\"42\" r=\"7\"/><circle cx=\"46\" cy=\"66\" r=\"8\"/><circle cx=\"70\" cy=\"68\" r=\"5\"/></g><g class=\"av-e\"><circle cx=\"30\" cy=\"58\" r=\"2.5\"/><circle cx=\"58\" cy=\"28\" r=\"2\"/><circle cx=\"62\" cy=\"58\" r=\"2\"/></g><circle class=\"av-l\" cx=\"50\" cy=\"50\" r=\"34\" fill=\"none\" opacity=\".4\"/></svg>"
+    }
+  ]
+}

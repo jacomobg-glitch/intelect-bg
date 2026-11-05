@@ -6,7 +6,7 @@ import { completeSession, maxDifficulty, saveTopic, state, topicOf } from '../co
 import math, { SESSION_SIZE, applyOutcome } from '../modules/math.js';
 import { showEvolution } from './evolution.js';
 import { VISUALIZATIONS } from './math-viz.js';
-import { fullName } from './ui.js';
+import { fullName, t, xpName } from './ui.js';
 
 const LEVEL_TABS = [['child', 'Като на дете'], ['standard', 'Стандартно'], ['why', 'Защо работи']];
 const formatDate = (iso) => iso.split('-').reverse().join('.');
@@ -133,8 +133,8 @@ export function renderSubtopic(root, id) {
     h('h1', { class: 'page-title' }, subtopic.title),
     h('div', { class: 'row-inline' }, masteredBadge(topic), checkbox(subtopic)),
     explanation(subtopic),
-    h('section', { class: 'group' }, h('h2', {}, 'Опитай сам'), vizSection(subtopic)),
-    h('section', { class: 'group' }, h('h2', {}, 'Решени примери'), subtopic.examples.map(workedExample)),
+    h('section', { class: 'group' }, h('h2', {}, t('math.try')), vizSection(subtopic)),
+    h('section', { class: 'group' }, h('h2', {}, t('math.examples')), subtopic.examples.map(workedExample)),
     h('section', { class: 'group' },
       h('h2', {}, 'Задачи'),
       h('a', { class: 'btn btn-primary btn-big', href: `#/math/${id}/practice` }, 'Упражнения'),
@@ -162,7 +162,7 @@ export function renderMathSession(root, id, mode, options = {}) {
     showResult(result, percent);
   };
 
-  function showResult({ xp, stats }, percent) {
+  function showResult({ xp, coins = 0, stats }, percent) {
     const topic = topicOf(id);
     const kicker = options.kicker ? h('p', { class: 'muted small' }, options.kicker) : null;
     let message = 'Практиката е записана.';
@@ -179,7 +179,8 @@ export function renderMathSession(root, id, mode, options = {}) {
         h('p', { class: 'result-score' }, `${percent}%`),
         h('p', {}, message),
         masteredBadge(topic),
-        h('p', { class: 'result-xp', 'aria-live': 'polite' }, xp > 0 ? `+${xp} XP` : 'Този път без XP: нямаше верен отговор.')),
+        h('p', { class: 'result-xp', 'aria-live': 'polite' }, xp > 0 ? `+${xp} ${xpName()}` : t('math.noXP', { xp: xpName() })),
+        coins > 0 ? h('p', { class: 'result-coins' }, `+${coins} ${coins === 1 ? 'монета' : 'монети'}`) : null),
       h('dl', { class: 'stats' }, stats.rows.map(([k, v]) => h('div', {}, h('dt', {}, k), h('dd', {}, v)))),
       options.next
         ? h('button', { class: 'btn btn-primary btn-big', onclick: options.next.onClick }, options.next.label)
@@ -209,7 +210,7 @@ export function renderMathSession(root, id, mode, options = {}) {
       if (!String(raw).trim()) return;
       const r = math.answer(raw);
       if (r.correct) {
-        feedback.textContent = 'Вярно.';
+        feedback.textContent = t('math.correct');
         feedback.className = 'feedback feedback-ok';
         lock();
         showNext();
@@ -219,7 +220,7 @@ export function renderMathSession(root, id, mode, options = {}) {
         lock();
         showNext();
       } else {
-        feedback.textContent = 'Още не. Ето какво може да помогне:';
+        feedback.textContent = t('math.wrong');
         feedback.className = 'feedback feedback-no';
         addHint(r.hint);
       }
@@ -255,7 +256,7 @@ export function renderMathSession(root, id, mode, options = {}) {
         const hint = math.showHint();
         if (!hint) return;
         addHint(hint);
-        hintBtn.textContent = ['Намек', 'Метод', 'Решение'][math.hintLevel] || 'Покажи решението';
+        hintBtn.textContent = [t('math.hint1'), t('math.hint2'), t('math.hint3')][math.hintLevel] || t('math.hint3');
         if (math.hintLevel >= 3) {
           hintBtn.remove();
           math.giveUp();
@@ -265,7 +266,7 @@ export function renderMathSession(root, id, mode, options = {}) {
           showNext();
         }
       },
-    }, 'Намек');
+    }, t('math.hint1'));
 
     actions.replaceChildren(...(mode === 'practice' ? [hintBtn] : []));
 

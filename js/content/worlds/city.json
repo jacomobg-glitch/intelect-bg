@@ -1,0 +1,219 @@
+{
+  "id": "city",
+  "name": "Градски мисии",
+  "tagline": "Градът, колелата и приключенията",
+  "xp": {
+    "word": "XP",
+    "long": "опит",
+    "drop": false
+  },
+  "unlockWord": "Мисия изпълнена! Отключи:",
+  "hero": {
+    "key": "riko",
+    "name": "Рико",
+    "note": "Млад куриер и изследовател на града. Стига навреме, без да бърза опасно.",
+    "base": "<circle class=\"av-a\" cx=\"50\" cy=\"24\" r=\"13\"/>\n      <circle class=\"av-d\" cx=\"45\" cy=\"23\" r=\"2.6\"/><circle class=\"av-d\" cx=\"55\" cy=\"23\" r=\"2.6\"/>\n      <path class=\"av-b\" d=\"M36 40h28a6 6 0 0 1 6 6v22a6 6 0 0 1-6 6H36a6 6 0 0 1-6-6V46a6 6 0 0 1 6-6Z\"/>\n      <path class=\"av-b\" d=\"M30 46 18 58M70 46l12 12\"/>\n      <rect class=\"av-a\" x=\"38\" y=\"74\" width=\"9\" height=\"16\" rx=\"3\"/><rect class=\"av-a\" x=\"53\" y=\"74\" width=\"9\" height=\"16\" rx=\"3\"/>\n      <rect class=\"av-e\" x=\"40\" y=\"50\" width=\"20\" height=\"12\" rx=\"2\"/>"
+  },
+  "companions": [
+    {
+      "key": "mira",
+      "name": "Мира",
+      "note": "Механичка в гаража. Разглобява, за да разбере.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-a\" cx=\"50\" cy=\"26\" r=\"13\"/><path class=\"av-d\" d=\"M37 20a13 13 0 0 1 26 0Z\"/><circle class=\"av-d\" cx=\"45\" cy=\"26\" r=\"2.6\"/><circle class=\"av-d\" cx=\"55\" cy=\"26\" r=\"2.6\"/><path class=\"av-b\" d=\"M34 42h32a6 6 0 0 1 6 6v26H28V48a6 6 0 0 1 6-6Z\"/><path class=\"av-e\" d=\"M40 52h20v10H40Z\"/><path class=\"av-l av-thick\" d=\"M72 50 86 64\"/></svg>"
+    },
+    {
+      "key": "vanya",
+      "name": "Ваня",
+      "note": "Пилот на хеликоптера. Вижда пътя отгоре.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-a\" cx=\"50\" cy=\"26\" r=\"13\"/><path class=\"av-b\" d=\"M35 24a15 15 0 0 1 30 0v3H35Z\"/><path class=\"av-e\" d=\"M38 28h24v6H38Z\" opacity=\".8\"/><path class=\"av-b\" d=\"M34 44h32a6 6 0 0 1 6 6v24H28V50a6 6 0 0 1 6-6Z\"/><path class=\"av-l\" d=\"M28 56h44\" opacity=\".6\"/></svg>"
+    },
+    {
+      "key": "mustak",
+      "name": "Мустак",
+      "note": "Градски котарак-талисман. Знае всички преки пътища.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse class=\"av-b\" cx=\"50\" cy=\"62\" rx=\"26\" ry=\"18\"/><circle class=\"av-a\" cx=\"50\" cy=\"34\" r=\"16\"/><path class=\"av-a\" d=\"M36 24 32 10l14 8ZM64 24l4-14-14 8Z\"/><circle class=\"av-d\" cx=\"44\" cy=\"34\" r=\"3\"/><circle class=\"av-d\" cx=\"56\" cy=\"34\" r=\"3\"/><path class=\"av-l\" d=\"M30 36H16M30 42H18M70 36h14M70 42h12\"/><path class=\"av-l av-thick\" d=\"M74 62q14-6 10-22\"/></svg>"
+    }
+  ],
+  "creatures": [
+    {
+      "key": "walker",
+      "name": "Пешеходец",
+      "trait": "основи, първи стъпки",
+      "colors": [
+        "#e07a5f",
+        "#f2b8a4"
+      ],
+      "can": "Пешеходецът стига навсякъде, стига да тръгне. Няма нужда от нищо освен от себе си.",
+      "you": "Първите стъпки. Започваш от основите, без да бързаш и без да се сравняваш с никого.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-a\" cx=\"50\" cy=\"22\" r=\"11\"/><path class=\"av-l av-thick\" d=\"M50 34v28M50 62l-10 22M50 62l11 22M50 42l-16 8M50 42l16 8\"/></svg>"
+    },
+    {
+      "key": "scooter",
+      "name": "Тротинетка",
+      "trait": "първо ускорение",
+      "colors": [
+        "#f2cc8f",
+        "#f8e3bc"
+      ],
+      "can": "Тротинетката е едно отблъскване и дълго търкаляне. Малко усилие, много път.",
+      "you": "Навикът вече те носи и когато не го буташ всеки ден.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-d\" cx=\"26\" cy=\"74\" r=\"10\"/><circle class=\"av-e\" cx=\"26\" cy=\"74\" r=\"3.846153846153846\"/><circle class=\"av-d\" cx=\"76\" cy=\"74\" r=\"10\"/><circle class=\"av-e\" cx=\"76\" cy=\"74\" r=\"3.846153846153846\"/><path class=\"av-l av-thick\" d=\"M26 74h44M70 74V30h12\"/><rect class=\"av-a\" x=\"30\" y=\"68\" width=\"34\" height=\"7\" rx=\"3\"/></svg>"
+    },
+    {
+      "key": "bike",
+      "name": "Колело",
+      "trait": "равновесие",
+      "colors": [
+        "#81b29a",
+        "#b5d6c6"
+      ],
+      "can": "Колелото стои право, докато се движи. Равновесието е движение, не застиване.",
+      "you": "Редовността те държи: малко и често е по-здраво от рядко и много.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-d\" cx=\"26\" cy=\"70\" r=\"16\"/><circle class=\"av-e\" cx=\"26\" cy=\"70\" r=\"6.153846153846153\"/><circle class=\"av-d\" cx=\"76\" cy=\"70\" r=\"16\"/><circle class=\"av-e\" cx=\"76\" cy=\"70\" r=\"6.153846153846153\"/><path class=\"av-l av-thick\" d=\"M26 70 44 42h20l12 28M44 42 36 70M64 42h10\"/><path class=\"av-l\" d=\"M40 36h10\"/></svg>"
+    },
+    {
+      "key": "skate",
+      "name": "Скейтборд",
+      "trait": "точност",
+      "colors": [
+        "#9b5de5",
+        "#c9a7f0"
+      ],
+      "can": "На дъската печели точното движение, а не силното. Половин сантиметър решава.",
+      "you": "Вече не удряш напосоки: мериш и после действаш.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-a\" d=\"M14 62h72a6 6 0 0 1 0 12H14a6 6 0 0 1 0-12Z\"/><circle class=\"av-d\" cx=\"30\" cy=\"80\" r=\"7\"/><circle class=\"av-e\" cx=\"30\" cy=\"80\" r=\"2.692307692307692\"/><circle class=\"av-d\" cx=\"70\" cy=\"80\" r=\"7\"/><circle class=\"av-e\" cx=\"70\" cy=\"80\" r=\"2.692307692307692\"/><path class=\"av-l\" d=\"M24 54 34 40h32l10 14\" opacity=\".5\"/></svg>"
+    },
+    {
+      "key": "moped",
+      "name": "Мотопед",
+      "trait": "темпо",
+      "colors": [
+        "#3d9bd9",
+        "#8cc8ee"
+      ],
+      "can": "Мотопедът държи постоянно темпо, без да се задъхва.",
+      "you": "Намерил си своето темпо и го държиш.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-d\" cx=\"26\" cy=\"72\" r=\"13\"/><circle class=\"av-e\" cx=\"26\" cy=\"72\" r=\"5\"/><circle class=\"av-d\" cx=\"76\" cy=\"72\" r=\"13\"/><circle class=\"av-e\" cx=\"76\" cy=\"72\" r=\"5\"/><path class=\"av-b\" d=\"M22 64h34l8-14h16l6 14h6v6H22Z\"/><path class=\"av-l av-thick\" d=\"M64 50 76 38h10\"/><rect class=\"av-e\" x=\"34\" y=\"56\" width=\"16\" height=\"6\" rx=\"3\"/></svg>"
+    },
+    {
+      "key": "kart",
+      "name": "Картинг",
+      "trait": "реакция",
+      "colors": [
+        "#f25c54",
+        "#f9a19a"
+      ],
+      "can": "В картинга завоят идва бързо. Печели този, който реагира навреме.",
+      "you": "Реакцията ти вече е част от уменията, не късмет.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-d\" cx=\"24\" cy=\"72\" r=\"11\"/><circle class=\"av-e\" cx=\"24\" cy=\"72\" r=\"4.230769230769231\"/><circle class=\"av-d\" cx=\"78\" cy=\"72\" r=\"11\"/><circle class=\"av-e\" cx=\"78\" cy=\"72\" r=\"4.230769230769231\"/><path class=\"av-b\" d=\"M16 66h70l-8-14H44l-6 8H16Z\"/><rect class=\"av-a\" x=\"44\" y=\"40\" width=\"16\" height=\"12\" rx=\"3\"/><path class=\"av-l\" d=\"M62 52 70 44\"/></svg>"
+    },
+    {
+      "key": "car",
+      "name": "Кола",
+      "trait": "самостоятелност",
+      "colors": [
+        "#4895ef",
+        "#9ec5f5"
+      ],
+      "can": "Колата стига далеч, но иска внимание през цялото време.",
+      "you": "Караш сам: избираш какво да тренираш и кога.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-b\" d=\"M14 68h72v-10l-10-4-10-12H40L28 54l-14 4Z\"/><path class=\"av-e\" d=\"M42 44h16l8 10H36Z\"/><circle class=\"av-d\" cx=\"30\" cy=\"72\" r=\"9\"/><circle class=\"av-e\" cx=\"30\" cy=\"72\" r=\"3.4615384615384612\"/><circle class=\"av-d\" cx=\"72\" cy=\"72\" r=\"9\"/><circle class=\"av-e\" cx=\"72\" cy=\"72\" r=\"3.4615384615384612\"/></svg>"
+    },
+    {
+      "key": "jeep",
+      "name": "Джип",
+      "trait": "труден терен",
+      "colors": [
+        "#7f9172",
+        "#b3c2a4"
+      ],
+      "can": "Джипът минава там, където няма път. Бавно, но минава.",
+      "you": "Трудната задача вече не те спира: намираш начин.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-b\" d=\"M12 66h76V50H66l-8-12H30l-6 12H12Z\"/><path class=\"av-e\" d=\"M32 42h22v8H28Z\"/><circle class=\"av-d\" cx=\"28\" cy=\"70\" r=\"12\"/><circle class=\"av-e\" cx=\"28\" cy=\"70\" r=\"4.615384615384615\"/><circle class=\"av-d\" cx=\"72\" cy=\"70\" r=\"12\"/><circle class=\"av-e\" cx=\"72\" cy=\"70\" r=\"4.615384615384615\"/><path class=\"av-l\" d=\"M12 50h76\"/></svg>"
+    },
+    {
+      "key": "truck",
+      "name": "Камион",
+      "trait": "носимост",
+      "colors": [
+        "#e8873d",
+        "#f5bb8a"
+      ],
+      "can": "Камионът носи много наведнъж, защото е направен за това.",
+      "you": "Държиш по-голям товар: повече задачи, без да изпускаш.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect class=\"av-a\" x=\"12\" y=\"36\" width=\"44\" height=\"30\" rx=\"3\"/><path class=\"av-b\" d=\"M58 66h30V52l-8-12H58Z\"/><path class=\"av-e\" d=\"M62 44h12l5 8H62Z\"/><circle class=\"av-d\" cx=\"26\" cy=\"72\" r=\"11\"/><circle class=\"av-e\" cx=\"26\" cy=\"72\" r=\"4.230769230769231\"/><circle class=\"av-d\" cx=\"74\" cy=\"72\" r=\"11\"/><circle class=\"av-e\" cx=\"74\" cy=\"72\" r=\"4.230769230769231\"/></svg>"
+    },
+    {
+      "key": "racer",
+      "name": "Състезателна кола",
+      "trait": "скорост с контрол",
+      "colors": [
+        "#ef233c",
+        "#f98c9b"
+      ],
+      "can": "Бързата кола е безполезна без спирачки. Скоростта струва само с контрол.",
+      "you": "Бърз си и точен едновременно.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-b\" d=\"M8 68h84l-6-10H58l-8-10H34l-6 10H8Z\"/><rect class=\"av-a\" x=\"36\" y=\"44\" width=\"14\" height=\"6\" rx=\"2\"/><path class=\"av-e\" d=\"M86 50h8v8h-8Z\"/><circle class=\"av-d\" cx=\"26\" cy=\"72\" r=\"10\"/><circle class=\"av-e\" cx=\"26\" cy=\"72\" r=\"3.846153846153846\"/><circle class=\"av-d\" cx=\"74\" cy=\"72\" r=\"10\"/><circle class=\"av-e\" cx=\"74\" cy=\"72\" r=\"3.846153846153846\"/><path class=\"av-l\" d=\"M8 60h20\" opacity=\".5\"/></svg>"
+    },
+    {
+      "key": "boat",
+      "name": "Катер",
+      "trait": "нова среда",
+      "colors": [
+        "#2a9d8f",
+        "#8fd4ca"
+      ],
+      "can": "На вода правилата са други: няма спиране на място, има течение.",
+      "you": "Пренасяш уменията си в нова среда и те пак работят.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-b\" d=\"M14 58h72l-10 18H26Z\"/><path class=\"av-a\" d=\"M38 58V38h22l8 20Z\"/><path class=\"av-l\" d=\"M10 82q10-6 20 0t20 0 20 0 20 0\"/><path class=\"av-e\" d=\"M44 44h12v8H44Z\"/></svg>"
+    },
+    {
+      "key": "heli",
+      "name": "Хеликоптер",
+      "trait": "поглед отгоре",
+      "colors": [
+        "#577590",
+        "#a2b6c8"
+      ],
+      "can": "Хеликоптерът вижда целия град наведнъж и може да спре във въздуха.",
+      "you": "Виждаш задачата отгоре, преди да влезеш в нея.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse class=\"av-b\" cx=\"46\" cy=\"56\" rx=\"26\" ry=\"16\"/><path class=\"av-b\" d=\"M70 56h22v8H70Z\"/><path class=\"av-a\" d=\"M84 52h10v16H84Z\"/><path class=\"av-e\" d=\"M30 48h16v12H26Z\"/><path class=\"av-l av-thick\" d=\"M8 32h76M46 32v8\"/><path class=\"av-l\" d=\"M34 72v8h24v-8\"/></svg>"
+    },
+    {
+      "key": "plane",
+      "name": "Самолет",
+      "trait": "голямо разстояние",
+      "colors": [
+        "#4361ee",
+        "#9db0f5"
+      ],
+      "can": "Самолетът стига далеч, но пътят му се планира преди да излети.",
+      "you": "Планираш напред, не само следващата стъпка.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-b\" d=\"M10 54h68l14 6-14 6H10a6 6 0 0 1 0-12Z\"/><path class=\"av-a\" d=\"M40 54 26 26h10l24 28ZM40 60 26 88h10l24-28Z\"/><path class=\"av-e\" d=\"M62 56h10v6H62Z\"/></svg>"
+    },
+    {
+      "key": "rocket",
+      "name": "Ракета",
+      "trait": "излизане от познатото",
+      "colors": [
+        "#f72585",
+        "#fba0cb"
+      ],
+      "can": "Ракетата излиза извън всичко познато. За това трябва много подготовка и малко смелост.",
+      "you": "Пробваш неща, които доскоро са ти изглеждали невъзможни.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-b\" d=\"M50 8c12 12 16 30 16 46v16H34V54c0-16 4-34 16-46Z\"/><path class=\"av-a\" d=\"M34 56 20 76h14ZM66 56l14 20H66Z\"/><circle class=\"av-e\" cx=\"50\" cy=\"40\" r=\"8\"/><path class=\"av-d\" d=\"M42 70h16l-8 20Z\"/></svg>"
+    },
+    {
+      "key": "station",
+      "name": "Космическа станция",
+      "trait": "цялост",
+      "colors": [
+        "#8fdc9a",
+        "#c8f0b0"
+      ],
+      "can": "Станцията е дом, лаборатория и кораб наведнъж. Всичко в нея работи заедно.",
+      "you": "Това, което знаеш, вече е свързано в едно цяло.",
+      "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect class=\"av-b\" x=\"36\" y=\"30\" width=\"28\" height=\"44\" rx=\"10\"/><rect class=\"av-a\" x=\"6\" y=\"42\" width=\"24\" height=\"20\" rx=\"3\"/><rect class=\"av-a\" x=\"70\" y=\"42\" width=\"24\" height=\"20\" rx=\"3\"/><path class=\"av-l\" d=\"M30 52h6M64 52h6\"/><circle class=\"av-e\" cx=\"50\" cy=\"44\" r=\"6\"/><circle class=\"av-e\" cx=\"50\" cy=\"60\" r=\"6\"/></svg>"
+    }
+  ]
+}

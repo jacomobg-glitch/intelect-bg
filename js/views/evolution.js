@@ -2,7 +2,7 @@
 import { h } from '../core/dom.js';
 import { creatureIndex, difficultyCeiling, subLabel } from '../core/evolution.js';
 import { unlockedBetween } from '../core/registry.js';
-import { activeSkin, avatarEl, fullName } from './ui.js';
+import { activeSkin, avatarEl, fullName, unlockPhrase } from './ui.js';
 
 // Какво реално се отключва: само неща, които вече съществуват в приложението.
 export function unlocksBetween(from, to) {
@@ -55,7 +55,8 @@ export function showEvolution(from, to) {
           ? [h('p', {}, newC.can), h('p', { class: 'evo-you' }, newC.you)]
           : h('p', {}, `Подстепен ${subLabel(to)} на ${newC.name}: още практика в „${newC.trait}“.`),
         unlocks.length
-          ? h('div', { class: 'evo-unlocks' }, h('h3', {}, 'Отключва се'), h('ul', {}, unlocks.map((u) => h('li', {}, u))))
+          // Светът казва отключването със своите думи: „Мисия изпълнена! Отключи:“ в града.
+          ? h('div', { class: 'evo-unlocks' }, h('h3', {}, unlockPhrase()), h('ul', {}, unlocks.map((u) => h('li', {}, u))))
           : null,
         button));
 

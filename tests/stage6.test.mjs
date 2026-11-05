@@ -11,7 +11,7 @@ import {
 } from '../js/content/games/generators.js';
 import { SKILLS } from '../js/core/config.js';
 import { creatureIndex, subLabel } from '../js/core/evolution.js';
-import nature from '../js/content/skins/nature.js';
+import nature from '../js/content/worlds/nature.json' with { type: 'json' };
 import { cleanSettings, defaultSettings } from '../js/core/model.js';
 import { validateGame } from '../js/core/registry.js';
 import { ALL_SUBTOPICS, MATH_TREE } from '../js/content/math/topics.js';

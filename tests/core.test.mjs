@@ -9,7 +9,7 @@ import {
 } from '../js/core/evolution.js';
 import { defaultProfile } from '../js/core/model.js';
 import { validateGame } from '../js/core/registry.js';
-import nature from '../js/content/skins/nature.js';
+import nature from '../js/content/worlds/nature.json' with { type: 'json' };
 import games from '../js/modules/index.js';
 import { buildManifest, render } from '../tools/gen-precache.mjs';
 

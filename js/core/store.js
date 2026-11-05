@@ -1,6 +1,7 @@
 // Състояние в паметта плюс запис в IndexedDB. Изгледите четат оттук.
 // От Етап 6г нататък всичко е в рамките на ЕДИН профил: в паметта стои само отвореният,
 // а ключовете му не се записват никъде. Профилите не се виждат един друг.
+import { coinsFor } from '../content/shop.js';
 import { CONFIG } from './config.js';
 import { decryptJson, encryptJson, openWithPassword } from './crypto.js';
 import { PROFILES, getAll, getOne, writeAll } from './db.js';
@@ -223,6 +224,17 @@ export const recordOf = (id) => state.records.get(id) || defaultRecord(id);
 export const topicOf = (id) => state.topics.get(id) || defaultTopic(id);
 export const maxDifficulty = () => difficultyCeiling(state.profile.step);
 
+// Купуване от магазина: монетите се харчат, предметът влиза в профила.
+// Нищо тук не пипа XP, трудност или отключвания — магазинът е само украса.
+export async function buyItem(item) {
+  const coins = state.profile.coins || 0;
+  const owned = state.profile.owned || [];
+  if (!item || owned.includes(item.id) || coins < item.price) return false;
+  state.profile = { ...state.profile, coins: coins - item.price, owned: [...owned, item.id] };
+  await persist();
+  return true;
+}
+
 // Детският профил се качва по-бавно: трябва един верен отговор повече, за да се вдигне
 // трудността, а началната е с една стъпка по-ниска.
 export const staircaseUp = () => CONFIG.STAIRCASE_UP + (isChild() ? 1 : 0);
@@ -278,14 +290,40 @@ export async function completeSession(game) {
     feel: null, // оценката важи за точно една сесия; тази вече я ползва
   };
   const { profile, from, to } = applyXP(state.profile, xp, game.skills, activeSkills);
+  // Монетите идват от същата сесия и от същия XP: друг начин да се печелят няма.
+  const coins = coinsFor(xp);
+  const withCoins = { ...profile, coins: (profile.coins || 0) + coins };
 
   state.records.set(game.id, record);
-  state.profile = profile;
+  state.profile = withCoins;
   await persist();
-  return { score, xp, isRecord, from, to, stats, record };
+  return { score, xp, coins, isRecord, from, to, stats, record };
 }
 
-// Искане браузърът да не изтрива данните при липса на място. При отказ не показва нищо.
-export function requestPersistence() {
-  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+// Искане браузърът да не изтрива данните при липса на място. Най-добре се иска
+// веднага след истинско действие на човека (създаване на профил), затова се вика и там.
+export async function requestPersistence() {
+  if (!navigator.storage || !navigator.storage.persist) return false;
+  try {
+    return await navigator.storage.persist();
+  } catch {
+    return false;
+  }
+}
+
+// Какво казва браузърът за хранилището: трайно ли е и колко място ползваме.
+export async function storageStatus() {
+  const out = { persisted: null, usage: null, quota: null };
+  if (!navigator.storage) return out;
+  try {
+    if (navigator.storage.persisted) out.persisted = await navigator.storage.persisted();
+    if (navigator.storage.estimate) {
+      const { usage, quota } = await navigator.storage.estimate();
+      out.usage = usage ?? null;
+      out.quota = quota ?? null;
+    }
+  } catch {
+    // Браузърът не казва: показваме „не се знае“, вместо да гадаем.
+  }
+  return out;
 }
