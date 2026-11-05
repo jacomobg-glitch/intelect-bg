@@ -7,7 +7,16 @@
 //   - разсейване: рядък опит с време далеч над срока, който играта брои като пропуск;
 //   - умора: след 3 минути точността пада и времената се разтягат.
 import { CONFIG } from '../js/core/config.js';
+import { quickParams, simonParams, sortParams, swapParams } from '../js/content/games/generators.js';
 import { TrialLog, staircaseTarget } from '../js/modules/shared/trial-log.js';
+import { goNoGoParams } from '../js/modules/go-nogo.js';
+import { SPEED_LIMIT_MS as LOGIC_LIMIT_MS } from '../js/modules/logic.js';
+import { SPEED_LIMIT_MS as MIRROR_LIMIT_MS } from '../js/modules/mirror.js';
+import { limitFor as oddLimit } from '../js/modules/odd-one-out.js';
+import { INPUT_LIMIT_MS as SEQ_LIMIT_MS } from '../js/modules/sequence.js';
+import { reactionParams } from '../js/modules/simple-reaction.js';
+import { stroopParams } from '../js/modules/stroop.js';
+import { ANSWER_LIMIT_MS as SWAP_LIMIT_MS } from '../js/modules/swapped.js';
 
 export const RT_RANGE = [250, 450];      // границите, в които стоят времената без разсейване
 export const BASE_ACCURACY = 0.85;       // 15% грешки на „своята“ трудност
@@ -74,8 +83,8 @@ export function playSession({
   return { log, levels, trials: levels.length };
 }
 
-const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
-const sd = (xs) => {
+export const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
+export const sd = (xs) => {
   if (xs.length < 2) return 0;
   const m = mean(xs);
   return Math.sqrt(xs.reduce((a, x) => a + (x - m) ** 2, 0) / (xs.length - 1));
@@ -107,6 +116,66 @@ export function calibrate(options = {}, runs = 40) {
   };
 }
 
+
+// --- Профили на отделните игри ---
+// Срокът за отговор и паузата между опитите идват от самите модули, не се преписват тук.
+// Така калибрирането следва истинските числа и се чупи, ако някой ги промени.
+export const GAME_PROFILES = [
+  { id: 'stroop', title: 'Stroop', limit: (l) => stroopParams(l).limit, gapMs: 450, runMs: 60000 },
+  { id: 'simple-reaction', title: 'Проста реакция', limit: (l) => reactionParams(l).deadline, gapMs: 2200, runMs: 45000 },
+  { id: 'go-nogo', title: 'Go / No-Go', limit: (l) => goNoGoParams(l).duration, gapMs: 1000, runMs: 60000 },
+  { id: 'fireflies', title: 'Светулки', limit: (l) => Math.max(450, 1500 - 70 * (l - 1)), gapMs: 1050, runMs: 60000 },
+  { id: 'logic', title: 'Логически редици', limit: () => LOGIC_LIMIT_MS, gapMs: 800, runMs: 240000 },
+  { id: 'odd-one-out', title: 'Различното', limit: (l) => oddLimit(l), gapMs: 550, runMs: 60000 },
+  { id: 'swapped', title: 'Разменени неща', limit: () => SWAP_LIMIT_MS, gapMs: (l) => swapParams(l).studyMs + 1200, runMs: 90000 },
+  { id: 'quick-math', title: 'Бърза сметка', limit: (l) => quickParams(l).limitMs, gapMs: 450, runMs: 60000 },
+  { id: 'sequence', title: 'Цветни последователности', limit: () => SEQ_LIMIT_MS, gapMs: (l) => simonParams(l).length * (simonParams(l).showMs + simonParams(l).gapMs) + 1400, runMs: 120000 },
+  { id: 'mirror', title: 'Огледални фигури', limit: () => MIRROR_LIMIT_MS, gapMs: 900, runMs: 240000 },
+  { id: 'sorting', title: 'Сортиране по правило', limit: (l) => sortParams(l).limitMs, gapMs: 600, runMs: 90000 },
+];
+
+// Една игра, изиграна от симулирания човек със собствените ѝ срокове.
+// startLevel: 1 е първа сесия, а ability е завърналият се играч, който продължава от lastDifficulty.
+export function calibrateGame(profile, { ability = 4, maxLevel = 9, runs = 30, startLevel = 1 } = {}) {
+  const stats = [];
+  for (let i = 0; i < runs; i += 1) {
+    const random = seeded(i * 6151 + 29);
+    const log = new TrialLog({ startLevel, maxLevel });
+    const levels = [];
+    let elapsed = 0;
+    const runMs = profile.runMs;
+    while (elapsed < runMs) {
+      const fatigue = fatigueAt(elapsed);
+      const limitMs = profile.limit(log.level);
+      const gapMs = typeof profile.gapMs === 'function' ? profile.gapMs(log.level) : profile.gapMs;
+      const rt = reactionAt(log.level, ability, fatigue, random);
+      levels.push(log.level);
+      if (rt > limitMs) log.error('miss');
+      else if (random() < accuracyAt(log.level, ability, fatigue)) log.correct({ rt, limit: limitMs });
+      else log.error('wrong');
+      elapsed += gapMs + Math.min(rt, limitMs);
+    }
+    const settled = levels.slice(Math.floor(levels.length / 2));
+    stats.push({
+      quality: log.quality(),
+      settledMean: mean(settled),
+      settledSd: sd(settled),
+      trials: levels.length,
+    });
+  }
+  return {
+    id: profile.id,
+    title: profile.title,
+    trials: mean(stats.map((x) => x.trials)),
+    quality: mean(stats.map((x) => x.quality)),
+    settledMean: mean(stats.map((x) => x.settledMean)),
+    settledSd: mean(stats.map((x) => x.settledSd)),
+    worstSd: Math.max(...stats.map((x) => x.settledSd)),
+  };
+}
+
+export const calibrateAllGames = (options) => GAME_PROFILES.map((p) => calibrateGame(p, options));
+
 // npm run calibrate: таблица за различни способности и дължини на сесията.
 function printTable() {
   const target = staircaseTarget();
@@ -125,6 +194,23 @@ function printTable() {
         `${r.meanRT.toFixed(0)} ms`.padStart(10),
       ].join(''));
     }
+  }
+
+  // Завърналият се играч продължава от lastDifficulty, затова startLevel е способността му.
+  // Първата сесия на нова игра започва от 1 и затова изглежда по-лесна: staircase още се качва.
+  const first = new Map(calibrateAllGames({ startLevel: 1 }).map((r) => [r.id, r]));
+  console.log('\nПо игри (способност 4, таван 9, 30 сесии всяка):');
+  console.log('игра                        опити  1-ва сесия  после  трудност  клатене  най-лошо');
+  for (const row of calibrateAllGames({ startLevel: 4 })) {
+    console.log([
+      row.title.slice(0, 26).padEnd(28),
+      row.trials.toFixed(0).padStart(5),
+      `${(first.get(row.id).quality * 100).toFixed(1)}%`.padStart(12),
+      `${(row.quality * 100).toFixed(1)}%`.padStart(7),
+      row.settledMean.toFixed(2).padStart(10),
+      `\u00b1${row.settledSd.toFixed(2)}`.padStart(9),
+      `\u00b1${row.worstSd.toFixed(2)}`.padStart(10),
+    ].join(''));
   }
 }
 

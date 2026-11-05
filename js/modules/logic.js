@@ -1,28 +1,16 @@
 // Логически редици и матрици. Няма таймер: задачата иска мислене, а не бързина.
 import { makeLogicTask } from '../content/logic/generators.js';
-import { h, trustedSvg } from '../core/dom.js';
+import { h } from '../core/dom.js';
 import { createGame } from './shared/base-game.js';
+// Фигурите са общи за логиката и за игрите от Етап 6а: един източник, един вид.
+import { cellSvg } from './shared/glyphs.js';
 
 export const TASKS = 8;
 export const MAX_TASK_MS = 90000; // замислен е добре, забравено устройство не е
-const SPEED_LIMIT_MS = 30000;
+export const SPEED_LIMIT_MS = 30000;
 const FEEDBACK_MS = 800;
 
-const glyph = (shape, fill, cx, cy, r) => {
-  const cls = fill === 'solid' ? 'lg-solid' : 'lg-line';
-  const dot = fill === 'dot' ? `<circle class="lg-solid" cx="${cx}" cy="${cy}" r="${r * 0.32}"/>` : '';
-  if (shape === 'circle') return `<circle class="${cls}" cx="${cx}" cy="${cy}" r="${r}"/>${dot}`;
-  if (shape === 'square') return `<rect class="${cls}" x="${cx - r}" y="${cy - r}" width="${2 * r}" height="${2 * r}"/>${dot}`;
-  return `<path class="${cls}" d="M${cx} ${cy - r}L${cx + r} ${cy + r}H${cx - r}Z"/>${dot}`;
-};
-
-const POSITIONS = { 1: [[50, 50]], 2: [[30, 50], [70, 50]], 3: [[50, 28], [28, 70], [72, 70]] };
-
-// Само константи от кода минават през trustedSvg: стойностите идват от ATTRIBUTES.
-export const cellSvg = ({ shape, count, fill }) => trustedSvg(
-  `<svg viewBox="0 0 100 100">${POSITIONS[count].map(([x, y]) => glyph(shape, fill, x, y, count === 1 ? 24 : 16)).join('')}</svg>`,
-  'lg-cell',
-);
+export { cellSvg };
 
 function showTask(g) {
   const s = g.state;

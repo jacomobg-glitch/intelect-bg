@@ -10,7 +10,8 @@ import { activeSkin, formatXP, fullName } from './ui.js';
 import { canInstall, promptInstall } from '../install.js';
 
 const THEMES = [['auto', 'Като системата'], ['dark', 'Тъмна'], ['light', 'Светла']];
-export const APP_VERSION = '0.7.0';
+const COLOR_MODES = [[false, 'С цветове'], [true, 'С форми']];
+export const APP_VERSION = '0.8.0';
 const TAPS_FOR_TEST_MODE = 7;
 
 async function exportBackup() {
@@ -131,6 +132,17 @@ export function renderSettings(root) {
         onclick: async () => {
           await saveSettings({ theme: id });
           applyTheme(id);
+          rerender();
+        },
+      }, label)))),
+    h('section', { class: 'group' },
+      h('h2', {}, 'Цветове в игрите'),
+      h('p', { class: 'muted small' }, 'Игрите с цветове имат и вариант с форми. Същото се избира и преди всяка такава игра.'),
+      h('div', { class: 'segmented', role: 'group', 'aria-label': 'Цветове в игрите' }, COLOR_MODES.map(([value, label]) => h('button', {
+        class: state.settings.colorFree === value ? 'active' : '',
+        'aria-pressed': String(state.settings.colorFree === value),
+        onclick: async () => {
+          await saveSettings({ colorFree: value });
           rerender();
         },
       }, label)))),

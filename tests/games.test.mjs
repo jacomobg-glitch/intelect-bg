@@ -30,7 +30,7 @@ const LEVELS = [1, 2, 3, 4, 5, 6];
 const ROUNDS = 500;
 
 test('всички модули спазват интерфейса, а на Мравка I има модул за всяка способност', () => {
-  assert.equal(games.length, 8);
+  assert.equal(games.length, 14);
   for (const g of games) assert.deepEqual(validateGame(g), [], g.id);
   registerGames(games);
   assert.deepEqual([...activeSkills(0)].sort(), [...SKILLS].sort());

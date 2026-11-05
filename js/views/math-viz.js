@@ -255,6 +255,246 @@ function sieve(host) {
   });
 }
 
+
+// --- Визуализации за нива 4–6 ---
+
+const bgNum = (x) => String(x).replace('.', ',');
+const round2 = (x) => Math.round(x * 100) / 100;
+
+// Лента, разделена на равни части: толкова от тях са взети.
+function fractionBar(host) {
+  let den = 4;
+  let num = 1;
+  frame(host, (render) => {
+    const W = 340;
+    const svg = svgRoot(W, 96, `Дроб ${num} върху ${den}`);
+    const w = (W - 16) / den;
+    for (let i = 0; i < den; i += 1) {
+      svg.append(s('rect', {
+        x: 8 + i * w, y: 14, width: w - 3, height: 46, rx: 4,
+        class: i < num ? 'viz-cell-hit' : 'viz-cell',
+      }));
+    }
+    svg.append(s('text', { x: W / 2, y: 84, class: 'viz-label' }, `${num}/${den} = ${bgNum(String(Math.round((num / den) * 1000) / 1000))}`));
+    const set = (fn) => (v) => { fn(v); if (num > den) num = den; render(); };
+    return {
+      drawing: svg,
+      readout: `Цялото е нарязано на ${den} равни части и са взети ${num}. Това е ${Math.round((num / den) * 100)}% от цялото.`,
+      controls: [
+        stepper('Части', () => den, set((v) => { den = v; }), 1, 12),
+        stepper('Взети', () => num, set((v) => { num = v; }), 0, 12),
+      ],
+    };
+  });
+}
+
+// Квадрат от 100 клетки: всяка клетка е една стотна, всеки цял ред е една десета.
+function decimalGrid(host) {
+  let hundredths = 37;
+  frame(host, (render) => {
+    const cell = 30;
+    const svg = svgRoot(cell * 10, cell * 10 + 26, `${hundredths} стотни от цялото`);
+    for (let i = 0; i < 100; i += 1) {
+      svg.append(s('rect', {
+        x: (i % 10) * cell + 1, y: Math.floor(i / 10) * cell + 1, width: cell - 2, height: cell - 2, rx: 3,
+        class: i < hundredths ? 'viz-cell-hit' : 'viz-cell',
+      }));
+    }
+    svg.append(s('text', { x: (cell * 10) / 2, y: cell * 10 + 18, class: 'viz-label' }, bgNum(String(hundredths / 100))));
+    return {
+      drawing: svg,
+      readout: `${hundredths} стотни са ${bgNum(String(hundredths / 100))}: ${Math.floor(hundredths / 10)} цели реда (десети) и ${hundredths % 10} отделни клетки (стотни).`,
+      controls: [
+        stepper('Стотни', () => hundredths, (v) => { hundredths = v; render(); }, 0, 100),
+        stepper('Десети', () => hundredths, (v) => { hundredths = v; render(); }, 0, 100, 10),
+      ],
+    };
+  });
+}
+
+// Лента с процент: колко от цялото е взето и колко прави това от конкретно число.
+function percentBar(host) {
+  let p = 20;
+  let base = 200;
+  frame(host, (render) => {
+    const W = 340;
+    const svg = svgRoot(W, 92, `${p} процента`);
+    svg.append(s('rect', { x: 8, y: 16, width: W - 16, height: 34, rx: 6, class: 'viz-cell' }));
+    svg.append(s('rect', { x: 8, y: 16, width: ((W - 16) * p) / 100, height: 34, rx: 6, class: 'viz-cell-hit' }));
+    for (let i = 1; i < 10; i += 1) {
+      const x = 8 + ((W - 16) * i) / 10;
+      svg.append(s('line', { x1: x, y1: 16, x2: x, y2: 50, class: 'viz-tick' }));
+    }
+    svg.append(s('text', { x: W / 2, y: 76, class: 'viz-label' }, `${p}% от ${base} = ${bgNum(String(round2((base * p) / 100)))}`));
+    return {
+      drawing: svg,
+      readout: `Процентът е част от 100. ${p}% значи ${p} от всеки 100, тоест ${bgNum(String(round2((base * p) / 100)))} от ${base}.`,
+      controls: [
+        stepper('Процент', () => p, (v) => { p = v; render(); }, 0, 100, 5),
+        stepper('Цяло', () => base, (v) => { base = v; render(); }, 10, 1000, 10),
+      ],
+    };
+  });
+}
+
+// Числова ос с нула в средата: отрицателните числа са отляво.
+function signedLine(host) {
+  let a = -4;
+  let b = 7;
+  frame(host, (render) => {
+    const W = 340;
+    const MIN = -10;
+    const MAX = 10;
+    const x = (n) => 16 + ((n - MIN) / (MAX - MIN)) * (W - 32);
+    const Y = 54;
+    const end = Math.max(MIN, Math.min(MAX, a + b));
+    const svg = svgRoot(W, 92, `От ${a} със стъпка ${b}`);
+    svg.append(s('line', { x1: 8, y1: Y, x2: W - 8, y2: Y, class: 'viz-axis' }));
+    for (let n = MIN; n <= MAX; n += 1) {
+      svg.append(s('line', { x1: x(n), y1: Y - 5, x2: x(n), y2: Y + 5, class: 'viz-tick' }));
+      if (n % 5 === 0) svg.append(s('text', { x: x(n), y: Y + 22, class: 'viz-label' }, n));
+    }
+    svg.append(s('path', {
+      d: `M${x(a)} ${Y - 8}Q${(x(a) + x(end)) / 2} ${Y - 38} ${x(end)} ${Y - 8}`,
+      class: 'viz-hop',
+    }));
+    svg.append(s('circle', { cx: x(a), cy: Y, r: 5, class: 'viz-dot-alt' }));
+    svg.append(s('circle', { cx: x(end), cy: Y, r: 5, class: 'viz-dot' }));
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: `${a} + (${b}) = ${a + b}. Плюс значи надясно, минус значи наляво. Нулата е място по пътя, а не край.`,
+      controls: [
+        stepper('Начало', () => a, set((v) => { a = v; }), -10, 10),
+        stepper('Стъпка', () => b, set((v) => { b = v; }), -10, 10),
+      ],
+    };
+  });
+}
+
+// Степен: колко пъти основата се умножава по себе си. Квадратът се вижда като квадрат.
+function powerStack(host) {
+  let base = 3;
+  let exp = 2;
+  frame(host, (render) => {
+    const value = base ** exp;
+    const svg = svgRoot(340, 128, `${base} на степен ${exp}`);
+    if (exp === 2) {
+      const cell = Math.min(20, 104 / base);
+      for (let r = 0; r < base; r += 1) {
+        for (let c = 0; c < base; c += 1) {
+          svg.append(s('rect', { x: 10 + c * cell, y: 10 + r * cell, width: cell - 2, height: cell - 2, rx: 2, class: 'viz-cell-hit' }));
+        }
+      }
+      svg.append(s('text', { x: 230, y: 60, class: 'viz-label' }, `квадрат ${base} на ${base}`));
+    } else {
+      for (let i = 0; i < exp; i += 1) {
+        svg.append(s('rect', { x: 14 + i * 62, y: 34, width: 44, height: 44, rx: 6, class: 'viz-cell-hit' }));
+        svg.append(s('text', { x: 36 + i * 62, y: 62, class: 'viz-cell-text-hit' }, base));
+        if (i < exp - 1) svg.append(s('text', { x: 68 + i * 62, y: 62, class: 'viz-label' }, '×'));
+      }
+    }
+    svg.append(s('text', { x: 170, y: 118, class: 'viz-label' }, `${base} на степен ${exp} = ${value}`));
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: `${base} на степен ${exp} значи ${exp} пъти ${base}, умножени едно по друго: ${value}.`,
+      controls: [
+        stepper('Основа', () => base, set((v) => { base = v; }), 2, 12),
+        stepper('Степен', () => exp, set((v) => { exp = v; }), 1, 5),
+      ],
+    };
+  });
+}
+
+// Корен: квадрат с известна площ, а страната е това, което търсим.
+function rootSquare(host) {
+  let side = 6;
+  frame(host, (render) => {
+    const size = Math.min(140, 18 * side);
+    const svg = svgRoot(340, 170, `Квадрат с площ ${side * side}`);
+    const cell = size / side;
+    for (let r = 0; r < side; r += 1) {
+      for (let c = 0; c < side; c += 1) {
+        svg.append(s('rect', { x: 14 + c * cell, y: 14 + r * cell, width: cell - 1.5, height: cell - 1.5, class: 'viz-cell-hit' }));
+      }
+    }
+    svg.append(s('text', { x: 14 + size / 2, y: 14 + size + 18, class: 'viz-label' }, `страна ${side}`));
+    svg.append(s('text', { x: 250, y: 70, class: 'viz-label' }, `площ ${side * side}`));
+    svg.append(s('text', { x: 250, y: 92, class: 'viz-label' }, `корен = ${side}`));
+    return {
+      drawing: svg,
+      readout: `Квадрат от ${side * side} клетки има страна ${side}. Коренът връща страната, когато знаеш площта.`,
+      controls: [stepper('Страна', () => side, (v) => { side = v; render(); }, 1, 12)],
+    };
+  });
+}
+
+// Две лентички в дадено отношение: умножаването на двете не променя отношението.
+function ratioBars(host) {
+  let a = 2;
+  let b = 3;
+  let factor = 2;
+  frame(host, (render) => {
+    const W = 340;
+    const unit = Math.min(26, (W - 70) / (Math.max(a, b) * factor));
+    const svg = svgRoot(W, 118, `Отношение ${a} към ${b}`);
+    const row = (value, y, label) => {
+      for (let i = 0; i < value; i += 1) {
+        svg.append(s('rect', { x: 52 + i * unit, y, width: Math.max(3, unit - 2), height: 24, rx: 3, class: 'viz-cell-hit' }));
+      }
+      svg.append(s('text', { x: 28, y: y + 17, class: 'viz-label' }, label));
+    };
+    row(a * factor, 12, String(a * factor));
+    row(b * factor, 48, String(b * factor));
+    svg.append(s('text', { x: W / 2, y: 104, class: 'viz-label' }, `${a * factor} : ${b * factor} = ${a} : ${b}`));
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: `${a * factor} към ${b * factor} е същото отношение като ${a} към ${b}: и двете са умножени по ${factor}.`,
+      controls: [
+        stepper('Първо', () => a, set((v) => { a = v; }), 1, 6),
+        stepper('Второ', () => b, set((v) => { b = v; }), 1, 6),
+        stepper('Пъти', () => factor, set((v) => { factor = v; }), 1, 5),
+      ],
+    };
+  });
+}
+
+// Сметка пред касата: цена по брой, платено и ресто.
+function moneyStack(host) {
+  let price = 3;
+  let count = 4;
+  let paid = 20;
+  frame(host, (render) => {
+    const total = price * count;
+    const change = paid - total;
+    const W = 340;
+    const svg = svgRoot(W, 116, `Сметка: ${count} по ${price} лева`);
+    for (let i = 0; i < count; i += 1) {
+      const x = 12 + i * 40;
+      svg.append(s('rect', { x, y: 12, width: 34, height: 26, rx: 4, class: 'viz-cell-hit' }));
+      svg.append(s('text', { x: x + 17, y: 30, class: 'viz-cell-text-hit' }, price));
+    }
+    const line = (text, y) => svg.append(s('text', { x: 12, y, class: 'viz-label', 'text-anchor': 'start' }, text));
+    line(`общо ${total} лв.`, 64);
+    line(`платено ${paid} лв.`, 86);
+    line(change >= 0 ? `ресто ${change} лв.` : `не стигат ${-change} лв.`, 108);
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: change >= 0
+        ? `${count} × ${price} = ${total} лв. От ${paid} лв. остават ${change} лв. ресто.`
+        : `${count} × ${price} = ${total} лв., а имаш ${paid} лв.: не стигат ${-change} лв.`,
+      controls: [
+        stepper('Цена', () => price, set((v) => { price = v; }), 1, 20),
+        stepper('Брой', () => count, set((v) => { count = v; }), 1, 8),
+        stepper('Плащаш', () => paid, set((v) => { paid = v; }), 5, 100, 5),
+      ],
+    };
+  });
+}
+
 export const VISUALIZATIONS = {
   blocks,
   jumps,
@@ -265,4 +505,12 @@ export const VISUALIZATIONS = {
   array,
   share,
   sieve,
+  'fraction-bar': fractionBar,
+  'decimal-grid': decimalGrid,
+  'percent-bar': percentBar,
+  'signed-line': signedLine,
+  'power-stack': powerStack,
+  'root-square': rootSquare,
+  'ratio-bars': ratioBars,
+  'money-stack': moneyStack,
 };

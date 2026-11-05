@@ -1,12 +1,11 @@
 // Процедурни задачи по шаблони. Чисти функции: random се подава отвън, затова всичко се тества директно.
 // Всяка задача носи check: данните, по които тестът пресмята отговора независимо от генератора.
+// Темите от нива 4–6 са в gen-advanced.js; тук са основите и общият регистър.
+import { ADVANCED_GENERATORS } from './gen-advanced.js';
+import { choiceTask, int, numberTask, parseNumeric, pick, sameAnswer } from './task.js';
+
 export const MAX_LEVEL = 6;
-
-const int = (random, min, max) => min + Math.floor(random() * (max - min + 1));
-const pick = (random, list) => list[Math.floor(random() * list.length)];
-
-const numberTask = (prompt, answer, hints, check) => ({ kind: 'number', prompt, answer: String(answer), options: null, hints, check });
-const choiceTask = (prompt, answer, options, hints, check) => ({ kind: 'choice', prompt, answer, options, hints, check });
+export { parseNumeric };
 
 const PARITY = ['Четно', 'Нечетно'];
 const YES_NO = ['Да', 'Не'];
@@ -221,6 +220,7 @@ export const GENERATORS = Object.freeze({
   mul,
   div,
   divisibility,
+  ...ADVANCED_GENERATORS,
 });
 
 export function makeTask(topicId, level, random = Math.random) {
@@ -228,8 +228,9 @@ export function makeTask(topicId, level, random = Math.random) {
   return { topicId, level: clamped, ...GENERATORS[topicId](clamped, random) };
 }
 
-// Отговорът се сравнява като текст: интервалите не пречат, а главните и малките букви са без значение.
+// Числата се сравняват по стойност: „0,5“, „0.5“ и „1/2“ минават за един и същ отговор,
+// а десетичната запетая е по български. Текстовите отговори („Да“, „Четно“) се сравняват
+// без интервали и без значение на главните букви.
 export function checkAnswer(task, raw) {
-  const clean = (s) => String(s).replace(/\s+/g, '').toLowerCase();
-  return clean(raw) !== '' && clean(raw) === clean(task.answer);
+  return sameAnswer(raw, task.answer);
 }
