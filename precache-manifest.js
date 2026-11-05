@@ -1,6 +1,6 @@
 // Генериран файл: не се редактира на ръка. Обновява се с `npm run precache`.
 self.PRECACHE = {
-  "version": "627766655abb",
+  "version": "5b310fb3e370",
   "files": [
     "./",
     "./icons/LUCIDE-LICENSE.txt",
@@ -16,6 +16,7 @@ self.PRECACHE = {
     "./js/content/hero.js",
     "./js/content/logic/generators.js",
     "./js/content/math/gen-advanced.js",
+    "./js/content/math/gen-upper.js",
     "./js/content/math/generators.js",
     "./js/content/math/task.js",
     "./js/content/math/topics.js",

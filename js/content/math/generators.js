@@ -1,7 +1,8 @@
 // Процедурни задачи по шаблони. Чисти функции: random се подава отвън, затова всичко се тества директно.
 // Всяка задача носи check: данните, по които тестът пресмята отговора независимо от генератора.
-// Темите от нива 4–6 са в gen-advanced.js; тук са основите и общият регистър.
+// Темите от нива 4–6 са в gen-advanced.js, тези от 7–10 в gen-upper.js; тук са основите и общият регистър.
 import { ADVANCED_GENERATORS } from './gen-advanced.js';
+import { UPPER_GENERATORS } from './gen-upper.js';
 import { choiceTask, int, numberTask, parseNumeric, pick, sameAnswer } from './task.js';
 
 export const MAX_LEVEL = 6;
@@ -221,6 +222,7 @@ export const GENERATORS = Object.freeze({
   div,
   divisibility,
   ...ADVANCED_GENERATORS,
+  ...UPPER_GENERATORS,
 });
 
 export function makeTask(topicId, level, random = Math.random) {

@@ -600,6 +600,517 @@ function travel(host) {
   });
 }
 
+// --- Визуализации за теми 7–10 ---
+
+const gcdOf = (a, b) => (b === 0 ? Math.abs(a) : gcdOf(b, a % b));
+const fracOf = (n, d) => {
+  const g = gcdOf(n, d) || 1;
+  return d / g === 1 ? String(n / g) : `${n / g}/${d / g}`;
+};
+const sumOf = (list) => list.reduce((a, b) => a + b, 0);
+
+// Буквеният израз като дължина: кутиите с неизвестното и отделните единици
+// стоят в една редица, затова стойността се вижда, а не само се смята.
+function termTiles(host) {
+  let boxes = 3;
+  let inside = 4;
+  let extra = 2;
+  frame(host, (render) => {
+    const W = 340;
+    const value = boxes * inside + extra;
+    const unit = Math.min(16, (W - 30) / Math.max(value, 1));
+    const svg = svgRoot(W, 98, `${boxes} кутии по ${inside} и още ${extra} единици`);
+    let x = 10;
+    for (let i = 0; i < boxes; i += 1) {
+      const w = Math.max(10, inside * unit - 3);
+      svg.append(s('rect', { x, y: 16, width: w, height: 34, rx: 5, class: 'viz-cell-hit' }));
+      svg.append(s('text', { x: x + w / 2, y: 38, class: 'viz-cell-text-hit' }, 'a'));
+      x += w + 3;
+    }
+    for (let i = 0; i < extra; i += 1) {
+      svg.append(s('rect', { x, y: 16, width: Math.max(5, unit - 2), height: 34, rx: 2, class: 'viz-cell' }));
+      x += unit;
+    }
+    const written = extra ? `${boxes}a + ${extra}` : `${boxes}a`;
+    svg.append(s('text', { x: W / 2, y: 78, class: 'viz-label' }, `${written} = ${value} при a = ${inside}`));
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: `При a = ${inside} изразът ${written} е ${boxes} × ${inside}${extra ? ` + ${extra}` : ''} = ${value}. Кутиите са еднакви, затова само те се събират помежду си.`,
+      controls: [
+        stepper('Кутии', () => boxes, set((v) => { boxes = v; }), 1, 6),
+        stepper('В кутия', () => inside, set((v) => { inside = v; }), 1, 9),
+        stepper('Единици', () => extra, set((v) => { extra = v; }), 0, 9),
+      ],
+    };
+  });
+}
+
+// Общата рисунка на везната: отляво кутии с неизвестното и отделни единици, отдясно единици.
+// Ползва се и от двете уравнителни визуализации, за да е една и същата картинка.
+function scales(label, boxes, units, right) {
+  const W = 340;
+  const PLATE = 112;
+  const svg = svgRoot(W, 152, label);
+  svg.append(s('line', { x1: 28, y1: 18, x2: W - 28, y2: 18, class: 'viz-beam' }));
+  svg.append(s('path', { d: `M${W / 2} 18 L${W / 2 - 18} 142 L${W / 2 + 18} 142 Z`, class: 'viz-shape' }));
+  const plate = (cx) => {
+    svg.append(s('line', { x1: cx, y1: 18, x2: cx, y2: PLATE, class: 'viz-edge-soft' }));
+    svg.append(s('rect', { x: cx - 62, y: PLATE, width: 124, height: 5, rx: 2, class: 'viz-beam' }));
+  };
+  const slot = (cx, n) => ({ x: cx - 57 + (n % 6) * 19, y: PLATE - 16 - Math.floor(n / 6) * 17 });
+  plate(86);
+  plate(W - 86);
+  for (let i = 0; i < boxes; i += 1) {
+    const p = slot(86, i);
+    svg.append(s('rect', { x: p.x, y: p.y, width: 15, height: 15, rx: 4, class: 'viz-cell-hit' }));
+    svg.append(s('text', { x: p.x + 7.5, y: p.y + 12, class: 'viz-cell-text-hit' }, 'x'));
+  }
+  for (let i = 0; i < units; i += 1) {
+    const p = slot(86, boxes + i);
+    svg.append(s('rect', { x: p.x, y: p.y, width: 15, height: 15, rx: 3, class: 'viz-cell' }));
+  }
+  for (let i = 0; i < right; i += 1) {
+    const p = slot(W - 86, i);
+    svg.append(s('rect', { x: p.x, y: p.y, width: 15, height: 15, rx: 3, class: 'viz-cell' }));
+  }
+  return svg;
+}
+
+// Едно действие: каквото се махне отляво, се маха и отдясно.
+function balance(host) {
+  let hidden = 7;
+  let extra = 3;
+  let cleared = false;
+  frame(host, (render) => {
+    const right = cleared ? hidden : hidden + extra;
+    const svg = scales(
+      cleared ? `Везна: кутия срещу ${right}` : `Везна: кутия и ${extra} срещу ${right}`,
+      1, cleared ? 0 : extra, right,
+    );
+    return {
+      drawing: svg,
+      readout: cleared
+        ? `Махнахме ${extra} от двете страни и остана x = ${hidden}. Везната е още равна, защото промяната беше еднаква.`
+        : `x + ${extra} = ${hidden + extra}. Везната стои равна, значи двете страни са едно и също число.`,
+      controls: [
+        stepper('В кутията', () => hidden, (v) => { hidden = v; render(); }, 1, 9),
+        stepper('Отделни', () => extra, (v) => { extra = v; cleared = false; render(); }, 0, 9),
+        h('button', {
+          type: 'button',
+          class: `chip ${cleared ? 'chip-active' : ''}`,
+          'aria-pressed': String(cleared),
+          onclick: () => { cleared = !cleared; render(); },
+        }, cleared ? 'Върни ги' : `Махни ${extra} от двете страни`),
+      ],
+    };
+  });
+}
+
+const TWO_STAGES = ['Както е дадено', 'Махни единиците', 'Раздели на кутиите'];
+
+// Две стъпки: първо си отива излишното, после всичко се дели на броя кутии.
+function balanceTwo(host) {
+  let hidden = 5;
+  let boxes = 3;
+  let extra = 4;
+  let stage = 0;
+  frame(host, (render) => {
+    const whole = boxes * hidden + extra;
+    const shown = stage === 0
+      ? { boxes, units: extra, right: whole }
+      : stage === 1
+        ? { boxes, units: 0, right: whole - extra }
+        : { boxes: 1, units: 0, right: hidden };
+    const svg = scales(`Везна, стъпка ${stage + 1}`, shown.boxes, shown.units, shown.right);
+    const line = [
+      `${boxes}x + ${extra} = ${whole}`,
+      `${boxes}x = ${whole - extra}`,
+      `x = ${hidden}`,
+    ][stage];
+    const set = (fn) => (v) => { fn(v); stage = 0; render(); };
+    return {
+      drawing: svg,
+      readout: `${line}. ${['Първо махни единиците от двете страни.', 'Сега раздели и двете страни на броя кутии.', 'Остана една кутия: това е отговорът.'][stage]}`,
+      controls: [
+        stepper('В кутията', () => hidden, set((v) => { hidden = v; }), 1, 6),
+        stepper('Кутии', () => boxes, set((v) => { boxes = v; }), 1, 4),
+        stepper('Единици', () => extra, set((v) => { extra = v; }), 0, 8),
+        ...TWO_STAGES.map((name, i) => h('button', {
+          type: 'button',
+          class: `chip ${i === stage ? 'chip-active' : ''}`,
+          'aria-pressed': String(i === stage),
+          onclick: () => { stage = i; render(); },
+        }, name)),
+      ],
+    };
+  });
+}
+
+// Ъгъл: едно рамо се върти, а изправеният ъгъл до него показва остатъка до 180°.
+function protractor(host) {
+  let deg = 50;
+  frame(host, (render) => {
+    const W = 340;
+    const CX = W / 2;
+    const CY = 124;
+    const R = 100;
+    const at = (d, r) => [CX + r * Math.cos((d * Math.PI) / 180), CY - r * Math.sin((d * Math.PI) / 180)];
+    const [ax, ay] = at(deg, R);
+    const [arcX, arcY] = at(deg, 40);
+    const [labelX, labelY] = at(deg / 2, 62);
+    const [restX, restY] = at((deg + 180) / 2, 62);
+    const svg = svgRoot(W, 152, `Ъгъл ${deg} градуса и съседният му ${180 - deg} градуса`);
+    svg.append(s('line', { x1: CX - R, y1: CY, x2: CX + R, y2: CY, class: 'viz-edge-soft' }));
+    svg.append(s('line', { x1: CX, y1: CY, x2: ax, y2: ay, class: 'viz-edge' }));
+    svg.append(s('path', { d: `M${CX + 40} ${CY} A40 40 0 0 0 ${arcX} ${arcY}`, class: 'viz-arc' }));
+    svg.append(s('circle', { cx: CX, cy: CY, r: 4, class: 'viz-dot' }));
+    svg.append(s('text', { x: labelX, y: labelY, class: 'viz-label' }, `${deg}°`));
+    svg.append(s('text', { x: restX, y: restY, class: 'viz-label-soft' }, `${180 - deg}°`));
+    return {
+      drawing: svg,
+      readout: `Ъгълът е ${deg}°, а съседният до него е ${180 - deg}°. Заедно правят изправен ъгъл от 180°. Правият ъгъл е 90°${deg === 90 ? ' — точно този' : ''}.`,
+      controls: [stepper('Градуси', () => deg, (v) => { deg = v; render(); }, 5, 175, 5)],
+    };
+  });
+}
+
+// Обиколка: оградата по контура, страна по страна, с деления по единица.
+function perimeterShape(host) {
+  let wide = 6;
+  let tall = 4;
+  frame(host, (render) => {
+    const W = 340;
+    const unit = Math.min(26, 230 / Math.max(wide, tall));
+    const w = wide * unit;
+    const hgt = tall * unit;
+    const x0 = (W - w) / 2;
+    const y0 = 26;
+    const svg = svgRoot(W, hgt + 86, `Правоъгълник ${wide} на ${tall}`);
+    svg.append(s('rect', { x: x0, y: y0, width: w, height: hgt, class: 'viz-shape' }));
+    for (let i = 1; i < wide; i += 1) {
+      svg.append(s('line', { x1: x0 + i * unit, y1: y0, x2: x0 + i * unit, y2: y0 + 7, class: 'viz-tick' }));
+      svg.append(s('line', { x1: x0 + i * unit, y1: y0 + hgt - 7, x2: x0 + i * unit, y2: y0 + hgt, class: 'viz-tick' }));
+    }
+    for (let i = 1; i < tall; i += 1) {
+      svg.append(s('line', { x1: x0, y1: y0 + i * unit, x2: x0 + 7, y2: y0 + i * unit, class: 'viz-tick' }));
+      svg.append(s('line', { x1: x0 + w - 7, y1: y0 + i * unit, x2: x0 + w, y2: y0 + i * unit, class: 'viz-tick' }));
+    }
+    svg.append(s('text', { x: x0 + w / 2, y: y0 - 8, class: 'viz-label' }, wide));
+    svg.append(s('text', { x: x0 + w / 2, y: y0 + hgt + 18, class: 'viz-label' }, wide));
+    svg.append(s('text', { x: x0 - 14, y: y0 + hgt / 2 + 4, class: 'viz-label' }, tall));
+    svg.append(s('text', { x: x0 + w + 14, y: y0 + hgt / 2 + 4, class: 'viz-label' }, tall));
+    svg.append(s('text', { x: W / 2, y: hgt + 74, class: 'viz-label' }, `2 × (${wide} + ${tall}) = ${2 * (wide + tall)}`));
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: `Обиколката е ${wide} + ${tall} + ${wide} + ${tall} = ${2 * (wide + tall)}. Това е дължина, затова се мери в сантиметри.`,
+      controls: [
+        stepper('Широчина', () => wide, set((v) => { wide = v; }), 1, 12),
+        stepper('Височина', () => tall, set((v) => { tall = v; }), 1, 9),
+      ],
+    };
+  });
+}
+
+// Лице: броят плочки. Триъгълникът покрива точно половината от същия правоъгълник.
+function areaGrid(host) {
+  let wide = 6;
+  let tall = 4;
+  let triangle = false;
+  frame(host, (render) => {
+    const W = 340;
+    const unit = Math.min(28, 240 / Math.max(wide, tall));
+    const w = wide * unit;
+    const hgt = tall * unit;
+    const x0 = (W - w) / 2;
+    const y0 = 14;
+    const cells = wide * tall;
+    const value = triangle ? cells / 2 : cells;
+    const svg = svgRoot(W, hgt + 62, triangle ? `Триъгълник в мрежа ${wide} на ${tall}` : `Правоъгълник ${wide} на ${tall}`);
+    for (let r = 0; r < tall; r += 1) {
+      for (let c = 0; c < wide; c += 1) {
+        svg.append(s('rect', {
+          x: x0 + c * unit + 1, y: y0 + r * unit + 1, width: unit - 2, height: unit - 2, rx: 2,
+          class: 'viz-cell',
+        }));
+      }
+    }
+    svg.append(triangle
+      ? s('polygon', { points: `${x0},${y0 + hgt} ${x0 + w},${y0 + hgt} ${x0},${y0}`, class: 'viz-area' })
+      : s('rect', { x: x0, y: y0, width: w, height: hgt, class: 'viz-area' }));
+    svg.append(s('text', { x: W / 2, y: hgt + 50, class: 'viz-label' }, triangle
+      ? `${wide} × ${tall} ÷ 2 = ${bgNum(String(value))}`
+      : `${wide} × ${tall} = ${value}`));
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: triangle
+        ? `Правоъгълникът е ${cells} плочки, а триъгълникът покрива половината: ${bgNum(String(value))}. Затова лицето на триъгълник е основа по височина, делено на 2.`
+        : `${tall} реда по ${wide} плочки са ${cells} плочки. Лицето се мери в квадратни единици.`,
+      controls: [
+        stepper('Широчина', () => wide, set((v) => { wide = v; }), 1, 10),
+        stepper('Височина', () => tall, set((v) => { tall = v; }), 1, 8),
+        h('button', {
+          type: 'button',
+          class: `chip ${triangle ? '' : 'chip-active'}`,
+          'aria-pressed': String(!triangle),
+          onclick: () => { triangle = false; render(); },
+        }, 'Правоъгълник'),
+        h('button', {
+          type: 'button',
+          class: `chip ${triangle ? 'chip-active' : ''}`,
+          'aria-pressed': String(triangle),
+          onclick: () => { triangle = true; render(); },
+        }, 'Триъгълник'),
+      ],
+    };
+  });
+}
+
+const CHART_DAYS = ['пн', 'вт', 'ср', 'чт'];
+
+// Стълбовидна диаграма: скалата започва от нула, затова дължините се сравняват направо.
+function barChart(host) {
+  const values = [4, 7, 5, 9];
+  frame(host, (render) => {
+    const W = 340;
+    const base = 116;
+    const top = Math.max(...values, 1);
+    const low = Math.min(...values);
+    const best = CHART_DAYS[values.indexOf(top)];
+    const svg = svgRoot(W, 156, `Диаграма по дни: ${values.join(', ')}`);
+    svg.append(s('line', { x1: 26, y1: base, x2: W - 12, y2: base, class: 'viz-axis' }));
+    svg.append(s('text', { x: 16, y: base + 4, class: 'viz-label-soft' }, '0'));
+    values.forEach((v, i) => {
+      const height = (v / top) * 82;
+      const x = 42 + i * 70;
+      svg.append(s('rect', { x, y: base - height, width: 44, height, rx: 4, class: 'viz-cell-hit' }));
+      svg.append(s('text', { x: x + 22, y: base - height - 7, class: 'viz-label' }, v));
+      svg.append(s('text', { x: x + 22, y: base + 18, class: 'viz-label-soft' }, CHART_DAYS[i]));
+    });
+    svg.append(s('text', { x: W / 2, y: 148, class: 'viz-label' }, `общо ${sumOf(values)} · най-много ${top} · разлика ${top - low}`));
+    return {
+      drawing: svg,
+      readout: `Общо ${sumOf(values)}. Най-силен е ${best} с ${top}, а разликата с най-слабия ден е ${top - low}. Скалата започва от 0: ако започваше по-високо, разликите щяха да изглеждат по-големи.`,
+      controls: CHART_DAYS.map((name, i) => stepper(name, () => values[i], (v) => { values[i] = v; render(); }, 0, 12)),
+    };
+  });
+}
+
+// Средна стойност: пунктираната линия е нивото, на което всички стълбове стават равни.
+function meanBars(host) {
+  const values = [3, 8, 5, 4];
+  let levelled = false;
+  frame(host, (render) => {
+    const W = 340;
+    const base = 116;
+    const mean = sumOf(values) / values.length;
+    const sorted = [...values].sort((a, b) => a - b);
+    const middle = (sorted[1] + sorted[2]) / 2;
+    const counts = values.map((v) => values.filter((x) => x === v).length);
+    const topCount = Math.max(...counts);
+    const mode = topCount > 1 ? values[counts.indexOf(topCount)] : null;
+    const top = Math.max(...values, mean, 1);
+    const toY = (v) => base - (v / top) * 82;
+    const svg = svgRoot(W, 156, `Стълбове ${values.join(', ')} и средна стойност ${bgNum(String(round2(mean)))}`);
+    svg.append(s('line', { x1: 26, y1: base, x2: W - 12, y2: base, class: 'viz-axis' }));
+    values.forEach((v, i) => {
+      const shown = levelled ? mean : v;
+      const x = 42 + i * 70;
+      svg.append(s('rect', { x, y: toY(shown), width: 44, height: base - toY(shown), rx: 4, class: 'viz-cell-hit' }));
+      svg.append(s('text', { x: x + 22, y: toY(shown) - 7, class: 'viz-label' }, bgNum(String(round2(shown)))));
+      svg.append(s('text', { x: x + 22, y: base + 18, class: 'viz-label-soft' }, `№${i + 1}`));
+    });
+    svg.append(s('line', { x1: 30, y1: toY(mean), x2: W - 16, y2: toY(mean), class: 'viz-mean-line' }));
+    svg.append(s('text', { x: W / 2, y: 148, class: 'viz-label' },
+      `средна ${bgNum(String(round2(mean)))} · медиана ${bgNum(String(round2(middle)))} · мода ${mode === null ? 'няма' : mode}`));
+    return {
+      drawing: svg,
+      readout: levelled
+        ? `Разделено по равно, всеки стълб става ${bgNum(String(round2(mean)))}. Точно това е средната стойност: сборът ${sumOf(values)}, разделен на ${values.length}.`
+        : `Сборът е ${sumOf(values)}, числата са ${values.length}, значи средната стойност е ${bgNum(String(round2(mean)))}. Медианата е средата на подредените: ${bgNum(String(round2(middle)))}.`,
+      controls: [
+        ...values.map((v, i) => stepper(`№${i + 1}`, () => values[i], (nv) => { values[i] = nv; render(); }, 0, 12)),
+        h('button', {
+          type: 'button',
+          class: `chip ${levelled ? 'chip-active' : ''}`,
+          'aria-pressed': String(levelled),
+          onclick: () => { levelled = !levelled; render(); },
+        }, levelled ? 'Върни както бяха' : 'Раздели по равно'),
+      ],
+    };
+  });
+}
+
+// Вероятност: колко от равните сектори са благоприятни. Секторите са номерирани,
+// за да не е цветът единственият сигнал кои са те.
+function chanceSpinner(host) {
+  let parts = 6;
+  let good = 1;
+  frame(host, (render) => {
+    const W = 340;
+    const CX = W / 2;
+    const CY = 92;
+    const R = 76;
+    const at = (turn, r) => [CX + r * Math.cos(turn * 2 * Math.PI - Math.PI / 2), CY + r * Math.sin(turn * 2 * Math.PI - Math.PI / 2)];
+    const svg = svgRoot(W, 170, `Кръг от ${parts} равни сектора, ${good} от тях благоприятни`);
+    for (let i = 0; i < parts; i += 1) {
+      const [x1, y1] = at(i / parts, R);
+      const [x2, y2] = at((i + 1) / parts, R);
+      const large = 1 / parts > 0.5 ? 1 : 0;
+      const hit = i < good;
+      svg.append(s('path', {
+        d: parts === 1
+          ? `M${CX} ${CY - R} A${R} ${R} 0 1 1 ${CX - 0.01} ${CY - R} Z`
+          : `M${CX} ${CY} L${x1} ${y1} A${R} ${R} 0 ${large} 1 ${x2} ${y2} Z`,
+        class: hit ? 'viz-sector-hit' : 'viz-sector',
+      }));
+      const [tx, ty] = at((i + 0.5) / parts, R * 0.66);
+      svg.append(s('text', { x: tx, y: ty + 4, class: hit ? 'viz-cell-text-hit' : 'viz-cell-text' }, i + 1));
+    }
+    const share = fracOf(good, parts);
+    svg.append(s('text', { x: CX, y: 162, class: 'viz-label' }, `${good} от ${parts} = ${share} = ${bgNum(String(round2((good / parts) * 100)))}%`));
+    const set = (fn) => (v) => { fn(v); if (good > parts) good = parts; render(); };
+    return {
+      drawing: svg,
+      readout: `Благоприятни са ${good} от ${parts} равновъзможни сектора, значи вероятността е ${share}, тоест ${bgNum(String(round2((good / parts) * 100)))}%. Вероятността да НЕ стане е ${fracOf(parts - good, parts)}.`,
+      controls: [
+        stepper('Сектори', () => parts, set((v) => { parts = v; }), 2, 10),
+        stepper('Благоприятни', () => good, set((v) => { good = v; }), 0, 10),
+      ],
+    };
+  });
+}
+
+// Редица като стъпала: постоянната разлика расте равномерно, постоянното отношение — скокообразно.
+function sequenceSteps(host) {
+  let start = 2;
+  let rule = 3;
+  let multiply = false;
+  frame(host, (render) => {
+    const W = 340;
+    const base = 122;
+    const count = multiply ? 5 : 6;
+    const terms = Array.from({ length: count }, (_, i) => (multiply ? start * rule ** i : start + i * rule));
+    const top = Math.max(...terms, 1);
+    const colW = (W - 24) / count;
+    const svg = svgRoot(W, 162, `Редица: ${terms.join(', ')}`);
+    svg.append(s('line', { x1: 12, y1: base, x2: W - 12, y2: base, class: 'viz-axis' }));
+    terms.forEach((v, i) => {
+      const height = Math.max(3, (v / top) * 88);
+      const x = 16 + i * colW;
+      svg.append(s('rect', { x, y: base - height, width: colW - 10, height, rx: 4, class: 'viz-cell-hit' }));
+      svg.append(s('text', { x: x + (colW - 10) / 2, y: base - height - 7, class: 'viz-label' }, v));
+      svg.append(s('text', { x: x + (colW - 10) / 2, y: base + 18, class: 'viz-label-soft' }, i + 1));
+    });
+    svg.append(s('text', { x: W / 2, y: 154, class: 'viz-label' },
+      multiply ? `всяко следващо × ${rule}` : `всяко следващо + ${rule}`));
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: multiply
+        ? `${terms.join(', ')}, … Всяко следващо е ${rule} пъти предишното, затова редицата се вдига рязко. Следващото е ${terms[count - 1] * rule}.`
+        : `${terms.join(', ')}, … Всяко следващо е с ${rule} повече, затова стъпалата са еднакви. Следващото е ${terms[count - 1] + rule}.`,
+      controls: [
+        stepper('Начало', () => start, set((v) => { start = v; }), 1, multiply ? 3 : 9),
+        stepper(multiply ? 'Отношение' : 'Разлика', () => rule, set((v) => { rule = v; }), multiply ? 2 : 1, multiply ? 4 : 6),
+        h('button', {
+          type: 'button',
+          class: `chip ${multiply ? '' : 'chip-active'}`,
+          'aria-pressed': String(!multiply),
+          onclick: () => { multiply = false; rule = 3; start = 2; render(); },
+        }, 'Добавя'),
+        h('button', {
+          type: 'button',
+          class: `chip ${multiply ? 'chip-active' : ''}`,
+          'aria-pressed': String(multiply),
+          onclick: () => { multiply = true; rule = 2; start = 1; render(); },
+        }, 'Умножава'),
+      ],
+    };
+  });
+}
+
+// Кратните на двете числа до 60. Квадратчето и кръгчето казват на кое от двете е кратно
+// всяко число, а общите клетки са общите кратни: първата от тях е НОК.
+function factorGrid(host) {
+  let first = 4;
+  let second = 6;
+  frame(host, (render) => {
+    const cell = 32;
+    const COLS = 10;
+    const ROWS = 6;
+    const g = gcdOf(first, second);
+    const l = (first * second) / g;
+    const svg = svgRoot(cell * COLS, cell * ROWS + 46, `Кратните на ${first} и на ${second} до 60`);
+    for (let n = 1; n <= COLS * ROWS; n += 1) {
+      const x = ((n - 1) % COLS) * cell;
+      const y = Math.floor((n - 1) / COLS) * cell;
+      const isFirst = n % first === 0;
+      const isSecond = n % second === 0;
+      const both = isFirst && isSecond;
+      if (isFirst || isSecond) {
+        svg.append(s('rect', { x: x + 1, y: y + 1, width: cell - 2, height: cell - 2, rx: 5, class: both ? 'viz-cell-hit' : 'viz-cell' }));
+      }
+      svg.append(s('text', { x: x + cell / 2, y: y + cell / 2 + 4, class: both ? 'viz-cell-text-hit' : 'viz-cell-text' }, n));
+      if (isFirst) svg.append(s('rect', { x: x + 4, y: y + 4, width: 6, height: 6, class: 'viz-dot' }));
+      if (isSecond) svg.append(s('circle', { cx: x + cell - 7, cy: y + cell - 7, r: 3.5, class: 'viz-dot-alt' }));
+    }
+    svg.append(s('text', { x: (cell * COLS) / 2, y: cell * ROWS + 20, class: 'viz-label' },
+      `най-голям общ делител: НОД(${first}, ${second}) = ${g}`));
+    svg.append(s('text', { x: (cell * COLS) / 2, y: cell * ROWS + 38, class: 'viz-label' },
+      `най-малко общо кратно: НОК(${first}, ${second}) = ${l}`));
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: `Квадратчето значи „кратно на ${first}“, кръгчето — „кратно на ${second}“. Клетките с двата знака са общите кратни; първата от тях е ${l}, тоест НОК. Най-голямото число, което дели и двете, е ${g}.`,
+      controls: [
+        stepper('Първо', () => first, set((v) => { first = v; }), 2, 12),
+        stepper('Второ', () => second, set((v) => { second = v; }), 2, 12),
+      ],
+    };
+  });
+}
+
+// Дърво на възможностите: всеки първи избор се разклонява на всички втори,
+// затова броят се умножава, а не се събира.
+function choiceTree(host) {
+  let first = 3;
+  let second = 2;
+  frame(host, (render) => {
+    const W = 340;
+    const H = 170;
+    const rootX = 24;
+    const rootY = 84;
+    const midX = 136;
+    const leafX = 286;
+    const svg = svgRoot(W, H, `${first} по ${second} възможности`);
+    const spread = (i, n) => 22 + ((i + 0.5) / n) * 120;
+    for (let i = 0; i < first; i += 1) {
+      const y = spread(i, first);
+      svg.append(s('line', { x1: rootX + 8, y1: rootY, x2: midX - 9, y2: y, class: 'viz-edge-soft' }));
+      svg.append(s('circle', { cx: midX, cy: y, r: 8, class: 'viz-dot-alt' }));
+      for (let j = 0; j < second; j += 1) {
+        const leafY = spread(i * second + j, first * second);
+        svg.append(s('line', { x1: midX + 9, y1: y, x2: leafX - 7, y2: leafY, class: 'viz-edge-soft' }));
+        svg.append(s('rect', { x: leafX - 6, y: leafY - 6, width: 12, height: 12, rx: 3, class: 'viz-cell-hit' }));
+      }
+    }
+    svg.append(s('circle', { cx: rootX, cy: rootY, r: 8, class: 'viz-dot' }));
+    svg.append(s('text', { x: W / 2, y: H - 4, class: 'viz-label' }, `${first} × ${second} = ${first * second}`));
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: `Първият избор има ${first} възможности, а за всяка от тях вторият има ${second}. Листата са ${first} × ${second} = ${first * second}.`,
+      controls: [
+        stepper('Първи избор', () => first, set((v) => { first = v; }), 1, 4),
+        stepper('Втори избор', () => second, set((v) => { second = v; }), 1, 4),
+      ],
+    };
+  });
+}
+
 export const VISUALIZATIONS = {
   blocks,
   jumps,
@@ -619,4 +1130,16 @@ export const VISUALIZATIONS = {
   'ratio-bars': ratioBars,
   'money-stack': moneyStack,
   travel,
+  'term-tiles': termTiles,
+  balance,
+  'balance-two': balanceTwo,
+  protractor,
+  'perimeter-shape': perimeterShape,
+  'area-grid': areaGrid,
+  'bar-chart': barChart,
+  'mean-bars': meanBars,
+  'chance-spinner': chanceSpinner,
+  'sequence-steps': sequenceSteps,
+  'factor-grid': factorGrid,
+  'choice-tree': choiceTree,
 };

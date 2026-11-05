@@ -21,6 +21,60 @@ function seeded(seed) {
 // Независимо пресмятане на верния отговор, без да се ползва кодът на генератора.
 // Числовите типове връщат число (сравнява се по стойност), текстовите връщат текст.
 const EUR = 1.95583; // курсът се пише тук наново, за да не се чете от генератора
+const PI = 3.14;     // същото важи и за π: стойността се пише наново
+
+// Сметките за теми 7–10 се пишат наново тук, без да се ползва код на генератора.
+const total = (list) => list.reduce((a, b) => a + b, 0);
+const sorted = (list) => [...list].sort((a, b) => a - b);
+const medianOf = (list) => {
+  const s = sorted(list);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+};
+const modeOf = (list) => {
+  let best = list[0];
+  let bestCount = 0;
+  for (const v of list) {
+    const count = list.filter((x) => x === v).length;
+    if (count > bestCount) { best = v; bestCount = count; }
+  }
+  return best;
+};
+const primeByTrial = (n) => {
+  if (n < 2) return false;
+  for (let i = 2; i <= n - 1; i += 1) if (n % i === 0) return false;
+  return true;
+};
+const gcdByList = (a, b) => {
+  let best = 1;
+  for (let i = 1; i <= Math.min(a, b); i += 1) if (a % i === 0 && b % i === 0) best = i;
+  return best;
+};
+const lcmByList = (a, b) => {
+  for (let i = Math.max(a, b); i <= a * b; i += 1) if (i % a === 0 && i % b === 0) return i;
+  return a * b;
+};
+const factorialOf = (n) => {
+  let v = 1;
+  for (let i = 2; i <= n; i += 1) v *= i;
+  return v;
+};
+const fallingOf = (n, k) => {
+  let v = 1;
+  for (let i = 0; i < k; i += 1) v *= n - i;
+  return v;
+};
+const dicePairs = (target) => {
+  let count = 0;
+  for (let a = 1; a <= 6; a += 1) for (let b = 1; b <= 6; b += 1) if (a + b === target) count += 1;
+  return count;
+};
+const fibTerm = (first, second, index) => {
+  const terms = [first, second];
+  while (terms.length <= index) terms.push(terms[terms.length - 1] + terms[terms.length - 2]);
+  return terms[index];
+};
+
 function expected(c) {
   switch (c.type) {
     case 'next': return c.n + 1;
@@ -66,6 +120,68 @@ function expected(c) {
     case 'two-goods': return c.a * c.pa + c.b * c.pb;
     case 'two-legs': return c.s1 * c.h1 + c.s2 * c.h2;
     case 'to-euro': return Math.round(c.leva / EUR);
+    // Нива 7-10
+    case 'expr-lin': return c.k * c.v + c.m;
+    case 'expr-sum-coef': return c.k + c.m;
+    case 'expr-two': return c.k * c.v + c.m * c.w;
+    case 'expr-bracket': return c.k * (c.v + c.m);
+    case 'eq-add': return c.total - c.a;
+    case 'eq-sub': return c.diff + c.a;
+    case 'eq-mul': return c.product / c.k;
+    case 'eq-div': return c.quotient * c.k;
+    case 'eq2-add': return (c.r - c.m) / c.k;
+    case 'eq2-sub': return (c.r + c.m) / c.k;
+    case 'eq2-bracket-plus': return c.r / c.k - c.m;
+    case 'eq2-bracket-minus': return c.r / c.k + c.m;
+    case 'eq2-both': return (c.p - c.m) / (c.k - c.n);
+    case 'ang-comp': return 90 - c.given;
+    case 'ang-supp': return 180 - c.given;
+    case 'ang-tri': return 180 - c.a - c.c;
+    case 'ang-iso': return (180 - c.apex) / 2;
+    case 'ang-quad': return 360 - c.a - c.c - c.e;
+    case 'ang-poly': return ((c.n - 2) * 180) / c.n;
+    case 'per-square': return 4 * c.a;
+    case 'per-rect': return 2 * (c.a + c.c);
+    case 'per-tri': return c.a + c.c + c.e;
+    case 'per-side': return c.p / 2 - c.a;
+    case 'per-poly': return c.n * c.a;
+    case 'per-circle': return Math.round(2 * PI * c.r * 100) / 100;
+    case 'area-square': return c.a * c.a;
+    case 'area-rect': return c.a * c.c;
+    case 'area-tri': return (c.base * c.height) / 2;
+    case 'area-side': return c.value / c.a;
+    case 'area-trap': return ((c.a + c.c) * c.height) / 2;
+    case 'area-circle': return Math.round(PI * c.r * c.r * 100) / 100;
+    case 'data-max': return c.labels[c.values.indexOf(Math.max(...c.values))];
+    case 'data-sum': return total(c.values);
+    case 'data-range': return Math.max(...c.values) - Math.min(...c.values);
+    case 'data-count': return c.values.filter((v) => v > c.limit).length;
+    case 'data-missing': return c.total - total(c.values);
+    case 'data-share': return (100 * c.part) / c.total;
+    case 'mean': return total(c.values) / c.values.length;
+    case 'median': return medianOf(c.values);
+    case 'mode': return modeOf(c.values);
+    case 'mean-missing': return c.mean * c.count - total(c.values);
+    case 'prob-simple': return c.good / c.total;
+    case 'prob-not': return (c.total - c.good) / c.total;
+    case 'prob-percent': return (100 * c.good) / c.total;
+    case 'prob-two': return (c.good1 * c.good2) / (c.total1 * c.total2);
+    case 'prob-dice-sum': return dicePairs(c.target) / 36;
+    case 'seq-arith': return c.start + c.step * c.index;
+    case 'seq-geom': return c.start * c.ratio ** c.index;
+    case 'seq-square': return c.n * c.n;
+    case 'seq-tri': return (c.n * (c.n + 1)) / 2;
+    case 'seq-fib': return fibTerm(c.first, c.second, c.index);
+    case 'seq-sum': return (c.count * (2 * c.start + (c.count - 1) * c.step)) / 2;
+    case 'prime': return primeByTrial(c.n) ? 'Да' : 'Не';
+    case 'gcd': return gcdByList(c.a, c.c);
+    case 'lcm': return lcmByList(c.a, c.c);
+    case 'count-mul': return c.a * c.c;
+    case 'count-mul3': return c.a * c.c * c.e;
+    case 'count-pow': return c.base ** c.exp;
+    case 'count-perm': return factorialOf(c.n);
+    case 'count-perm-k': return fallingOf(c.n, c.k);
+    case 'count-comb': return fallingOf(c.n, c.k) / factorialOf(c.k);
     case 'const': return c.value;
     default: throw new Error(`непознат тип ${c.type}`);
   }
@@ -95,7 +211,8 @@ test('генератори: верният отговор винаги е вер
 });
 
 // Темите, при които отговорът може да не е цяло число или да е отрицателен.
-const FRACTIONAL = new Set(['fractions', 'decimals', 'percent', 'word-money']);
+const FRACTIONAL = new Set(['fractions', 'decimals', 'percent', 'word-money',
+  'perimeter', 'area', 'averages', 'probability']);
 const SIGNED = new Set(['negatives', 'powers']);
 
 test('генератори: няма деление на нула, счупен текст или неуместни дроби и минуси', () => {
@@ -171,13 +288,14 @@ test('parseNumeric: чете цели, десетични и прости дро
 });
 
 test('генератори: опциите съдържат верния отговор и няма дублирани', () => {
-  for (const id of ['parity', 'divisibility']) {
+  for (const id of Object.keys(GENERATORS)) {
     for (let level = 1; level <= MAX_LEVEL; level += 1) {
       const random = seeded(level * 31);
       for (let i = 0; i < ROUNDS; i += 1) {
         const t = makeTask(id, level, random);
-        assert.ok(t.options.includes(t.answer));
-        assert.equal(new Set(t.options).size, t.options.length);
+        if (t.kind !== 'choice') continue;
+        assert.ok(t.options.includes(t.answer), `${id}/${level}: ${t.prompt}`);
+        assert.equal(new Set(t.options).size, t.options.length, `${id}/${level}`);
       }
     }
   }
@@ -185,7 +303,9 @@ test('генератори: опциите съдържат верния отг�
 
 test('генератори: решението (третата подсказка) съдържа отговора при числовите задачи', () => {
   const ids = ['add', 'sub', 'mul', 'div', 'mental', 'count', 'number-line',
-    'fractions', 'decimals', 'percent', 'negatives', 'powers', 'roots', 'ratio', 'word-money', 'word-travel'];
+    'fractions', 'decimals', 'percent', 'negatives', 'powers', 'roots', 'ratio', 'word-money', 'word-travel',
+    'expressions', 'one-step', 'two-step', 'angles', 'perimeter', 'area',
+    'charts', 'averages', 'probability', 'sequences', 'multiples', 'counting'];
   for (const id of ids) {
     for (let level = 1; level <= MAX_LEVEL; level += 1) {
       const random = seeded(level * 13 + id.length);
@@ -225,8 +345,8 @@ test('отговорите се сравняват толерантно, но п
 });
 
 test('съдържание: всяка подтема има 3 нива, 3 примера, визуализация и генератор', () => {
-  assert.equal(MATH_TREE.length, 6);
-  assert.equal(ALL_SUBTOPICS.length, 18);
+  assert.equal(MATH_TREE.length, 10);
+  assert.equal(ALL_SUBTOPICS.length, 30);
   for (const s of ALL_SUBTOPICS) {
     assert.ok(GENERATORS[s.id], s.id);
     assert.ok(s.viz, s.id);

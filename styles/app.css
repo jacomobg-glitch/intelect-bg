@@ -468,6 +468,16 @@ body.playing .view { max-width: none; padding: 0; height: 100dvh; margin: 0; }
 .viz-wheel { fill: var(--text); }
 .viz-clock-face { fill: var(--glow-soft); stroke: var(--text-muted); stroke-width: 1.5; }
 .viz-clock-hand { stroke: var(--highlight); stroke-width: 2.5; stroke-linecap: round; }
+/* Теми 7–10: везна, ъгли, фигури, диаграми, сектори и дървета */
+.viz-shape { fill: var(--glow-soft); stroke: var(--accent); stroke-width: 2; }
+.viz-area { fill: var(--accent); fill-opacity: .55; stroke: var(--accent); stroke-width: 2; }
+.viz-edge { stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; fill: none; }
+.viz-edge-soft { stroke: var(--text-muted); stroke-width: 1.5; fill: none; }
+.viz-arc { fill: none; stroke: var(--highlight); stroke-width: 2.5; }
+.viz-beam { stroke: var(--text); stroke-width: 3; stroke-linecap: round; fill: var(--text); }
+.viz-mean-line { stroke: var(--highlight); stroke-width: 2; stroke-dasharray: 6 4; }
+.viz-sector { fill: var(--glow-soft); stroke: var(--panel); stroke-width: 1; }
+.viz-sector-hit { fill: var(--accent); stroke: var(--panel); stroke-width: 1; }
 
 /* Еволюция: мек проблясък и преливане на силуета */
 .evo-overlay {

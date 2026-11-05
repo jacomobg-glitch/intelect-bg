@@ -1,6 +1,6 @@
 {
   "name": "evolyutsiya-na-uma",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "private": true,
   "type": "module",
   "description": "Еволюция на ума – офлайн PWA за математика, когнитивни игри и рефлекси",
@@ -11,6 +11,7 @@
     "precache": "node tools/gen-precache.mjs",
     "table": "node tools/print-ladder.mjs",
     "calibrate": "node tools/sim-player.mjs",
-    "kid-texts": "node tools/gen-kid-texts.mjs"
+    "kid-texts": "node tools/gen-kid-texts.mjs",
+    "check": "node tools/browser-check.mjs"
   }
 }

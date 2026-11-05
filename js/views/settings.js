@@ -21,7 +21,7 @@ import { avatarEl } from './ui.js';
 
 const THEMES = [['auto', 'Като системата'], ['dark', 'Тъмна'], ['light', 'Светла']];
 const COLOR_MODES = [[false, 'С цветове'], [true, 'С форми']];
-export const APP_VERSION = '0.13.0';
+export const APP_VERSION = '0.14.0';
 const TAPS_FOR_TEST_MODE = 7;
 
 const stepLabel = (step) => `${activeSkin().creatures[creatureIndex(step)].name} ${subLabel(step)}`;
