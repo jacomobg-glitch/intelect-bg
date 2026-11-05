@@ -24,6 +24,7 @@ export const defaultSettings = () => ({
   world: DEFAULT_WORLD,   // кой свят облича стълбата; механиката не зависи от него
   hero: { ...DEFAULT_HERO }, // цвят, шапка, инструмент и име на героя
   background: null,       // купен фон, ако има такъв
+  decorOff: [],           // купена украса, която детето е махнало от сцената
   stroopVariant: 'color', // color | shape: вариант на Stroop без цветове
   colorFree: false,       // true: игрите с цветове минават на форми (цветна слепота)
 });
@@ -83,6 +84,9 @@ export function cleanSettings(raw) {
   if (WORLD_IDS.includes(world)) base.world = world;
   base.hero = cleanHero(raw.hero, Array.isArray(raw.owned) ? raw.owned : []);
   if (typeof raw.background === 'string' && itemOf(raw.background)) base.background = raw.background;
+  base.decorOff = Array.isArray(raw.decorOff)
+    ? [...new Set(raw.decorOff.filter((id) => typeof id === 'string' && itemOf(id)))]
+    : [];
   if (['color', 'shape'].includes(raw.stroopVariant)) base.stroopVariant = raw.stroopVariant;
   base.colorFree = raw.colorFree === true;
   return base;

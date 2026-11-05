@@ -210,5 +210,6 @@
       "you": "Това, което знаеш, вече е свързано в едно цяло и ще остане.",
       "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"av-d\" d=\"M10 86h80v6H10Z\" opacity=\".45\"/><path class=\"av-b\" d=\"M40 86V46h20v40Z\"/><path class=\"av-b\" d=\"M44 58 26 42M56 54l20-16\"/><circle class=\"av-a\" cx=\"50\" cy=\"34\" r=\"30\"/><circle class=\"av-a\" cx=\"22\" cy=\"46\" r=\"15\"/><circle class=\"av-a\" cx=\"78\" cy=\"46\" r=\"15\"/></svg>"
     }
-  ]
+  ],
+  "anim": "water"
 }

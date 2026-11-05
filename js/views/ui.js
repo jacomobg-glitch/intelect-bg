@@ -1,4 +1,5 @@
 // Общи части на изгледите: аватар, имена, икони, думите на активния свят.
+import { backgroundVars } from '../content/backgrounds.js';
 import { colorOf, heroMarkup, heroName } from '../content/hero.js';
 import { creatureAt as creatureOf, isDrops, unlockWord as unlockOf, worldOf, xpLong, xpWord } from '../content/worlds/index.js';
 import { text as pickText } from '../content/texts.js';
@@ -26,6 +27,19 @@ export const withXP = (value) => `${formatXP(value)} ${xpName()}`;
 
 // Текст според профила: детският получава своята версия, останалите — стандартната.
 export const t = (key, params = {}) => pickText(key, { kid: isChild(), ...params });
+
+// Слага купения фон върху елемент. Двата варианта (тъмен и светъл) се подават
+// заедно, а темата избира — затова фонът остава четим и в двете.
+export function applyScene(el) {
+  const vars = backgroundVars(state.settings.background);
+  if (!vars) {
+    el.removeAttribute('data-bg');
+    return el;
+  }
+  el.dataset.bg = state.settings.background;
+  for (const [name, value] of Object.entries(vars)) el.style.setProperty(name, value);
+  return el;
+}
 
 export function avatarEl(creature, extraClass = '') {
   const el = trustedSvg(creature.avatar, `avatar ${extraClass}`);

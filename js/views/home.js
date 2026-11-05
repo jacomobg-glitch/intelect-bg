@@ -6,7 +6,7 @@ import { activeSkills, allGames, isUnlocked, moduleForSkill } from '../core/regi
 import { state } from '../core/store.js';
 import { icon } from './icons.js';
 import { dueSubtopics } from './math.js';
-import { activeSkin, avatarEl, creatureAt, formatXP, fullName, meter, t, xpName } from './ui.js';
+import { activeSkin, applyScene, avatarEl, creatureAt, formatXP, fullName, meter, t, xpName } from './ui.js';
 
 const SUB_NAMES = ['I', 'II', 'III'];
 
@@ -59,7 +59,8 @@ export function renderHome(root) {
 
   mount(root,
     state.simSnapshot ? h('p', { class: 'badge badge-test' }, 'Тестов режим: реалният прогрес е запазен') : null,
-    h('section', { class: 'hero' },
+    // Купеният фон сменя фона на hero картата; без фон остава стъклото.
+    applyScene(h('section', { class: 'hero' },
       h('div', { class: 'hero-art', 'aria-hidden': 'true' }, avatarEl(creature)),
       h('div', { class: 'hero-main' },
         h('div', { class: 'hero-avatar' }, avatarEl(creature)),
@@ -71,7 +72,7 @@ export function renderHome(root) {
         target
           ? h('a', { class: 'btn btn-pill', href: target.route || `#/play/${target.id}` }, `Тренирай ${target.title}`, icon('arrow-up-right'))
           : h('a', { class: 'btn btn-pill', href: '#/train' }, t('home.continue'), icon('arrow-up-right'))),
-      substeps(profile.step)),
+      substeps(profile.step))),
     due ? h('a', { class: 'review-link', href: '#/math' }, `Готови за преговор: ${due}`) : null,
     h('a', { class: 'btn surprise-link', href: '#/surprise' }, icon('sparkles'), 'Изненадай ме'),
     h('h2', { class: 'section-title' }, 'Шестте способности'),

@@ -209,5 +209,6 @@
       "you": "Това, което знаеш, вече е свързано в едно цяло.",
       "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-b\" cx=\"50\" cy=\"50\" r=\"34\" opacity=\".35\"/><g class=\"av-a\"><circle cx=\"36\" cy=\"36\" r=\"9\"/><circle cx=\"66\" cy=\"42\" r=\"7\"/><circle cx=\"46\" cy=\"66\" r=\"8\"/><circle cx=\"70\" cy=\"68\" r=\"5\"/></g><g class=\"av-e\"><circle cx=\"30\" cy=\"58\" r=\"2.5\"/><circle cx=\"58\" cy=\"28\" r=\"2\"/><circle cx=\"62\" cy=\"58\" r=\"2\"/></g><circle class=\"av-l\" cx=\"50\" cy=\"50\" r=\"34\" fill=\"none\" opacity=\".4\"/></svg>"
     }
-  ]
+  ],
+  "anim": "spark"
 }

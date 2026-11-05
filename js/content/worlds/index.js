@@ -34,5 +34,9 @@ export const xpWord = (world) => (world.xp && world.xp.word) || 'XP';
 export const xpLong = (world) => (world.xp && world.xp.long) || 'опит';
 export const isDrops = (world) => Boolean(world.xp && world.xp.drop);
 
+// Как се превръща светът: blocks, water, mission, spark или простото преливане.
+export const ANIMATIONS = Object.freeze(['fade', 'blocks', 'water', 'mission', 'spark']);
+export const animOf = (world) => (ANIMATIONS.includes(world.anim) ? world.anim : 'fade');
+
 // Как светът казва „отключи“. „Градски мисии“ го казва като мисия.
 export const unlockWord = (world) => world.unlockWord || 'Отключи';

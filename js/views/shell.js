@@ -13,6 +13,7 @@ const NAV = [
   { route: 'reflex', href: '#/reflex', label: 'Рефлекси', icon: 'zap' },
   { route: 'gallery', href: '#/gallery', label: 'Еволюция', icon: 'dna' },
   { route: 'profile', href: '#/profile', label: 'Профил', icon: 'user' },
+  { route: 'world', href: '#/world', label: 'Моят свят', icon: 'dna' },
   { route: 'shop', href: '#/shop', label: 'Магазин', icon: 'archive' },
 ];
 

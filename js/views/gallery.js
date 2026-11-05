@@ -2,6 +2,7 @@
 import { confirmDialog, h, mount } from '../core/dom.js';
 import { creatureIndex, subLabel } from '../core/evolution.js';
 import { state } from '../core/store.js';
+import { sceneEl } from './scene.js';
 import { activeSkin, activeWorld, avatarEl, t } from './ui.js';
 
 // Някои светове имат своя спокойна дума (например градината: нищо не изсъхва).
@@ -16,6 +17,8 @@ export function renderGallery(root) {
 
   mount(root,
     h('h1', { class: 'page-title' }, t('gallery.title')),
+    // Сцената на света: купеният фон и украсата се виждат точно тук.
+    sceneEl(),
     h('p', { class: 'muted' }, `${current + 1} от ${skin.creatures.length} стъпки в света „${activeWorld().name}“`),
     calmNote(),
     h('div', { class: 'gallery' }, skin.creatures.map((c, i) => {

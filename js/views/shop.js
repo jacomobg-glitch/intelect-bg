@@ -1,7 +1,8 @@
 // Магазинът: само украса. Нищо купено не дава предимство в игрите и в математиката.
 // Няма реални пари, няма оферти с таймер и няма „само днес“. Монетите не изгарят.
-import { KIND_LABELS, KIND_ORDER, itemsForWorld } from '../content/shop.js';
-import { h, mount, toast } from '../core/dom.js';
+import { KIND_LABELS, KIND_ORDER, itemsForWorld, previewMarkup } from '../content/shop.js';
+import { backgroundVars } from '../content/backgrounds.js';
+import { h, mount, toast, trustedSvg } from '../core/dom.js';
 import { buyItem, saveSettings, state } from '../core/store.js';
 import { activeWorld, formatXP } from './ui.js';
 
@@ -44,13 +45,20 @@ export function renderShop(root) {
         disabled: coins < item.price,
         onclick: () => buy(item),
       }, `${item.price} ${coinWord(item.price)}`);
+    // Прегледът „така ще изглежда“ стои над цената: купува се видяно, не описано.
+    const preview = trustedSvg(previewMarkup(item), 'shop-preview');
+    if (item.kind === 'background') {
+      for (const [name, value] of Object.entries(backgroundVars(item.id) || {})) preview.style.setProperty(name, value);
+    }
     return h('div', { class: `card shop-item${mine ? ' shop-item-own' : ''}` },
+      preview,
       h('strong', {}, item.name),
       h('span', { class: 'small muted' }, KIND_LABELS[item.kind]),
       action);
   };
 
-  const items = itemsForWorld(world.id);
+  // Предмет без преглед не се показва: купено, но невидимо, е нарушено обещание.
+  const items = itemsForWorld(world.id).filter((item) => previewMarkup(item));
   const groups = KIND_ORDER
     .map((kind) => [kind, items.filter((item) => item.kind === kind)])
     .filter(([, list]) => list.length);

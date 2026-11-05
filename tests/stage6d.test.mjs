@@ -178,8 +178,8 @@ test('монетите идват от практиката и не се пал�
   assert.equal(canAfford(1000, 'няма такова'), false);
   assert.equal(itemOf('няма такова'), null);
   // Украсата за един свят не се предлага в друг.
-  assert.ok(itemsForWorld('garden').some((i) => i.id === 'decor-pond'));
-  assert.ok(!itemsForWorld('space').some((i) => i.id === 'decor-pond'));
+  assert.ok(itemsForWorld('garden').some((i) => i.id === 'decor-fountain'));
+  assert.ok(!itemsForWorld('space').some((i) => i.id === 'decor-fountain'));
 });
 
 test('монетите и покупките пътуват с копието и не изгарят', () => {

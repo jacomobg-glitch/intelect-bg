@@ -221,5 +221,6 @@
       "you": "Това, което знаеш, вече е свързано в едно цяло.",
       "avatar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"av-b\" cx=\"50\" cy=\"52\" r=\"34\"/><path class=\"av-a\" d=\"M50 18a34 34 0 0 1 0 68 34 34 0 0 1 0-68Z\" opacity=\".5\"/><g class=\"av-e\"><rect x=\"34\" y=\"34\" width=\"12\" height=\"12\"/><rect x=\"54\" y=\"42\" width=\"12\" height=\"12\"/><rect x=\"40\" y=\"56\" width=\"12\" height=\"12\"/></g><path class=\"av-l\" d=\"M16 52h68M50 18v68\" opacity=\".35\"/></svg>"
     }
-  ]
+  ],
+  "anim": "blocks"
 }

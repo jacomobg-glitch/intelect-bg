@@ -1,6 +1,6 @@
 // Генериран файл: не се редактира на ръка. Обновява се с `npm run precache`.
 self.PRECACHE = {
-  "version": "5cb62b9b0c1d",
+  "version": "627766655abb",
   "files": [
     "./",
     "./icons/LUCIDE-LICENSE.txt",
@@ -9,6 +9,8 @@ self.PRECACHE = {
     "./icons/icon-maskable-512.png",
     "./icons/icon.svg",
     "./js/app.js",
+    "./js/content/backgrounds.js",
+    "./js/content/decor.js",
     "./js/content/games/generators.js",
     "./js/content/games/reflex.js",
     "./js/content/hero.js",
@@ -79,6 +81,7 @@ self.PRECACHE = {
     "./js/views/perf.js",
     "./js/views/play.js",
     "./js/views/profile.js",
+    "./js/views/scene.js",
     "./js/views/settings.js",
     "./js/views/shell.js",
     "./js/views/shop.js",
