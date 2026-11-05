@@ -302,6 +302,43 @@ body.playing .tabbar, body.playing .sidebar { display: none; }
 .thr-slider { width: 100%; min-height: 44px; accent-color: var(--accent); }
 .select { flex: 1 1 180px; min-height: 48px; padding: 8px; font: inherit; border-radius: var(--radius-m); background: var(--panel-solid); color: var(--text); border: 1px solid var(--panel-border); }
 
+/* Без отворен профил или на екрана за почивка: само съдържанието, без лента и без меню */
+.no-profile .sidebar, .no-profile .tabbar, .no-profile .scrim,
+.resting .sidebar, .resting .tabbar, .resting .scrim { display: none; }
+body.no-profile, body.resting { padding-left: 0; }
+.no-profile .view, .resting .view { max-width: 720px; padding-left: 16px; padding-right: 16px; }
+
+/* „Кой тренира?“: картите на профилите */
+.who-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+.who-card {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 10px;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-l);
+  color: var(--text); font: inherit; cursor: pointer; text-align: center;
+  transition: transform var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+.who-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.who-avatar { width: 72px; height: 72px; }
+.who-name { font-weight: 800; font-size: 1.05rem; }
+.who-role { display: inline-flex; align-items: center; gap: 4px; }
+.who-role .icon { width: 14px; height: 14px; }
+.who-unlock, .who-create { display: flex; flex-direction: column; gap: 10px; max-width: 420px; }
+.pin-input, .text-input, .num-input {
+  min-height: 48px; padding: 10px 14px; font: inherit; font-size: 1.05rem; color: var(--text);
+  background: var(--panel-solid); border: 1px solid var(--panel-border); border-radius: var(--radius-m);
+}
+.pin-input { letter-spacing: .25em; font-variant-numeric: tabular-nums; }
+.num-input { width: 7rem; font-variant-numeric: tabular-nums; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.profile-admin { display: flex; flex-direction: column; gap: 8px; }
+.child-limits { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--panel-border); padding-top: 8px; }
+
+/* Детски профил: по-едър текст навсякъде. Оформлението остава същото. */
+.kid body { font-size: 18px; }
+.kid .small { font-size: .95rem; }
+.kid .page-title { font-size: clamp(1.9rem, 6vw, 2.8rem); }
+.kid .explain-text { font-size: 1.12rem; line-height: 1.7; }
+.kid .btn, .kid .answer-btn { min-height: 56px; }
+
 /* Диалог, съобщения, импорт */
 .dialog {
   max-width: min(460px, calc(100vw - 28px)); border: 1px solid var(--panel-border); border-radius: var(--radius-l);

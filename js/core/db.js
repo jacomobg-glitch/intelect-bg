@@ -1,8 +1,12 @@
 // Тънка обвивка над IndexedDB с обещания.
 const DB_NAME = 'evolyutsiya-na-uma';
-const DB_VERSION = 1;
+// Версия 2 добавя хранилището „profiles“. Старите три остават: от тях се вдига
+// първият профил при миграция и те са единственият начин да се види стар прогрес.
+const DB_VERSION = 2;
 export const STORES = ['meta', 'records', 'topics'];
-const KEY_PATHS = { meta: 'key', records: 'id', topics: 'id' };
+export const PROFILES = 'profiles';
+export const ALL_STORES = [...STORES, PROFILES];
+const KEY_PATHS = { meta: 'key', records: 'id', topics: 'id', profiles: 'id' };
 
 let dbPromise = null;
 
@@ -11,7 +15,7 @@ function openDB() {
   dbPromise = new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
-      for (const name of STORES) {
+      for (const name of ALL_STORES) {
         if (!req.result.objectStoreNames.contains(name)) {
           req.result.createObjectStore(name, { keyPath: KEY_PATHS[name] });
         }
@@ -62,8 +66,9 @@ export async function writeAll(writes) {
 // Пълна замяна на данните при импорт: или минава цялата, или нищо не се променя.
 export async function replaceEverything(byStore) {
   const db = await openDB();
-  const tx = db.transaction(STORES, 'readwrite');
-  for (const name of STORES) {
+  const names = Object.keys(byStore).filter((name) => ALL_STORES.includes(name));
+  const tx = db.transaction(names.length ? names : ALL_STORES, 'readwrite');
+  for (const name of (names.length ? names : ALL_STORES)) {
     const os = tx.objectStore(name);
     os.clear();
     for (const value of byStore[name] || []) os.put(value);

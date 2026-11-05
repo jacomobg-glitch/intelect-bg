@@ -3,7 +3,7 @@ import { CONFIG, SKILLS } from './config.js';
 import { TOTAL_STEPS } from './evolution.js';
 import { isISODate } from './sm2.js';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const defaultProfile = () => ({
   key: 'profile',

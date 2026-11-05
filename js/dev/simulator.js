@@ -3,23 +3,21 @@
 // При включване реалният прогрес се запазва, а при изход се връща точно както е бил.
 import { CUMULATIVE_XP, TOTAL_STEPS, levelFromXP, requiredLevel, applyXP } from '../core/evolution.js';
 import { CONFIG, SKILLS, SKILL_LABELS } from '../core/config.js';
-import { writeAll } from '../core/db.js';
+
 import { h, mount, toast } from '../core/dom.js';
 import { activeSkills } from '../core/registry.js';
-import { saveProfile, state } from '../core/store.js';
+import { saveProfile, setSimSnapshot, state } from '../core/store.js';
 import { showEvolution } from '../views/evolution.js';
 import { updateDevice } from '../views/perf.js';
 import { fullName } from '../views/ui.js';
 
 async function enter() {
-  state.simSnapshot = state.profile;
-  await writeAll([{ store: 'meta', value: { key: 'simSnapshot', profile: state.profile } }]);
+  await setSimSnapshot(state.profile);
 }
 
 async function leave() {
   const real = state.simSnapshot;
-  state.simSnapshot = null;
-  await writeAll([{ store: 'meta', delete: 'simSnapshot' }]);
+  await setSimSnapshot(null);
   await saveProfile(real);
 }
 

@@ -63,7 +63,10 @@ export function createGame(spec) {
 
     init(ctx) {
       this.ctx = ctx;
-      this.log = new TrialLog({ startLevel: ctx.difficulty, maxLevel: ctx.maxDifficulty, adapt: spec.adapt !== false });
+      // up идва от профила: детският се качва след един верен отговор повече.
+      this.log = new TrialLog({
+        startLevel: ctx.difficulty, maxLevel: ctx.maxDifficulty, adapt: spec.adapt !== false, up: ctx.staircaseUp,
+      });
       this.running = false;
       this.state = {};
       this.elapsed = 0;

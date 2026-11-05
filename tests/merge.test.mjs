@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { APP_ID, BackupError, parseBackup, summarize } from '../js/core/backup.js';
+import { APP_ID, BackupError, parseBackup, summarizePayload } from '../js/core/backup.js';
 import { SKILLS } from '../js/core/config.js';
 import { CUMULATIVE_XP, TOTAL_STEPS, applyXP, advancedStep, nextStepInfo, requiredLevel, requirementFor, syncActivation } from '../js/core/evolution.js';
 import { mergeData, mergeProfiles, mergeRecord, mergeTopic } from '../js/core/merge.js';
@@ -84,7 +84,7 @@ test('мек преход (б): способност, активна от нач
 test('мек преход (в): activationStep оцелява при експорт и импорт', () => {
   const p = { ...profile({ speed: 500 }, 12), activationSteps: { speed: 0, logic: 9 } };
   const parsed = parseBackup(JSON.stringify({ app: APP_ID, schema: 1, data: { meta: [p] } }));
-  assert.deepEqual(parsed.meta.find((m) => m.key === 'profile').activationSteps, { speed: 0, logic: 9 });
+  assert.deepEqual(parsed.profiles[0].data.profile.activationSteps, { speed: 0, logic: 9 });
 });
 
 test('мек преход (в): при сливане печели по-ранната стойност', () => {
@@ -97,7 +97,7 @@ test('мек преход (в): при сливане печели по-ранн
 test('мек преход: повреден activationStep се изчиства при импорт', () => {
   const p = { ...profile({}), activationSteps: { logic: 99, memory: -1, speed: 'x', evil: 3, attention: 2 } };
   const parsed = parseBackup(JSON.stringify({ app: APP_ID, schema: 1, data: { meta: [p] } }));
-  assert.deepEqual(parsed.meta.find((m) => m.key === 'profile').activationSteps, { attention: 2 });
+  assert.deepEqual(parsed.profiles[0].data.profile.activationSteps, { attention: 2 });
 });
 
 test('синхронизация: стар запис не се пипа, а липсващият взема текущата стъпка', () => {
@@ -180,8 +180,9 @@ test('сливане: цели данни, с настройките на уст
   assert.equal(m.meta.find((x) => x.key === 'settings').theme, 'dark');
   assert.deepEqual(m.records.map((r) => r.id).sort(), ['a', 'b']);
   assert.deepEqual(m.topics.map((t) => t.id).sort(), ['t1', 't2']);
-  assert.equal(summarize(m).records, 2);
-  assert.equal(summarize(m).mastered, 1);
+  const asPayload = { profile: m.meta.find((x) => x.key === 'profile'), settings: defaultSettings(), records: m.records, topics: m.topics, simSnapshot: null };
+  assert.equal(summarizePayload(asPayload).records, 2);
+  assert.equal(summarizePayload(asPayload).mastered, 1);
 });
 
 test('сливане: взема реалния прогрес, а не тестовия режим, и го изчиства', () => {
@@ -205,7 +206,7 @@ test('импорт: празен и повреден файл се отхвър�
     JSON.stringify({ ...valid, data: { meta: [{ key: 'profile', step: 'x' }] } })]) {
     assert.throws(() => parseBackup(bad), BackupError, JSON.stringify(bad));
   }
-  assert.equal(parseBackup(JSON.stringify(valid)).records.length, 0);
+  assert.equal(parseBackup(JSON.stringify(valid)).profiles[0].data.records.length, 0);
 });
 
 test('темите се изчистват: непознати полета и лоши дати отпадат', () => {

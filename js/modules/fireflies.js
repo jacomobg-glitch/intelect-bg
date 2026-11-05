@@ -179,7 +179,7 @@ const game = {
     if (correct) {
       this.correct += 1;
       this.correctRun += 1;
-      if (this.correctRun >= CONFIG.STAIRCASE_UP) {
+      if (this.correctRun >= (this.ctx.staircaseUp || CONFIG.STAIRCASE_UP)) {
         this.difficulty = Math.min(this.difficulty + 1, this.ctx.maxDifficulty || 3);
         this.correctRun = 0;
       }

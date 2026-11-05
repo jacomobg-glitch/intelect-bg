@@ -2,7 +2,10 @@
 import { h, mount } from '../core/dom.js';
 import { FEELS, FEEL_LABELS, startDifficulty } from '../core/model.js';
 import { getGame, isUnlocked } from '../core/registry.js';
-import { completeSession, markDemoSeen, maxDifficulty, recordOf, saveFeel, saveSettings, state } from '../core/store.js';
+import {
+  childStart, completeSession, isHidden, markDemoSeen, maxDifficulty, recordOf, saveFeel, saveSettings,
+  staircaseUp, state,
+} from '../core/store.js';
 import { showEvolution } from './evolution.js';
 import { startGameMonitor } from './perf.js';
 
@@ -26,7 +29,8 @@ export function feelRow(gameId) {
 // options.next по желание сменя бутоните на резултата с продължение (например „Изненадай ме“).
 export function renderPlay(root, id, options = {}) {
   const game = getGame(id);
-  if (!game || !isUnlocked(game, state.profile.step)) {
+  // Скритата за този профил игра не се отваря и през адреса.
+  if (!game || !isUnlocked(game, state.profile.step) || isHidden(id)) {
     location.hash = '#/train';
     return undefined;
   }
@@ -95,8 +99,10 @@ export function renderPlay(root, id, options = {}) {
       number.remove();
       game.init({
         container: stage,
-        difficulty: startDifficulty(recordOf(game.id)),
+        // Детският профил започва една стъпка по-ниско и се качва по-бавно.
+        difficulty: childStart(startDifficulty(recordOf(game.id))),
         maxDifficulty: maxDifficulty(),
+        staircaseUp: staircaseUp(),
         settings: state.settings,
         onEnd: finish,
       });

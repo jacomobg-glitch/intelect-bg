@@ -70,6 +70,18 @@ function mergeById(listA, listB, mergeOne) {
   return [...out.values()];
 }
 
+// Сливане на съдържанието на ЕДИН профил. Настройките остават на устройството,
+// а тестовият режим започва начисто: снимката му не се слива.
+export function mergePayload(local, incoming, activeFor) {
+  return {
+    profile: mergeProfiles(local.simSnapshot || local.profile, incoming.simSnapshot || incoming.profile, activeFor),
+    settings: local.settings,
+    records: mergeById(local.records, incoming.records, mergeRecord),
+    topics: mergeById(local.topics, incoming.topics, mergeTopic),
+    simSnapshot: null,
+  };
+}
+
 // local и incoming са изчистени данни { meta, records, topics }. Настройките остават на устройството.
 export function mergeData(local, incoming, activeFor) {
   const settings = local.meta.find((m) => m.key === 'settings');

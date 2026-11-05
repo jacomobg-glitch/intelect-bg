@@ -114,10 +114,14 @@ const validBackup = () => ({
   },
 });
 
-test('импорт: валидно копие минава', () => {
+test('импорт: валидно копие отпреди профилите влиза като един профил', () => {
   const parsed = parseBackup(JSON.stringify(validBackup()));
-  assert.equal(parsed.records[0].bestScore, 50);
-  assert.equal(parsed.meta.find((m) => m.key === 'settings').theme, 'light');
+  assert.equal(parsed.legacy, true);
+  assert.equal(parsed.profiles.length, 1);
+  const data = parsed.profiles[0].data;
+  assert.equal(data.records[0].bestScore, 50);
+  assert.equal(data.settings.theme, 'light');
+  assert.equal(parsed.profiles[0].role, 'admin', 'старият прогрес е на администратора');
 });
 
 test('импорт: повредени файлове се отхвърлят с разбираема грешка', () => {
@@ -137,10 +141,10 @@ test('импорт: непознати полета и невалидни зап
   b.data.meta[0].evil = '<script>';
   b.data.records.push({ id: '../hack', bestScore: 1 });
   b.data.records.push({ id: 'ok-id', bestScore: 'много' });
-  const parsed = parseBackup(JSON.stringify(b));
-  assert.equal(parsed.meta[0].evil, undefined);
-  assert.deepEqual(parsed.records.map((r) => r.id), ['fireflies', 'ok-id']);
-  assert.equal(parsed.records[1].bestScore, 0);
+  const { data } = parseBackup(JSON.stringify(b)).profiles[0];
+  assert.equal(data.profile.evil, undefined);
+  assert.deepEqual(data.records.map((r) => r.id), ['fireflies', 'ok-id']);
+  assert.equal(data.records[1].bestScore, 0);
 });
 
 test('модел на данните: няма дати на активност и история', () => {

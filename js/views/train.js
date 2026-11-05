@@ -2,7 +2,7 @@
 import { CATEGORIES, SKILL_LABELS } from '../core/config.js';
 import { h, mount } from '../core/dom.js';
 import { allGames, isUnlocked } from '../core/registry.js';
-import { recordOf, state } from '../core/store.js';
+import { isHidden, recordOf, state } from '../core/store.js';
 import { icon } from './icons.js';
 import { fullName } from './ui.js';
 
@@ -36,7 +36,7 @@ export function renderTrain(root, categoryId) {
         h('strong', {}, 'Изненадай ме'),
         h('span', {}, 'Една тема по математика и две игри, около 5 до 10 минути.'))),
     categories.map((cat) => {
-      const list = games.filter((g) => g.category === cat.id);
+      const list = games.filter((g) => g.category === cat.id && !isHidden(g.id));
       return h('section', { class: 'group' },
         categoryId ? null : h('h2', {}, cat.label),
         list.length ? list.map(gameCard) : h('p', { class: 'muted small' }, CATEGORY_NOTES[cat.id] || 'Идва в следващите етапи.'));

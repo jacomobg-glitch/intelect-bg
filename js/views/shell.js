@@ -2,7 +2,7 @@
 import { ALL_SUBTOPICS } from '../content/math/topics.js';
 import { h, mount } from '../core/dom.js';
 import { allGames, getGame, isUnlocked } from '../core/registry.js';
-import { recordOf, state } from '../core/store.js';
+import { isHidden, recordOf, state } from '../core/store.js';
 import { icon } from './icons.js';
 import { avatarEl, creatureAt, fullName } from './ui.js';
 
@@ -56,11 +56,14 @@ function subtopicCard(subtopic) {
     h('span', { class: 'module-text' }, h('strong', {}, subtopic.title), h('span', {}, subtopic.summary)));
 }
 
+// Игрите, които администраторът е скрил за този профил, просто ги няма в списъците.
+const visibleGames = () => allGames().filter((g) => !isHidden(g.id));
+
 function moduleList(query) {
   const q = query.trim().toLowerCase();
-  if (!q) return allGames().map(moduleCard);
+  if (!q) return visibleGames().map(moduleCard);
   const matches = (...texts) => texts.some((t) => t.toLowerCase().includes(q));
-  const games = allGames().filter((g) => matches(g.title, g.description));
+  const games = visibleGames().filter((g) => matches(g.title, g.description));
   const subtopics = ALL_SUBTOPICS.filter((s) => state.profile.step >= s.unlockStep && matches(s.title, s.summary));
   const items = [...games.map(moduleCard), ...subtopics.map(subtopicCard)];
   return items.length ? items : [h('p', { class: 'side-empty' }, 'Нищо не отговаря на търсенето.')];
@@ -86,7 +89,12 @@ function renderSidebar(sidebar, active) {
     modules,
     h('div', { class: 'side-foot' },
       navLink({ route: 'settings', href: '#/settings', label: 'Настройки', icon: 'settings' }, active),
-      h('a', { href: '#/settings', onclick: closeDrawer }, icon('archive'), h('span', {}, 'Експорт / Импорт'))));
+      h('a', { href: '#/settings', onclick: closeDrawer }, icon('archive'), h('span', {}, 'Експорт / Импорт')),
+      // Смяната на профил затваря текущия: ключовете му излизат от паметта.
+      h('a', {
+        href: '#/who',
+        onclick: () => { closeDrawer(); document.dispatchEvent(new CustomEvent('profile-close')); },
+      }, icon('user'), h('span', {}, `Смени профила${state.entry ? ` (${state.entry.name})` : ''}`))));
 }
 
 function renderTabbar(tabbar, active) {
@@ -101,6 +109,15 @@ function renderTabbar(tabbar, active) {
 }
 
 export function renderShell(name, arg) {
+  // Докато няма отворен профил, менютата са празни: няма какво да се навигира
+  // и нищо от профилите не бива да се вижда.
+  document.body.classList.toggle('no-profile', !state.entry);
+  if (!state.entry) {
+    mount(document.getElementById('sidebar'));
+    mount(document.getElementById('tabbar'));
+    closeDrawer();
+    return;
+  }
   const active = activeRoute(name, arg);
   renderSidebar(document.getElementById('sidebar'), active);
   renderTabbar(document.getElementById('tabbar'), active);

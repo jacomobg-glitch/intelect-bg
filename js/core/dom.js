@@ -60,6 +60,60 @@ export function confirmDialog({ title, body, ok = 'Да', cancel = 'Отказ' 
   });
 }
 
+// Диалог с едно поле. Връща текста или null при отказ. Ползва се за имена, ПИН и пароли.
+export function promptDialog({ title, body = [], value = '', placeholder = '', ok = 'Готово', password = false }) {
+  return new Promise((resolve) => {
+    const input = h('input', {
+      type: password ? 'password' : 'text',
+      class: password ? 'pin-input' : 'text-input',
+      value,
+      placeholder,
+      maxlength: '64',
+      autocomplete: password ? 'new-password' : 'off',
+      'aria-label': title,
+    });
+    const dialog = h('dialog', { class: 'dialog' },
+      h('h2', {}, title),
+      [].concat(body).map((line) => h('p', { class: 'muted small' }, line)),
+      input,
+      h('div', { class: 'dialog-actions' },
+        h('button', { class: 'btn', onclick: () => dialog.close('') }, 'Отказ'),
+        h('button', { class: 'btn btn-primary', onclick: () => dialog.close('ok') }, ok)));
+    dialog.addEventListener('close', () => {
+      const chosen = dialog.returnValue === 'ok' ? input.value : null;
+      dialog.remove();
+      resolve(chosen);
+    });
+    // Enter в полето значи „Готово“: иначе диалогът се затваря без стойност.
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); dialog.close('ok'); } });
+    document.body.append(dialog);
+    dialog.showModal();
+    setTimeout(() => input.focus(), 50);
+  });
+}
+
+// Диалог с избор от няколко възможности. Връща стойността или null при отказ.
+export function chooseDialog({ title, body = [], options }) {
+  return new Promise((resolve) => {
+    const dialog = h('dialog', { class: 'dialog' },
+      h('h2', {}, title),
+      [].concat(body).map((line) => h('p', { class: 'muted small' }, line)),
+      h('div', { class: 'dialog-actions' },
+        h('button', { class: 'btn', onclick: () => dialog.close('') }, 'Отказ'),
+        options.map(([value, label]) => h('button', {
+          class: 'btn btn-primary',
+          onclick: () => dialog.close(String(value)),
+        }, label))));
+    dialog.addEventListener('close', () => {
+      const chosen = dialog.returnValue;
+      dialog.remove();
+      resolve(chosen || null);
+    });
+    document.body.append(dialog);
+    dialog.showModal();
+  });
+}
+
 export function toast(message) {
   const el = h('div', { class: 'toast', role: 'status' }, message);
   document.body.append(el);

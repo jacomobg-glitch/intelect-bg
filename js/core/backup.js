@@ -1,40 +1,16 @@
 // Ръчен експорт и импорт в JSON: единственият мост между лаптопа и телефона.
-import { STORES, getAll, replaceEverything } from './db.js';
-import { realProfile } from './merge.js';
-import { SCHEMA_VERSION, cleanProfile, cleanRecord, cleanSettings, cleanTopic } from './model.js';
+// От Етап 6г копието съдържа профили. Заключеният профил излиза шифрован: файлът
+// носи само кутията и обвивките на ключа, не и съдържанието в четим вид.
+import { replaceEverything } from './db.js';
+import { cleanProfileEntry, migrateLegacy } from './profiles.js';
+import { SCHEMA_VERSION } from './model.js';
 
 export const APP_ID = 'evolyutsiya-na-uma';
-const MAX_CHARS = 5 * 1024 * 1024;
+const MAX_CHARS = 20 * 1024 * 1024;
 
 export class BackupError extends Error {}
 
-const list = (x) => (Array.isArray(x) ? x : []);
-
-// Изчиства суровите записи. Хвърля BackupError, ако прогресът е неизползваем.
-export function normalizeData(data) {
-  if (!data || !Array.isArray(data.meta)) throw new BackupError('В копието липсват данни.');
-
-  const profile = cleanProfile(data.meta.find((m) => m && m.key === 'profile'));
-  if (!profile) throw new BackupError('Данните за прогреса в копието са повредени.');
-
-  const meta = [profile, cleanSettings(data.meta.find((m) => m && m.key === 'settings'))];
-  const rawSnapshot = data.meta.find((m) => m && m.key === 'simSnapshot');
-  if (rawSnapshot) {
-    const saved = cleanProfile(rawSnapshot.profile);
-    if (saved) meta.push({ key: 'simSnapshot', profile: saved });
-  }
-  return {
-    meta,
-    records: list(data.records).map(cleanRecord).filter(Boolean),
-    topics: list(data.topics).map(cleanTopic).filter(Boolean),
-  };
-}
-
-export async function readAllData() {
-  const data = {};
-  for (const name of STORES) data[name] = await getAll(name);
-  return data;
-}
+export const isLocked = (entry) => Boolean(entry && entry.lock);
 
 // „Последен експорт“ в Настройки: дата и час по местно време, без секунди.
 // Празен или повреден запис дава null, за да може изгледът да каже „още няма“.
@@ -46,11 +22,16 @@ export function formatMoment(iso) {
   return `${at.getDate()}.${at.getMonth() + 1}.${at.getFullYear()}, ${time}`;
 }
 
-export async function buildBackup() {
-  return { app: APP_ID, schema: SCHEMA_VERSION, exportedAt: new Date().toISOString(), data: await readAllData() };
+export function buildBackup(entries) {
+  return {
+    app: APP_ID,
+    schema: SCHEMA_VERSION,
+    exportedAt: new Date().toISOString(),
+    profiles: entries,
+  };
 }
 
-// Чиста функция: от текст на файл до проверени записи за базата. Хвърля BackupError с ясен текст.
+// Чиста функция: от текст на файл до проверени профили. Хвърля BackupError с ясен текст.
 export function parseBackup(text) {
   if (typeof text !== 'string' || !text.trim()) throw new BackupError('Файлът е празен.');
   if (text.length > MAX_CHARS) throw new BackupError('Файлът е твърде голям за резервно копие.');
@@ -64,18 +45,37 @@ export function parseBackup(text) {
   if (!Number.isInteger(obj.schema) || obj.schema < 1 || obj.schema > SCHEMA_VERSION) {
     throw new BackupError('Копието е от непозната версия. Обнови приложението и опитай пак.');
   }
-  return normalizeData(obj.data);
+
+  // Копие отпреди профилите: целият прогрес е един профил.
+  if (!obj.profiles && obj.data) {
+    const entry = migrateLegacy(obj.data, 'От копие');
+    if (!entry) throw new BackupError('Данните за прогреса в копието са повредени.');
+    return { profiles: [entry], legacy: true };
+  }
+
+  if (!Array.isArray(obj.profiles)) throw new BackupError('В копието липсват профили.');
+  const profiles = obj.profiles.map(cleanProfileEntry).filter(Boolean);
+  if (!profiles.length) throw new BackupError('Профилите в копието са повредени.');
+  return { profiles, legacy: false };
 }
 
-export const applyBackup = (data) => replaceEverything(data);
-
 // Кратко описание за сравнението „устройство / файл / резултат“.
-export function summarize(data) {
-  const profile = realProfile(data);
+export function summarizePayload(payload) {
+  if (!payload) return { step: null, totalXP: null, records: null, mastered: null };
+  const profile = payload.simSnapshot || payload.profile;
   return {
     step: profile.step,
     totalXP: profile.totalXP,
-    records: data.records.length,
-    mastered: data.topics.filter((t) => t.mastered).length,
+    records: payload.records.length,
+    mastered: payload.topics.filter((t) => t.mastered).length,
   };
 }
+
+// Заключеният профил не казва нищо повече от картата си, докато не се отключи.
+export const summarizeEntry = (entry) => (entry.data
+  ? summarizePayload(entry.data)
+  : { step: entry.card.step, totalXP: entry.card.totalXP, records: null, mastered: null });
+
+// Пълна замяна на профилите (само администратор). Старите три хранилища не се пипат:
+// там стои прогресът отпреди профилите и той е последната мрежа при беда.
+export const applyProfiles = (entries) => replaceEverything({ profiles: entries });
