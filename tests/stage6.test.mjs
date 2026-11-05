@@ -419,7 +419,7 @@ test('калибрирането покрива всяка игра със stair
 });
 
 test('Етап 6а не внася дати, серии или история', () => {
-  assert.equal(ALL_SUBTOPICS.length, 30);
+  assert.equal(ALL_SUBTOPICS.length, 41);
   assert.equal(new Set(ALL_SUBTOPICS.map((s) => s.id)).size, ALL_SUBTOPICS.length);
   assert.equal(new Set(games.map((g) => g.id)).size, games.length);
 });

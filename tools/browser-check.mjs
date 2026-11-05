@@ -176,7 +176,12 @@ async function device(cdp, { width, height, mobile }) {
   await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: mobile, maxTouchPoints: mobile ? 5 : 1 });
 }
 
-// Профил с достатъчно напредък, за да са отворени всички теми, включително 7–10.
+// Последната награда по стълбата е на стъпка 34; профилът на проверката стои над нея,
+// за да е отворено ВСИЧКО. Числото е тук, а не по наборите: иначе разместване на
+// стълбата оставя теми заключени и снимките излизат празни.
+const READY_STEP = 40;
+
+// Профил с достатъчно напредък, за да са отворени всички теми.
 // Пише се направо в IndexedDB през модулите на приложението, за да е валиден записът.
 const SEED = (theme, step) => `(async () => {
   const { defaultProfileEntry, cardOf } = await import('./js/core/profiles.js');
@@ -212,6 +217,21 @@ const ALL_NEW_TOPICS = [
   'sequences', 'multiples', 'counting',
 ];
 
+// Натиска контрола на визуализацията по надписа ѝ.
+const CLICK = (text) => `(() => {
+  const button = [...document.querySelectorAll('.viz-controls button')]
+    .find((b) => b.textContent.includes(${JSON.stringify(text)}));
+  if (!button) return 'няма копче „' + ${JSON.stringify(text)} + '“';
+  button.click();
+  return 'натиснато';
+})()`;
+
+// Единайсетте подтеми, добавени след Етап 6в.
+const ADDED_TOPICS = [
+  'inequalities', 'coordinates', 'linear', 'parabola', 'rates',
+  'pythagoras', 'simulation', 'truth-tables', 'knights', 'coins', 'grid-puzzles',
+];
+
 const DESKTOP = { width: 1280, height: 900, mobile: false };
 const PORTRAIT = { width: 390, height: 844, mobile: true };
 const LANDSCAPE = { width: 844, height: 390, mobile: true };
@@ -220,7 +240,7 @@ const LANDSCAPE = { width: 844, height: 390, mobile: true };
 async function stage6v(cdp) {
   await device(cdp, DESKTOP);
   await open(cdp, '');
-  const step = await evaluate(cdp, SEED('dark', 30));
+  const step = await evaluate(cdp, SEED('dark', READY_STEP));
   console.log(`профил за проверката: стъпка ${step}`);
 
   await open(cdp, '/math');
@@ -244,12 +264,12 @@ async function stage6v(cdp) {
   }
 
   // Светла тема: същата проверка на геометрията, за да се види контрастът и там.
-  await evaluate(cdp, SEED('light', 30));
+  await evaluate(cdp, SEED('light', READY_STEP));
   await open(cdp, '/math/area');
   console.log(`  area (светла): ${await evaluate(cdp, SHOW_VIZ)}`);
   await wait(150);
   await screenshot(cdp, 'stage6v-geometry-light');
-  await evaluate(cdp, SEED('dark', 30));
+  await evaluate(cdp, SEED('dark', READY_STEP));
 
   // Упражнение: задача от новите генератори, подсказките и полето за отговор.
   await open(cdp, '/math/two-step/practice');
@@ -297,19 +317,117 @@ async function stage6v(cdp) {
   if (missing.length) die(`Липсва рисунка за: ${missing.join(', ')}`);
 }
 
-const SUITES = { '6v': stage6v };
+// Допълненията: неравенства, функции и графики, Питагор, много опити и загадки.
+async function added(cdp) {
+  await device(cdp, DESKTOP);
+  await open(cdp, '');
+  console.log(`профил за проверката: стъпка ${await evaluate(cdp, SEED('dark', READY_STEP))}`);
+
+  await open(cdp, '/math');
+  await evaluate(cdp, 'window.scrollTo(0, document.body.scrollHeight)');
+  await wait(150);
+  await screenshot(cdp, 'math-tree-full');
+
+  const plain = [
+    ['inequalities', 'math-inequalities'],
+    ['linear', 'math-linear'],
+    ['parabola', 'math-parabola'],
+    ['pythagoras', 'math-pythagoras'],
+    ['truth-tables', 'math-truth-table'],
+    ['knights', 'math-knights'],
+    ['coins', 'math-coins'],
+  ];
+  for (const [id, name] of plain) {
+    await open(cdp, `/math/${id}`);
+    console.log(`  ${id}: ${await evaluate(cdp, SHOW_VIZ)}`);
+    await wait(150);
+    await screenshot(cdp, name);
+  }
+
+  // Две рисунки показват същината си чак след щракане.
+  await open(cdp, '/math/simulation');
+  await evaluate(cdp, SHOW_VIZ);
+  console.log(`  simulation: ${await evaluate(cdp, CLICK('Хвърли 1000'))}`);
+  await wait(250);
+  await evaluate(cdp, SHOW_VIZ);
+  await screenshot(cdp, 'math-simulation');
+
+  await open(cdp, '/math/grid-puzzles');
+  await evaluate(cdp, SHOW_VIZ);
+  console.log(`  grid-puzzles: ${await evaluate(cdp, CLICK('Ана не е в синята'))}, ${await evaluate(cdp, CLICK('Боян е в червената'))}`);
+  await wait(200);
+  await evaluate(cdp, SHOW_VIZ);
+  await screenshot(cdp, 'math-logic-grid');
+
+  // Упражнение с интервал за отговор: новият вид поле се вижда на живо.
+  await open(cdp, '/math/inequalities/practice');
+  await wait(250);
+  console.log(`  условие: ${await evaluate(cdp, 'document.querySelector(".task-prompt")?.textContent || "няма задача"')}`);
+  console.log(`  клавиатура за полето: ${await evaluate(cdp, 'document.querySelector(".answer-input")?.inputMode')}`);
+  await screenshot(cdp, 'math-inequality-task');
+
+  // Светла тема: графиката на таксата.
+  await evaluate(cdp, SEED('light', READY_STEP));
+  await open(cdp, '/math/rates');
+  console.log(`  rates (светла): ${await evaluate(cdp, SHOW_VIZ)}`);
+  await wait(150);
+  await screenshot(cdp, 'math-rates-light');
+  await evaluate(cdp, SEED('dark', READY_STEP));
+
+  await device(cdp, PORTRAIT);
+  await open(cdp, '/math/coordinates');
+  console.log(`  coordinates (портрет): ${await evaluate(cdp, SHOW_VIZ)}`);
+  await wait(150);
+  await screenshot(cdp, 'math-coordinates-mobile');
+
+  await device(cdp, LANDSCAPE);
+  await open(cdp, '/math/pythagoras');
+  console.log(`  pythagoras (пейзаж): ${await evaluate(cdp, SHOW_VIZ)}`);
+  await wait(150);
+  await screenshot(cdp, 'math-pythagoras-landscape');
+
+  // Офлайн през service worker-а.
+  await device(cdp, DESKTOP);
+  await open(cdp, '/math');
+  await cdp.send('Network.enable');
+  await cdp.send('Network.emulateNetworkConditions', {
+    offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0,
+  });
+  await open(cdp, '/math/knights');
+  const offlineOk = await evaluate(cdp, 'document.body.classList.contains("ready") && Boolean(document.querySelector(".viz svg"))');
+  console.log(`  офлайн: ${offlineOk ? 'екранът се вдига с визуализация' : 'НЕ се вдига'}`);
+  await screenshot(cdp, 'math-offline-knights');
+  await cdp.send('Network.emulateNetworkConditions', {
+    offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1,
+  });
+  if (!offlineOk) die('Офлайн проверката падна: страницата не се вдига от кеша.');
+
+  // Нито една от единайсетте нови рисунки не бива да остане непроверена.
+  const missing = [];
+  for (const id of ADDED_TOPICS) {
+    await open(cdp, `/math/${id}`);
+    if (await evaluate(cdp, SHOW_VIZ) !== 'готово') missing.push(id);
+  }
+  console.log(missing.length ? `  БЕЗ рисунка: ${missing.join(', ')}` : '  и единайсетте нови визуализации се рисуват');
+  if (missing.length) die(`Липсва рисунка за: ${missing.join(', ')}`);
+}
+
+const SUITES = { '6v': stage6v, added };
 
 async function main() {
-  const which = process.argv[2] || '6v';
-  const suite = SUITES[which];
-  if (!suite) die(`Непознат набор „${which}“. Има: ${Object.keys(SUITES).join(', ')}`);
+  const which = process.argv[2];
+  if (which && !SUITES[which]) die(`Непознат набор „${which}“. Има: ${Object.keys(SUITES).join(', ')}`);
+  const chosen = which ? [which] : Object.keys(SUITES);
   await checkServer();
   mkdirSync(SHOTS, { recursive: true });
   const chrome = await launchChrome();
   try {
     await chrome.cdp.send('Page.enable');
     await chrome.cdp.send('Runtime.enable');
-    await suite(chrome.cdp);
+    for (const name of chosen) {
+      console.log(`\n--- набор ${name} ---`);
+      await SUITES[name](chrome.cdp);
+    }
     console.log('\nбраузърната проверка мина\n');
   } finally {
     chrome.stop();

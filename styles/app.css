@@ -478,6 +478,12 @@ body.playing .view { max-width: none; padding: 0; height: 100dvh; margin: 0; }
 .viz-mean-line { stroke: var(--highlight); stroke-width: 2; stroke-dasharray: 6 4; }
 .viz-sector { fill: var(--glow-soft); stroke: var(--panel); stroke-width: 1; }
 .viz-sector-hit { fill: var(--accent); stroke: var(--panel); stroke-width: 1; }
+/* Функции и загадки: мрежа, криви, лъчи и влачене */
+.viz-grid { stroke: var(--text-muted); stroke-width: .5; opacity: .3; }
+.viz-curve { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.viz-ray { stroke: var(--accent); stroke-width: 5; stroke-linecap: round; }
+.viz-open { fill: var(--panel); stroke: var(--accent); stroke-width: 3; }
+.viz-drag { cursor: grab; touch-action: none; }
 
 /* Еволюция: мек проблясък и преливане на силуета */
 .evo-overlay {

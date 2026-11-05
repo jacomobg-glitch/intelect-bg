@@ -1,7 +1,7 @@
 // Генератори за теми 7–10: изрази и уравнения, геометрия, данни и вероятност,
 // закономерности и броене. Чисти функции: random се подава отвън.
 // Всяка задача носи check — данните, по които тестът пресмята отговора независимо.
-import { choiceTask, dec, fracText, gcd, int, numberTask, pick } from './task.js';
+import { choiceTask, dec, fracText, gcd, int, numberTask, pick, rootText, textTask } from './task.js';
 
 // π се ползва закръглено, както е в училище. Тестът смята със същото число.
 export const PI = 3.14;
@@ -760,16 +760,226 @@ function counting(level, random) {
     { type: 'count-comb', n, k });
 }
 
+
+// --- Неравенства (към група 7) ---
+
+const SIGNS = { gt: '>', ge: '≥', lt: '<', le: '≤' };
+// Делението с отрицателно число обръща знака: 2 < 5, но -2 > -5.
+const FLIPPED = { gt: 'lt', ge: 'le', lt: 'gt', le: 'ge' };
+const sided = (op, value) => `x ${SIGNS[op]} ${value}`;
+const spanText = (op, value) => (op === 'gt' ? `(${value}; ∞)`
+  : op === 'ge' ? `[${value}; ∞)`
+    : op === 'lt' ? `(-∞; ${value})` : `(-∞; ${value}]`);
+const ASK = 'Запиши отговора като неравенство или като интервал.';
+
+function inequalities(level, random) {
+  const op = pick(random, Object.keys(SIGNS));
+  if (level === 1) {
+    const a = int(random, 2, 12);
+    const bound = int(random, 1, 15);
+    const r = bound + a;
+    return textTask(`Реши: x + ${a} ${SIGNS[op]} ${r}. ${ASK}`, sided(op, bound),
+      ['Неравенството се решава като уравнение: двете страни се менят еднакво.',
+        `Извади ${a} от двете страни.`,
+        `${r} - ${a} = ${bound}, значи ${sided(op, bound)}, тоест ${spanText(op, bound)}.`],
+      { type: 'ineq-add', a, r, op });
+  }
+  if (level === 2) {
+    const a = int(random, 2, 12);
+    const r = int(random, 1, 15);
+    const bound = r + a;
+    return textTask(`Реши: x - ${a} ${SIGNS[op]} ${r}. ${ASK}`, sided(op, bound),
+      ['Обратното на изваждането е събиране.',
+        `Добави ${a} към двете страни.`,
+        `${r} + ${a} = ${bound}, значи ${sided(op, bound)}, тоест ${spanText(op, bound)}.`],
+      { type: 'ineq-sub', a, r, op });
+  }
+  if (level === 3) {
+    const k = int(random, 2, 9);
+    const bound = int(random, 1, 12);
+    const r = k * bound;
+    return textTask(`Реши: ${k}x ${SIGNS[op]} ${r}. ${ASK}`, sided(op, bound),
+      ['Делителят е положителен, значи знакът остава какъвто е.',
+        `Раздели двете страни на ${k}.`,
+        `${r} ÷ ${k} = ${bound}, значи ${sided(op, bound)}, тоест ${spanText(op, bound)}.`],
+      { type: 'ineq-mul', k, r, op });
+  }
+  if (level === 4) {
+    const k = int(random, 2, 7);
+    const m = int(random, 1, 14);
+    const bound = int(random, 1, 10);
+    const r = k * bound + m;
+    return textTask(`Реши: ${k}x + ${m} ${SIGNS[op]} ${r}. ${ASK}`, sided(op, bound),
+      ['Първо махни събираемото, после раздели.',
+        `${r} - ${m} = ${k * bound}, после раздели на ${k}.`,
+        `${k * bound} ÷ ${k} = ${bound}, значи ${sided(op, bound)}, тоест ${spanText(op, bound)}.`],
+      { type: 'ineq-neg-free', k, m, r, op });
+  }
+  if (level === 5) {
+    const k = int(random, 2, 8);
+    const bound = int(random, 1, 10);
+    const r = k * bound;
+    const turned = FLIPPED[op];
+    return textTask(`Реши: -${k}x ${SIGNS[op]} ${-r}. ${ASK}`, sided(turned, bound),
+      ['Делителят е отрицателен: тук има едно особено правило.',
+        `Раздели на -${k} и ОБЪРНИ знака.`,
+        `${-r} ÷ (-${k}) = ${bound} с обърнат знак, значи ${sided(turned, bound)}, тоест ${spanText(turned, bound)}.`],
+      { type: 'ineq-neg', k, r, op });
+  }
+  const m = int(random, 1, 9);
+  const lo = int(random, 1, 10);
+  const hi = lo + int(random, 2, 9);
+  const answer = `(${lo - m}; ${hi - m}]`;
+  return textTask(`Реши: ${lo} < x + ${m} ≤ ${hi}. ${ASK}`, answer,
+    ['Трите части се менят едновременно.',
+      `Извади ${m} от всяка от трите части.`,
+      `Остава ${lo - m} < x ≤ ${hi - m}, тоест ${answer}.`],
+    { type: 'ineq-between', lo, hi, m });
+}
+
+// --- Питагорова теорема (към група 8) ---
+
+// Питагорови тройки: катет, катет, хипотенуза. Дават цели отговори.
+const TRIPLES = [
+  [3, 4, 5], [6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17],
+  [12, 16, 20], [7, 24, 25], [10, 24, 26], [20, 21, 29], [18, 24, 30],
+];
+
+function pythagoras(level, random) {
+  if (level === 1 || level === 3) {
+    const [a, c, hyp] = pick(random, level === 1 ? TRIPLES.slice(0, 4) : TRIPLES);
+    return numberTask(`Правоъгълен триъгълник с катети ${a} и ${c}. Колко е хипотенузата?`, rootText(a * a + c * c),
+      ['Квадратът на хипотенузата е сборът от квадратите на катетите.',
+        `${a} × ${a} = ${a * a} и ${c} × ${c} = ${c * c}; сборът е ${a * a + c * c}.`,
+        `Коренът от ${a * a + c * c} е ${hyp}.`],
+      { type: 'pyth-hyp', a, c });
+  }
+  if (level === 2) {
+    const [a, c, hyp] = pick(random, TRIPLES.slice(0, 6));
+    const known = random() < 0.5 ? a : c;
+    const other = known === a ? c : a;
+    return numberTask(`Правоъгълен триъгълник с хипотенуза ${hyp} и катет ${known}. Колко е другият катет?`, rootText(hyp * hyp - known * known),
+      ['От квадрата на хипотенузата се маха квадратът на известния катет.',
+        `${hyp} × ${hyp} = ${hyp * hyp}, а ${known} × ${known} = ${known * known}.`,
+        `${hyp * hyp} - ${known * known} = ${other * other}, а коренът е ${other}.`],
+      { type: 'pyth-leg', hyp, a: known });
+  }
+  if (level === 4) {
+    const a = int(random, 2, 9);
+    const c = int(random, 2, 9);
+    const square = a * a + c * c;
+    return numberTask(`Правоъгълен триъгълник с катети ${a} и ${c}. Колко е хипотенузата? Ако не е цяло число, запиши го с корен.`, rootText(square),
+      ['Отговорът невинаги е цяло число — и това е нормално.',
+        `${a * a} + ${c * c} = ${square}.`,
+        `Хипотенузата е ${rootText(square)}.`],
+      { type: 'pyth-hyp', a, c });
+  }
+  if (level === 5) {
+    const [a, c, hyp] = pick(random, TRIPLES.slice(0, 8));
+    const foot = random() < 0.5 ? a : c;
+    const height = foot === a ? c : a;
+    return numberTask(`Стълба с дължина ${hyp} м е подпряна на стена, а петата ѝ е на ${foot} м от стената. До каква височина стига?`, rootText(hyp * hyp - foot * foot),
+      ['Стълбата е хипотенузата, разстоянието до стената е единият катет.',
+        `${hyp * hyp} - ${foot * foot} = ${height * height}.`,
+        `Коренът от ${height * height} е ${height} метра.`],
+      { type: 'pyth-leg', hyp, a: foot });
+  }
+  const wide = int(random, 3, 16);
+  const tall = int(random, 3, 16);
+  const square = wide * wide + tall * tall;
+  return numberTask(`Правоъгълна стая е ${wide} на ${tall} метра. Колко е диагоналът ѝ? Ако не е цяло число, запиши го с корен.`, rootText(square),
+    ['Диагоналът е хипотенуза на правоъгълен триъгълник от двете страни.',
+      `${wide * wide} + ${tall * tall} = ${square}.`,
+      `Диагоналът е ${rootText(square)} метра.`],
+    { type: 'pyth-hyp', a: wide, c: tall });
+}
+
+// --- Много опити (към група 9) ---
+
+const COIN_TRIALS = [10, 20, 50, 100, 200];
+const DIE_TRIALS = [12, 30, 60, 120, 600];
+const SHARE_TRIALS = [10, 20, 25, 50, 100];
+
+function simulation(level, random) {
+  if (level === 1) {
+    const trials = pick(random, COIN_TRIALS);
+    return numberTask(`Хвърляш монета ${trials} пъти. Колко пъти се очаква да падне ези?`, trials / 2,
+      ['Очакваният брой е броят опити по вероятността.',
+        `Вероятността за ези е 1/2, значи ${trials} ÷ 2.`,
+        `Очакват се около ${trials / 2} пъти.`],
+      { type: 'sim-expect', trials, good: 1, total: 2 });
+  }
+  if (level === 2) {
+    const trials = pick(random, DIE_TRIALS);
+    const face = int(random, 1, 6);
+    return numberTask(`Хвърляш зар ${trials} пъти. Колко пъти се очаква да падне ${face}?`, trials / 6,
+      ['Шестте страни са равновъзможни.',
+        `Вероятността е 1/6, значи ${trials} ÷ 6.`,
+        `Очакват се около ${trials / 6} пъти.`],
+      { type: 'sim-expect', trials, good: 1, total: 6 });
+  }
+  if (level === 3) {
+    const trials = pick(random, SHARE_TRIALS);
+    const hits = int(random, 1, trials - 1);
+    const share = (100 * hits) / trials;
+    return numberTask(`При ${trials} хвърляния на монета ези е излязло ${hits} пъти. Какъв е делът в проценти?`, share,
+      ['Делът е броят попадения върху броя опити.',
+        `${hits} ÷ ${trials} и после по 100.`,
+        `Делът е ${share}%.`],
+      { type: 'sim-share', hits, trials });
+  }
+  if (level === 4) {
+    const trials = pick(random, SHARE_TRIALS);
+    const hits = int(random, 1, trials - 1);
+    const share = (100 * hits) / trials;
+    const gap = Math.abs(share - 50);
+    return numberTask(`При ${trials} хвърляния на монета ези е излязло ${hits} пъти. С колко процентни пункта делът се различава от теоретичните 50%?`, gap,
+      ['Първо сметни реалния дял, после разликата с теоретичния.',
+        `Делът е ${share}%, а теоретичният е 50%.`,
+        `Разликата е ${gap} процентни пункта.`],
+      { type: 'sim-gap', hits, trials, good: 1, total: 2 });
+  }
+  if (level === 5) {
+    const first = { trials: 20, hits: int(random, 6, 14) };
+    const second = { trials: 200, hits: int(random, 80, 120) };
+    const gapFirst = Math.abs((100 * first.hits) / first.trials - 50);
+    const gapSecond = Math.abs((100 * second.hits) / second.trials - 50);
+    // Равните случаи се избягват: задачата трябва да има един верен отговор.
+    const fixed = gapFirst === gapSecond ? { ...second, hits: second.hits + 1 } : second;
+    const options = ['първият опит', 'вторият опит'];
+    const answer = Math.abs((100 * fixed.hits) / fixed.trials - 50) < gapFirst ? options[1] : options[0];
+    return choiceTask(`Първият опит: ${first.hits} ези от ${first.trials} хвърляния. Вторият: ${fixed.hits} ези от ${fixed.trials}. При кой делът е по-близо до теоретичните 50%?`,
+      answer, options,
+      ['Сравняват се делове, не бройки.',
+        `Първият дава ${dec((100 * first.hits) / first.trials, 2)}%, вторият ${dec((100 * fixed.hits) / fixed.trials, 2)}%.`,
+        `По-близо до 50% е ${answer}.`],
+      { type: 'sim-closer', first, second: fixed, good: 1, total: 2 });
+  }
+  const trials = pick(random, [72, 180, 360, 720]);
+  const target = int(random, 3, 11);
+  let good = 0;
+  for (let a = 1; a <= 6; a += 1) for (let c = 1; c <= 6; c += 1) if (a + c === target) good += 1;
+  const expect = (trials * good) / 36;
+  return numberTask(`Хвърляш два зара ${trials} пъти. Колко пъти се очаква сборът да е ${target}?`, expect,
+    ['Равновъзможните случаи са 36 двойки, а не 11 сбора.',
+      `Сбор ${target} дават ${good} двойки, значи вероятността е ${good}/36.`,
+      `${trials} × ${good} ÷ 36 = ${expect} пъти.`],
+    { type: 'sim-dice-expect', trials, target });
+}
+
 export const UPPER_GENERATORS = Object.freeze({
   expressions,
   'one-step': oneStep,
   'two-step': twoStep,
+  inequalities,
   angles,
   perimeter,
   area,
+  pythagoras,
   charts,
   averages,
   probability,
+  simulation,
   sequences,
   multiples,
   counting,

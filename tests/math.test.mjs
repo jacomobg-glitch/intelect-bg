@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { GENERATORS, MAX_LEVEL, checkAnswer, makeTask, parseNumeric } from '../js/content/math/generators.js';
+import { parseInterval } from '../js/content/math/task.js';
 import { ALL_SUBTOPICS, MATH_TREE } from '../js/content/math/topics.js';
 import { defaultTopic } from '../js/core/model.js';
 import { validateGame } from '../js/core/registry.js';
@@ -69,6 +70,54 @@ const dicePairs = (target) => {
   for (let a = 1; a <= 6; a += 1) for (let b = 1; b <= 6; b += 1) if (a + b === target) count += 1;
   return count;
 };
+const INF = Infinity;
+// Интервал за сравнение по смисъл: краищата и това дали влизат.
+const between = (lo, loIn, hi, hiIn) => ({ lo: lo === 0 ? 0 : lo, loIn, hi: hi === 0 ? 0 : hi, hiIn });
+const OPEN = { gt: false, ge: true, lt: false, le: true };
+const upward = (op, value) => (op === 'gt' || op === 'ge'
+  ? between(value, OPEN[op], INF, false)
+  : between(-INF, false, value, OPEN[op]));
+const TURN = { gt: 'lt', ge: 'le', lt: 'gt', le: 'ge' };
+const hypotenuse = (a, c) => Math.sqrt(a * a + c * c);
+const minWeigh = (n) => {
+  let k = 0;
+  let reach = 1;
+  while (reach < n) { reach *= 3; k += 1; }
+  return k;
+};
+// Втори решател за рицарите и за мрежите: пише се наново, за да не се ползва кодът на генератора.
+const says = (stmt, assign) => {
+  if (stmt.k === 'knight') return assign[stmt.who] === true;
+  if (stmt.k === 'liar') return assign[stmt.who] === false;
+  if (stmt.k === 'same') return assign[stmt.a] === assign[stmt.b];
+  if (stmt.k === 'diff') return assign[stmt.a] !== assign[stmt.b];
+  if (stmt.k === 'allLiars') return assign.indexOf(true) === -1;
+  if (stmt.k === 'someLiar') return assign.indexOf(false) !== -1;
+  return assign.filter((v) => v === true).length === stmt.n;
+};
+const knightSolutions = (count, told) => {
+  const out = [];
+  for (let mask = 0; mask < 2 ** count; mask += 1) {
+    const assign = [];
+    for (let i = 0; i < count; i += 1) assign.push(((mask >> i) & 1) === 1);
+    if (told.every((t) => assign[t.who] === says(t.stmt, assign))) out.push(assign);
+  }
+  return out;
+};
+const orders = (n) => {
+  if (n === 0) return [[]];
+  const out = [];
+  for (const rest of orders(n - 1)) {
+    for (let at = 0; at <= rest.length; at += 1) out.push([...rest.slice(0, at), n - 1, ...rest.slice(at)]);
+  }
+  return out;
+};
+const gridSolutions = (n, clues) => orders(n).filter((order) => clues.every((clue) => {
+  if (clue.kind === 'is') return order[clue.person] === clue.item;
+  if (clue.kind === 'not') return order[clue.person] !== clue.item;
+  return clue.items.indexOf(order[clue.person]) !== -1;
+}));
+
 const fibTerm = (first, second, index) => {
   const terms = [first, second];
   while (terms.length <= index) terms.push(terms[terms.length - 1] + terms[terms.length - 2]);
@@ -182,6 +231,89 @@ function expected(c) {
     case 'count-perm': return factorialOf(c.n);
     case 'count-perm-k': return fallingOf(c.n, c.k);
     case 'count-comb': return fallingOf(c.n, c.k) / factorialOf(c.k);
+    // Допълненията: неравенства, функции, Питагор, много опити и загадки
+    case 'ineq-add': return { interval: upward(c.op, c.r - c.a) };
+    case 'ineq-sub': return { interval: upward(c.op, c.r + c.a) };
+    case 'ineq-mul': return { interval: upward(c.op, c.r / c.k) };
+    case 'ineq-neg-free': return { interval: upward(c.op, (c.r - c.m) / c.k) };
+    case 'ineq-neg': return { interval: upward(TURN[c.op], c.r / c.k) };
+    case 'ineq-between': return { interval: between(c.lo - c.m, false, c.hi - c.m, true) };
+    case 'coord-read': return c.axis === 'x' ? c.x : c.y;
+    case 'coord-quadrant': return c.x > 0 ? (c.y > 0 ? 1 : 4) : (c.y > 0 ? 2 : 3);
+    case 'coord-dist': return Math.abs(c.x2 - c.x1) + Math.abs(c.y2 - c.y1);
+    case 'coord-mid': return (c.x1 + c.x2) / 2;
+    case 'coord-reflect': return c.overX
+      ? (c.which === 'x' ? c.x : -c.y)
+      : (c.which === 'x' ? -c.x : c.y);
+    case 'lin-value': return c.k * c.x + c.b;
+    case 'lin-zero': return -c.b / c.k;
+    case 'lin-slope': return (c.y2 - c.y1) / (c.x2 - c.x1);
+    case 'lin-solve': return (c.y - c.b) / c.k;
+    case 'lin-cross': return (c.b2 - c.b1) / (c.k1 - c.k2);
+    case 'par-value': return c.x * c.x;
+    case 'par-stretch': return c.a * c.x * c.x;
+    case 'par-shift-up': return c.x * c.x + c.k;
+    case 'par-shift-side': return (c.x - c.h) * (c.x - c.h);
+    case 'par-vertex': return c.which === 'h' ? c.h : c.k;
+    case 'par-full': return c.a * (c.x - c.h) * (c.x - c.h) + c.k;
+    case 'rate-total': return c.base + c.per * c.units;
+    case 'rate-total-dec': return Math.round((c.base + c.per * c.units) * 100) / 100;
+    case 'rate-units': return (c.total - c.base) / c.per;
+    case 'rate-base': return c.total - c.per * c.units;
+    case 'rate-plan': return c.base + c.perExtra * Math.max(0, c.used - c.included);
+    case 'rate-even': return (c.baseB - c.baseA) / (c.perA - c.perB);
+    case 'pyth-hyp': return hypotenuse(c.a, c.c);
+    case 'pyth-leg': return Math.sqrt(c.hyp * c.hyp - c.a * c.a);
+    case 'sim-expect': return (c.trials * c.good) / c.total;
+    case 'sim-share': return (100 * c.hits) / c.trials;
+    case 'sim-gap': return Math.abs((100 * c.hits) / c.trials - (100 * c.good) / c.total);
+    case 'sim-closer': {
+      const gapA = Math.abs((100 * c.first.hits) / c.first.trials - (100 * c.good) / c.total);
+      const gapB = Math.abs((100 * c.second.hits) / c.second.trials - (100 * c.good) / c.total);
+      return gapB < gapA ? 'вторият опит' : 'първият опит';
+    }
+    case 'sim-dice-expect': return (c.trials * dicePairs(c.target)) / 36;
+    case 'log-and': return c.p && c.q ? 'Да' : 'Не';
+    case 'log-or': return c.p || c.q ? 'Да' : 'Не';
+    case 'log-not': return c.p ? 'Не' : 'Да';
+    case 'log-implies': return !c.p || c.q ? 'Да' : 'Не';
+    case 'log-rows': {
+      const table = [[true, true], [true, false], [false, true], [false, false]];
+      const op = {
+        and: (p, q) => p && q, or: (p, q) => p || q, implies: (p, q) => !p || q, xor: (p, q) => p !== q,
+      }[c.op];
+      return table.filter(([p, q]) => op(p, q)).length;
+    }
+    case 'log-compound': {
+      const form = [
+        (p, q, r) => (p && q) || !r,
+        (p, q) => !(p || q),
+        (p, q, r) => !p || (q && r),
+      ][c.form];
+      return form(c.p, c.q, c.r) ? 'Да' : 'Не';
+    }
+    case 'coins-max': return 3 ** c.k;
+    case 'coins-min': return minWeigh(c.n);
+    case 'coins-left': return c.n - 2 * c.each;
+    case 'coins-side': return c.up === 'none' ? 'сред неизмерените'
+      : (c.up === 'left' ? 'в лявата група' : 'в дясната група');
+    case 'knights': {
+      const [only] = knightSolutions(c.count, c.says);
+      if (!only) return 'без решение';
+      if (c.ask !== null) return only[c.ask] ? 'Да' : 'Не';
+      if (only[0] && only[1]) return 'и двамата';
+      if (only[0]) return 'само А';
+      if (only[1]) return 'само Б';
+      return 'никой';
+    }
+    case 'grid': {
+      // Имената се изписват наново тук, за да се хване и разминаване в тях.
+      const WHO = ['Ана', 'Боян', 'Вера', 'Генади'];
+      const WHERE = ['синята', 'зелената', 'червената', 'жълтата'];
+      const [only] = gridSolutions(c.n, c.clues);
+      if (!only) return 'без решение';
+      return c.ask.kind === 'person' ? WHERE[only[c.ask.index]] : WHO[only.indexOf(c.ask.index)];
+    }
     case 'const': return c.value;
     default: throw new Error(`непознат тип ${c.type}`);
   }
@@ -197,6 +329,13 @@ test('генератори: верният отговор винаги е вер
       for (let i = 0; i < ROUNDS; i += 1) {
         const t = makeTask(id, level, random);
         const want = expected(t.check);
+        if (want && typeof want === 'object') {
+          const got = parseInterval(t.answer);
+          assert.ok(got, `${id}/${level}: „${t.answer}“ не се чете като интервал`);
+          assert.deepEqual(got, want.interval, `${id}/${level}: ${t.prompt} → ${t.answer}`);
+          assert.ok(checkAnswer(t, t.answer));
+          continue;
+        }
         if (typeof want === 'number') {
           const got = parseNumeric(t.answer);
           assert.ok(got !== null, `${id}/${level}: „${t.answer}“ не е число`);
@@ -212,8 +351,8 @@ test('генератори: верният отговор винаги е вер
 
 // Темите, при които отговорът може да не е цяло число или да е отрицателен.
 const FRACTIONAL = new Set(['fractions', 'decimals', 'percent', 'word-money',
-  'perimeter', 'area', 'averages', 'probability']);
-const SIGNED = new Set(['negatives', 'powers']);
+  'perimeter', 'area', 'averages', 'probability', 'rates', 'pythagoras']);
+const SIGNED = new Set(['negatives', 'powers', 'coordinates', 'linear', 'parabola']);
 
 test('генератори: няма деление на нула, счупен текст или неуместни дроби и минуси', () => {
   for (const id of Object.keys(GENERATORS)) {
@@ -305,7 +444,9 @@ test('генератори: решението (третата подсказк�
   const ids = ['add', 'sub', 'mul', 'div', 'mental', 'count', 'number-line',
     'fractions', 'decimals', 'percent', 'negatives', 'powers', 'roots', 'ratio', 'word-money', 'word-travel',
     'expressions', 'one-step', 'two-step', 'angles', 'perimeter', 'area',
-    'charts', 'averages', 'probability', 'sequences', 'multiples', 'counting'];
+    'charts', 'averages', 'probability', 'sequences', 'multiples', 'counting',
+    'inequalities', 'coordinates', 'linear', 'parabola', 'rates', 'pythagoras',
+    'simulation', 'truth-tables', 'knights', 'coins', 'grid-puzzles'];
   for (const id of ids) {
     for (let level = 1; level <= MAX_LEVEL; level += 1) {
       const random = seeded(level * 13 + id.length);
@@ -345,8 +486,8 @@ test('отговорите се сравняват толерантно, но п
 });
 
 test('съдържание: всяка подтема има 3 нива, 3 примера, визуализация и генератор', () => {
-  assert.equal(MATH_TREE.length, 10);
-  assert.equal(ALL_SUBTOPICS.length, 30);
+  assert.equal(MATH_TREE.length, 12);
+  assert.equal(ALL_SUBTOPICS.length, 41);
   for (const s of ALL_SUBTOPICS) {
     assert.ok(GENERATORS[s.id], s.id);
     assert.ok(s.viz, s.id);

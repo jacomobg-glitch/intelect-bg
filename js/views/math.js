@@ -236,7 +236,12 @@ export function renderMathSession(root, id, mode, options = {}) {
       lock = () => buttons.forEach((b) => { b.disabled = true; });
     } else {
       const input = h('input', {
-        class: 'answer-input', type: 'text', inputmode: 'numeric', autocomplete: 'off', 'aria-label': 'Твоят отговор',
+        class: 'answer-input',
+        type: 'text',
+        // Интервалите и думите искат обикновена клавиатура, числата — цифрова.
+        inputmode: task.kind === 'number' ? 'numeric' : 'text',
+        autocomplete: 'off',
+        'aria-label': 'Твоят отговор',
       });
       answerArea = h('form', {
         class: 'answer-form',

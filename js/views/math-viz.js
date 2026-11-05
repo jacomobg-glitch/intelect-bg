@@ -1111,6 +1111,503 @@ function choiceTree(host) {
   });
 }
 
+// --- Визуализации за неравенствата, функциите и загадките ---
+
+const SIGNS_TEXT = { gt: '>', ge: '≥', lt: '<', le: '≤' };
+const SPAN_TEXT = {
+  gt: (v) => `(${v}; ∞)`,
+  ge: (v) => `[${v}; ∞)`,
+  lt: (v) => `(-∞; ${v})`,
+  le: (v) => `(-∞; ${v}]`,
+};
+const SIGN_CHIPS = [['gt', '>'], ['ge', '≥'], ['lt', '<'], ['le', '≤']];
+const exact = (n) => Math.round(Math.sqrt(n)) ** 2 === n;
+const rootLabel = (n) => (exact(n) ? String(Math.round(Math.sqrt(n))) : `√${n}`);
+
+// Координатна мрежа с оси. Връща рисунката и двете превръщания в пиксели,
+// за да стоят всички графики върху една и съща мрежа.
+function plane(label, xMin, xMax, yMin, yMax, height = 290) {
+  const W = 320;
+  const pad = 18;
+  const sx = (x) => pad + ((x - xMin) / (xMax - xMin)) * (W - 2 * pad);
+  const sy = (y) => height - pad - ((y - yMin) / (yMax - yMin)) * (height - 2 * pad);
+  const svg = svgRoot(W, height, label);
+  for (let x = Math.ceil(xMin); x <= xMax; x += 1) {
+    svg.append(s('line', { x1: sx(x), y1: pad, x2: sx(x), y2: height - pad, class: 'viz-grid' }));
+  }
+  for (let y = Math.ceil(yMin); y <= yMax; y += 1) {
+    svg.append(s('line', { x1: pad, y1: sy(y), x2: W - pad, y2: sy(y), class: 'viz-grid' }));
+  }
+  if (yMin <= 0 && yMax >= 0) svg.append(s('line', { x1: pad, y1: sy(0), x2: W - pad, y2: sy(0), class: 'viz-axis' }));
+  if (xMin <= 0 && xMax >= 0) svg.append(s('line', { x1: sx(0), y1: pad, x2: sx(0), y2: height - pad, class: 'viz-axis' }));
+  const step = xMax - xMin > 14 ? 5 : 2;
+  const zeroY = yMin <= 0 && yMax >= 0 ? 0 : yMin;
+  const zeroX = xMin <= 0 && xMax >= 0 ? 0 : xMin;
+  for (let x = Math.ceil(xMin / step) * step; x <= xMax; x += step) {
+    if (x !== 0) svg.append(s('text', { x: sx(x), y: sy(zeroY) + 14, class: 'viz-label-soft' }, x));
+  }
+  for (let y = Math.ceil(yMin / step) * step; y <= yMax; y += step) {
+    if (y !== 0) svg.append(s('text', { x: sx(zeroX) - 12, y: sy(y) + 4, class: 'viz-label-soft' }, y));
+  }
+  return { svg, sx, sy };
+}
+
+// Рисува функция като начупена линия, но само там, където е вътре в кутията.
+function curve(svg, fn, xMin, xMax, yMin, yMax, sx, sy) {
+  let run = [];
+  const flush = () => {
+    if (run.length > 1) svg.append(s('polyline', { points: run.join(' '), class: 'viz-curve' }));
+    run = [];
+  };
+  for (let i = 0; i <= 160; i += 1) {
+    const x = xMin + ((xMax - xMin) * i) / 160;
+    const y = fn(x);
+    if (!Number.isFinite(y) || y < yMin || y > yMax) { flush(); continue; }
+    run.push(`${sx(x).toFixed(1)},${sy(y).toFixed(1)}`);
+  }
+  flush();
+}
+
+// Неравенство върху оста: лъчът е решението, а кръгчето казва дали краят влиза.
+function intervalLine(host) {
+  let bound = 3;
+  let sign = 'gt';
+  frame(host, (render) => {
+    const W = 340;
+    const MIN = -10;
+    const MAX = 10;
+    const Y = 62;
+    const x = (n) => 18 + ((n - MIN) / (MAX - MIN)) * (W - 36);
+    const closed = sign === 'ge' || sign === 'le';
+    const rightwards = sign === 'gt' || sign === 'ge';
+    const svg = svgRoot(W, 110, `Решението на x ${SIGNS_TEXT[sign]} ${bound} върху числовата ос`);
+    svg.append(s('line', { x1: 10, y1: Y, x2: W - 10, y2: Y, class: 'viz-axis' }));
+    for (let n = MIN; n <= MAX; n += 1) {
+      svg.append(s('line', { x1: x(n), y1: Y - 5, x2: x(n), y2: Y + 5, class: 'viz-tick' }));
+      if (n % 5 === 0) svg.append(s('text', { x: x(n), y: Y + 22, class: 'viz-label' }, n));
+    }
+    svg.append(s('line', { x1: x(bound), y1: Y - 16, x2: rightwards ? W - 10 : 10, y2: Y - 16, class: 'viz-ray' }));
+    svg.append(s('circle', { cx: x(bound), cy: Y - 16, r: 7, class: closed ? 'viz-dot' : 'viz-open' }));
+    svg.append(s('text', { x: W / 2, y: 102, class: 'viz-label' },
+      `x ${SIGNS_TEXT[sign]} ${bound}  =  ${SPAN_TEXT[sign](bound)}`));
+    return {
+      drawing: svg,
+      readout: `Решението е всяко число ${rightwards ? 'вдясно' : 'вляво'} от ${bound}. Кръгчето е ${closed ? `запълнено: ${bound} влиза в решението` : `празно: ${bound} НЕ влиза в решението`}.`,
+      controls: [
+        stepper('Граница', () => bound, (v) => { bound = v; render(); }, -9, 9),
+        ...SIGN_CHIPS.map(([key, text]) => h('button', {
+          type: 'button',
+          class: `chip ${key === sign ? 'chip-active' : ''}`,
+          'aria-pressed': String(key === sign),
+          onclick: () => { sign = key; render(); },
+        }, `x ${text}`)),
+      ],
+    };
+  });
+}
+
+// Две числа посочват едно място.
+function gridPoints(host) {
+  let px = 4;
+  let py = 3;
+  frame(host, (render) => {
+    const { svg, sx, sy } = plane(`Точка с координати ${px} и ${py}`, -10, 10, -10, 10);
+    const quadrant = px === 0 || py === 0 ? null : (px > 0 ? (py > 0 ? 1 : 4) : (py > 0 ? 2 : 3));
+    svg.append(s('line', { x1: sx(0), y1: sy(py), x2: sx(px), y2: sy(py), class: 'viz-edge-soft' }));
+    svg.append(s('line', { x1: sx(px), y1: sy(0), x2: sx(px), y2: sy(py), class: 'viz-edge-soft' }));
+    svg.append(s('circle', { cx: sx(px), cy: sy(py), r: 6, class: 'viz-dot' }));
+    svg.append(s('text', { x: sx(px) + (px > 6 ? -28 : 28), y: sy(py) - 8, class: 'viz-label' }, `(${px}; ${py})`));
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: quadrant
+        ? `(${px}; ${py}) е на ${Math.abs(px)} ${px > 0 ? 'надясно' : 'наляво'} и ${Math.abs(py)} ${py > 0 ? 'нагоре' : 'надолу'}. Това е квадрант ${quadrant}.`
+        : `(${px}; ${py}) лежи върху ос, затова не е в нито един квадрант.`,
+      controls: [
+        stepper('Надясно', () => px, set((v) => { px = v; }), -10, 10),
+        stepper('Нагоре', () => py, set((v) => { py = v; }), -10, 10),
+      ],
+    };
+  });
+}
+
+// Линейна функция: b казва откъде тръгва, k — с колко се качва на всяка стъпка.
+function lineGraph(host) {
+  let k = 2;
+  let b = 1;
+  frame(host, (render) => {
+    const { svg, sx, sy } = plane(`Правата y = ${k}x + ${b}`, -10, 10, -10, 10);
+    curve(svg, (x) => k * x + b, -10, 10, -10, 10, sx, sy);
+    svg.append(s('circle', { cx: sx(0), cy: sy(b), r: 5, class: 'viz-dot-alt' }));
+    const zero = k === 0 ? null : -b / k;
+    if (zero !== null && zero >= -10 && zero <= 10) {
+      svg.append(s('circle', { cx: sx(zero), cy: sy(0), r: 5, class: 'viz-dot' }));
+    }
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: `y = ${k}x ${b < 0 ? '-' : '+'} ${Math.abs(b)}. Вертикалната ос се пресича при y = ${b}, а хоризонталната при x = ${zero === null ? 'никъде' : bgNum(String(round2(zero)))}. Когато x порасне с 1, y се мени с ${k}.`,
+      controls: [
+        stepper('Наклон k', () => k, set((v) => { k = v; }), -5, 5),
+        stepper('Начало b', () => b, set((v) => { b = v; }), -8, 8),
+      ],
+    };
+  });
+}
+
+// Парабола: a разтяга и обръща, h мести настрани, k мести нагоре.
+function parabolaGraph(host) {
+  let a = 1;
+  let hShift = 0;
+  let kShift = 0;
+  frame(host, (render) => {
+    const { svg, sx, sy } = plane(`Парабола с връх (${hShift}; ${kShift})`, -7, 7, -8, 16);
+    curve(svg, (x) => a * (x - hShift) ** 2 + kShift, -7, 7, -8, 16, sx, sy);
+    if (hShift >= -7 && hShift <= 7 && kShift >= -8 && kShift <= 16) {
+      svg.append(s('circle', { cx: sx(hShift), cy: sy(kShift), r: 5, class: 'viz-dot' }));
+    }
+    const front = a === 1 ? '' : a === -1 ? '-' : a;
+    const inside = hShift === 0 ? 'x' : `(x ${hShift > 0 ? '-' : '+'} ${Math.abs(hShift)})`;
+    const tail = kShift === 0 ? '' : ` ${kShift < 0 ? '-' : '+'} ${Math.abs(kShift)}`;
+    const written = `y = ${front}${inside}²${tail}`;
+    return {
+      drawing: svg,
+      readout: `${written}. Върхът е в (${hShift}; ${kShift}), кривата гледа ${a > 0 ? 'нагоре' : 'надолу'} и е ${Math.abs(a) > 1 ? 'по-тясна от' : 'широка като'} y = x². Двете ѝ страни са огледални, защото квадратът не различава знака.`,
+      controls: [
+        // Нулата е изключена: при a = 0 параболата престава да е парабола.
+        stepper('Разтягане a', () => a, (v) => { a = v === 0 ? -a : v; render(); }, -3, 3),
+        stepper('Настрани h', () => hShift, (v) => { hShift = v; render(); }, -5, 5),
+        stepper('Нагоре k', () => kShift, (v) => { kShift = v; render(); }, -6, 10),
+      ],
+    };
+  });
+}
+
+// Такса плюс цена на единица: правата не тръгва от нулата.
+function fareGraph(host) {
+  let base = 3;
+  let per = 2;
+  frame(host, (render) => {
+    const { svg, sx, sy } = plane(`Сметка при такса ${base} лв. и ${per} лв. на километър`, 0, 12, 0, 30, 270);
+    curve(svg, (x) => base + per * x, 0, 12, 0, 30, sx, sy);
+    svg.append(s('circle', { cx: sx(0), cy: sy(base), r: 5, class: 'viz-dot-alt' }));
+    for (const km of [2, 5, 10]) {
+      const total = base + per * km;
+      if (total <= 30) svg.append(s('circle', { cx: sx(km), cy: sy(total), r: 4, class: 'viz-dot' }));
+    }
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: `общо = ${base} + ${per} × километри. За 5 км излиза ${base} + ${per * 5} = ${base + per * 5} лв. Правата тръгва от ${base}, а не от нулата: таксата се плаща още преди първия километър.`,
+      controls: [
+        stepper('Такса', () => base, set((v) => { base = v; }), 0, 10),
+        stepper('На километър', () => per, set((v) => { per = v; }), 1, 4),
+      ],
+    };
+  });
+}
+
+// Питагор с квадрати върху трите страни: теоремата говори за лица, не за дължини.
+// Върхът се влачи с мишка или пръст, а стъпалата правят същото от клавиатурата.
+function pythagorasSquares(host) {
+  let legA = 3;
+  let legB = 4;
+  frame(host, (render) => {
+    const W = 320;
+    const H = 300;
+    const spanX = legA + 2 * legB;
+    const spanY = 2 * legA + legB;
+    const unit = Math.min((W - 26) / spanX, (H - 26) / spanY);
+    const ox = 13 + legB * unit;
+    const oy = H - 13 - legA * unit;
+    const px = (x) => ox + x * unit;
+    const py = (y) => oy - y * unit;
+    const svg = svgRoot(W, H, `Правоъгълен триъгълник с катети ${legA} и ${legB} и квадратите върху страните му`);
+    svg.setAttribute('class', 'viz-svg viz-drag');
+    const poly = (points, cls) => svg.append(s('polygon', {
+      points: points.map(([x, y]) => `${px(x)},${py(y)}`).join(' '), class: cls,
+    }));
+    poly([[0, 0], [legA, 0], [legA, -legA], [0, -legA]], 'viz-cell');
+    poly([[0, 0], [0, legB], [-legB, legB], [-legB, 0]], 'viz-cell');
+    poly([[legA, 0], [0, legB], [legB, legB + legA], [legA + legB, legA]], 'viz-area');
+    poly([[0, 0], [legA, 0], [0, legB]], 'viz-shape');
+    svg.append(s('text', { x: px(legA / 2), y: py(-legA / 2) + 4, class: 'viz-cell-text' }, legA * legA));
+    svg.append(s('text', { x: px(-legB / 2), y: py(legB / 2) + 4, class: 'viz-cell-text' }, legB * legB));
+    svg.append(s('text', { x: px((legA + legB) / 2), y: py((legA + legB) / 2) + 4, class: 'viz-cell-text-hit' }, legA * legA + legB * legB));
+
+    const grab = (event) => {
+      const box = svg.getBoundingClientRect();
+      if (!box.width) return;
+      const scale = box.width / W;
+      const nextA = Math.round(((event.clientX - box.left) / scale - ox) / unit);
+      const nextB = Math.round((oy - (event.clientY - box.top) / scale) / unit);
+      legA = Math.min(7, Math.max(1, nextA));
+      legB = Math.min(7, Math.max(1, nextB));
+      render();
+    };
+    svg.addEventListener('pointerdown', (event) => {
+      svg.setPointerCapture(event.pointerId);
+      grab(event);
+    });
+    svg.addEventListener('pointermove', (event) => {
+      if (svg.hasPointerCapture(event.pointerId)) grab(event);
+    });
+
+    const total = legA * legA + legB * legB;
+    return {
+      drawing: svg,
+      readout: `${legA} × ${legA} = ${legA * legA} и ${legB} × ${legB} = ${legB * legB}; заедно ${total}. Толкова е и големият квадрат, значи хипотенузата е ${rootLabel(total)}${exact(total) ? '' : ` ≈ ${bgNum(String(round2(Math.sqrt(total))))}`}. Влачи по рисунката или ползвай стъпалата.`,
+      controls: [
+        stepper('Катет надясно', () => legA, (v) => { legA = v; render(); }, 1, 7),
+        stepper('Катет нагоре', () => legB, (v) => { legB = v; render(); }, 1, 7),
+      ],
+    };
+  });
+}
+
+// Законът за големите числа: колкото повече хвърляния, толкова по-малко отклонение.
+function diceSim(host) {
+  let faces = 2;
+  let counts = [0, 0];
+  let thrown = 0;
+  frame(host, (render) => {
+    const W = 340;
+    const base = 150;
+    const top = Math.max(...counts, 1);
+    const expected = thrown / faces;
+    const svg = svgRoot(W, 198, `Резултати от ${thrown} хвърляния`);
+    svg.append(s('line', { x1: 24, y1: base, x2: W - 12, y2: base, class: 'viz-axis' }));
+    const colW = (W - 44) / faces;
+    counts.forEach((value, i) => {
+      const height = (value / top) * 112;
+      const x = 30 + i * colW;
+      svg.append(s('rect', { x, y: base - height, width: colW - 10, height, rx: 4, class: 'viz-cell-hit' }));
+      svg.append(s('text', { x: x + (colW - 10) / 2, y: base - height - 6, class: 'viz-label' }, value));
+      svg.append(s('text', { x: x + (colW - 10) / 2, y: base + 18, class: 'viz-label-soft' }, faces === 2 ? ['ези', 'тура'][i] : i + 1));
+    });
+    if (thrown) {
+      const y = base - (expected / top) * 112;
+      svg.append(s('line', { x1: 20, y1: y, x2: W - 12, y2: y, class: 'viz-mean-line' }));
+      svg.append(s('text', { x: W / 2, y: 192, class: 'viz-label' }, `теоретично по ${bgNum(String(round2(expected)))} на изход`));
+    }
+    const throwMany = (times) => {
+      for (let i = 0; i < times; i += 1) counts[Math.floor(Math.random() * faces)] += 1;
+      thrown += times;
+      render();
+    };
+    const reset = (next) => {
+      faces = next;
+      counts = Array.from({ length: next }, () => 0);
+      thrown = 0;
+      render();
+    };
+    const worst = thrown ? Math.max(...counts.map((v) => Math.abs((100 * v) / thrown - 100 / faces))) : 0;
+    return {
+      drawing: svg,
+      readout: thrown
+        ? `${thrown} хвърляния. Най-голямото отклонение от теоретичния дял е ${bgNum(String(round2(worst)))} процентни пункта. Хвърли още и гледай как се свива.`
+        : 'Натисни едно от копчетата: първо с малко хвърляния, после с много.',
+      controls: [
+        h('button', { type: 'button', class: 'chip', onclick: () => throwMany(10) }, 'Хвърли 10'),
+        h('button', { type: 'button', class: 'chip', onclick: () => throwMany(100) }, 'Хвърли 100'),
+        h('button', { type: 'button', class: 'chip', onclick: () => throwMany(1000) }, 'Хвърли 1000'),
+        h('button', {
+          type: 'button', class: `chip ${faces === 2 ? 'chip-active' : ''}`, 'aria-pressed': String(faces === 2), onclick: () => reset(2),
+        }, 'Монета'),
+        h('button', {
+          type: 'button', class: `chip ${faces === 6 ? 'chip-active' : ''}`, 'aria-pressed': String(faces === 6), onclick: () => reset(6),
+        }, 'Зар'),
+      ],
+    };
+  });
+}
+
+// Истинностна таблица: четирите случая на две твърдения.
+const TRUTH_OPS = [
+  ['and', 'P И Q', (p, q) => p && q, 'Стига едната част да не е вярна и цялото пада.'],
+  ['or', 'P ИЛИ Q', (p, q) => p || q, 'Математическото „или“ включва и случая, в който и двете са верни.'],
+  ['not', 'НЕ P', (p) => !p, 'Отрицанието обръща всеки ред.'],
+  ['implies', 'ако P, то Q', (p, q) => !p || q, 'Единственият невярен ред е вярно начало с невярен край: нарушено обещание.'],
+];
+
+function truthTable(host) {
+  let op = 'and';
+  frame(host, (render) => {
+    const [, title, holds, note] = TRUTH_OPS.find(([key]) => key === op);
+    const W = 320;
+    const rowH = 34;
+    const rows = [[true, true], [true, false], [false, true], [false, false]];
+    const svg = svgRoot(W, rowH * 4 + 50, `Истинностна таблица за ${title}`);
+    const columns = [52, 148, 250];
+    ['P', 'Q', title].forEach((text, i) => svg.append(s('text', { x: columns[i], y: 22, class: 'viz-label' }, text)));
+    rows.forEach(([p, q], r) => {
+      const y = 34 + r * rowH;
+      const value = holds(p, q);
+      [p, q].forEach((cell, i) => {
+        svg.append(s('rect', { x: columns[i] - 42, y, width: 84, height: rowH - 6, rx: 5, class: 'viz-cell' }));
+        svg.append(s('text', { x: columns[i], y: y + 19, class: 'viz-cell-text' }, cell ? 'вярно' : 'невярно'));
+      });
+      svg.append(s('rect', { x: columns[2] - 46, y, width: 92, height: rowH - 6, rx: 5, class: value ? 'viz-cell-hit' : 'viz-cell' }));
+      svg.append(s('text', { x: columns[2], y: y + 19, class: value ? 'viz-cell-text-hit' : 'viz-cell-text' }, value ? '✓ вярно' : '✗ невярно'));
+    });
+    const trueRows = rows.filter(([p, q]) => holds(p, q)).length;
+    return {
+      drawing: svg,
+      readout: `„${title}“ е вярно в ${trueRows} от 4 реда. ${note}`,
+      controls: TRUTH_OPS.map(([key, text]) => h('button', {
+        type: 'button',
+        class: `chip ${key === op ? 'chip-active' : ''}`,
+        'aria-pressed': String(key === op),
+        onclick: () => { op = key; render(); },
+      }, text)),
+    };
+  });
+}
+
+// Рицари и лъжци: пробваш разпределение и виждаш дали се връзва.
+function knightsBoard(host) {
+  // Класическата загадка: А твърди, че и двамата са лъжци.
+  const guess = [true, true];
+  frame(host, (render) => {
+    const claim = !guess[0] && !guess[1];
+    const consistent = guess[0] === claim;
+    const W = 320;
+    const svg = svgRoot(W, 214, 'Двама жители на острова и едно изказване');
+    svg.append(s('rect', { x: 18, y: 10, width: W - 36, height: 48, rx: 12, class: 'viz-shape' }));
+    svg.append(s('text', { x: W / 2, y: 30, class: 'viz-label' }, 'А казва:'));
+    svg.append(s('text', { x: W / 2, y: 50, class: 'viz-label' }, '„И двамата сме лъжци.“'));
+    svg.append(s('text', { x: W / 2, y: 80, class: 'viz-label' }, consistent ? '✓ без противоречие' : '✗ противоречие'));
+    ['А', 'Б'].forEach((name, i) => {
+      const cx = 88 + i * 144;
+      svg.append(s('path', { d: `M${cx - 26} 174 Q${cx} 132 ${cx + 26} 174 Z`, class: guess[i] ? 'viz-cell-hit' : 'viz-cell' }));
+      svg.append(s('circle', { cx, cy: 118, r: 17, class: guess[i] ? 'viz-cell-hit' : 'viz-cell' }));
+      svg.append(s('text', { x: cx, y: 124, class: guess[i] ? 'viz-cell-text-hit' : 'viz-cell-text' }, name));
+      svg.append(s('text', { x: cx, y: 198, class: 'viz-label' }, guess[i] ? 'рицар' : 'лъжец'));
+    });
+    return {
+      drawing: svg,
+      readout: consistent
+        ? `Това се връзва: А е ${guess[0] ? 'рицар' : 'лъжец'}, значи казаното трябва да е ${guess[0] ? 'вярно' : 'невярно'} — и излиза точно такова.`
+        : `Противоречие: А е ${guess[0] ? 'рицар' : 'лъжец'}, значи казаното трябва да е ${guess[0] ? 'вярно' : 'невярно'}, а излиза обратното.`,
+      controls: [0, 1].map((i) => h('button', {
+        type: 'button',
+        class: 'chip',
+        onclick: () => { guess[i] = !guess[i]; render(); },
+      }, `${['А', 'Б'][i]}: ${guess[i] ? 'рицар' : 'лъжец'}`)),
+    };
+  });
+}
+
+// Везната има три изхода, затова всяко претегляне дели на три.
+function scaleWeigh(host) {
+  let weighings = 2;
+  frame(host, (render) => {
+    const W = 330;
+    const covered = 3 ** weighings;
+    const svg = svgRoot(W, 56 + weighings * 52, `Дърво на ${weighings} претегляния`);
+    const draw = (x, y, width, depth) => {
+      svg.append(s('rect', { x: x - width / 2, y, width, height: 20, rx: 4, class: depth === 0 ? 'viz-cell-hit' : 'viz-cell' }));
+      if (depth === 0) return;
+      const third = width / 3;
+      for (let i = 0; i < 3; i += 1) {
+        const cx = x - width / 2 + third * (i + 0.5);
+        svg.append(s('line', { x1: x, y1: y + 20, x2: cx, y2: y + 52, class: 'viz-edge-soft' }));
+        draw(cx, y + 52, Math.max(10, third - 6), depth - 1);
+      }
+    };
+    draw(W / 2, 12, W - 30, weighings);
+    svg.append(s('text', { x: W / 2, y: 46 + weighings * 52, class: 'viz-label' }, `3 на степен ${weighings} = ${covered} монети`));
+    return {
+      drawing: svg,
+      readout: `Всяко претегляне има три изхода: по-леко ляво, по-леко дясно и равновесие. Затова с ${weighings} ${weighings === 1 ? 'претегляне' : 'претегляния'} се проверяват до ${covered} монети. С делене наполовина щяха да стигнат само ${2 ** weighings}.`,
+      controls: [stepper('Претегляния', () => weighings, (v) => { weighings = v; render(); }, 1, 4)],
+    };
+  });
+}
+
+// Логическа мрежа: следите се добавят една по една и зачеркват възможности.
+const GRID_NAMES = ['Ана', 'Боян', 'Вера'];
+const GRID_COLORS = ['синя', 'зелена', 'червена'];
+// Решението е Ана-зелена, Боян-червена, Вера-синя.
+const GRID_CLUES = [
+  { text: 'Ана не е в синята', out: [[0, 0]] },
+  { text: 'Боян е в червената', out: [[1, 0], [1, 1], [0, 2], [2, 2]] },
+];
+
+function logicGrid(host) {
+  let shown = 0;
+  frame(host, (render) => {
+    const crossed = GRID_CLUES.slice(0, shown).flatMap((clue) => clue.out).map(([a, b]) => `${a}-${b}`);
+    const out = new Set(crossed);
+    const isOut = (r, c) => out.has(`${r}-${c}`);
+    const rowOnly = (r) => {
+      const open = [0, 1, 2].filter((c) => !isOut(r, c));
+      return open.length === 1 ? open[0] : null;
+    };
+    const colOnly = (c) => {
+      const open = [0, 1, 2].filter((r) => !isOut(r, c));
+      return open.length === 1 ? open[0] : null;
+    };
+    // Сигурността се разпространява в двете посоки, докато спре да се променя нещо:
+    // намереното заема и своя ред, и своята колона.
+    for (let pass = 0; pass < 6; pass += 1) {
+      const before = out.size;
+      for (let r = 0; r < 3; r += 1) {
+        const sure = rowOnly(r);
+        if (sure === null) continue;
+        for (let other = 0; other < 3; other += 1) if (other !== r) out.add(`${other}-${sure}`);
+      }
+      for (let c = 0; c < 3; c += 1) {
+        const sure = colOnly(c);
+        if (sure === null) continue;
+        for (let other = 0; other < 3; other += 1) if (other !== c) out.add(`${sure}-${other}`);
+      }
+      if (out.size === before) break;
+    }
+    const certain = (r) => rowOnly(r);
+    const cell = 66;
+    const left = 84;
+    const top = 38;
+    const svg = svgRoot(left + cell * 3 + 8, top + cell * 3 + 10, 'Мрежа: кой в коя къща живее');
+    GRID_COLORS.forEach((name, c) => svg.append(s('text', { x: left + cell * c + cell / 2, y: 24, class: 'viz-label' }, name)));
+    GRID_NAMES.forEach((name, r) => {
+      svg.append(s('text', { x: 42, y: top + cell * r + cell / 2 + 5, class: 'viz-label' }, name));
+      for (let c = 0; c < 3; c += 1) {
+        const out = isOut(r, c);
+        const sure = certain(r) === c;
+        svg.append(s('rect', {
+          x: left + cell * c + 3, y: top + cell * r + 3, width: cell - 6, height: cell - 6, rx: 8,
+          class: sure ? 'viz-cell-hit' : 'viz-cell',
+        }));
+        if (out || sure) {
+          svg.append(s('text', {
+            x: left + cell * c + cell / 2, y: top + cell * r + cell / 2 + 7,
+            class: sure ? 'viz-cell-text-hit' : 'viz-cell-text',
+          }, sure ? '✓' : '✗'));
+        }
+      }
+    });
+    const solved = [0, 1, 2].every((r) => certain(r) !== null);
+    return {
+      drawing: svg,
+      readout: shown === 0
+        ? 'Трима души, три къщи, по един във всяка. Добавяй следите и зачерквай невъзможното.'
+        : solved
+          ? 'Във всеки ред остана по една възможност: Ана е в зелената, Боян в червената, Вера в синята.'
+          : `След ${shown} ${shown === 1 ? 'следа' : 'следи'} още има ред с две възможности. Трябва още една следа.`,
+      controls: [
+        ...GRID_CLUES.map((clue, i) => h('button', {
+          type: 'button',
+          class: `chip ${i < shown ? 'chip-active' : ''}`,
+          'aria-pressed': String(i < shown),
+          onclick: () => { shown = i < shown ? i : i + 1; render(); },
+        }, clue.text)),
+        h('button', { type: 'button', class: 'chip', onclick: () => { shown = 0; render(); } }, 'Отначало'),
+      ],
+    };
+  });
+}
+
 export const VISUALIZATIONS = {
   blocks,
   jumps,
@@ -1142,4 +1639,15 @@ export const VISUALIZATIONS = {
   'sequence-steps': sequenceSteps,
   'factor-grid': factorGrid,
   'choice-tree': choiceTree,
+  'interval-line': intervalLine,
+  'grid-points': gridPoints,
+  'line-graph': lineGraph,
+  'parabola-graph': parabolaGraph,
+  'fare-graph': fareGraph,
+  'pythagoras-squares': pythagorasSquares,
+  'dice-sim': diceSim,
+  'truth-table': truthTable,
+  'knights-board': knightsBoard,
+  'scale-weigh': scaleWeigh,
+  'logic-grid': logicGrid,
 };

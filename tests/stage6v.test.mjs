@@ -34,14 +34,18 @@ function forEachTask(id, visit, rounds = ROUNDS) {
 
 // --- Дърво и стълба ---
 
-test('теми 7–10: четири нови групи с по три подтеми', () => {
-  assert.equal(MATH_TREE.length, 10);
-  assert.deepEqual(MATH_TREE.slice(6).map((g) => g.id), NEW_GROUPS);
-  for (const group of MATH_TREE.slice(6)) {
-    assert.equal(group.subtopics.length, 3, group.id);
+const groupOf = (id) => MATH_TREE.find((g) => g.id === id);
+
+test('теми 7–10: четирите групи стоят в дървото, всяка с подтемите си', () => {
+  for (const id of NEW_GROUPS) {
+    const group = groupOf(id);
+    assert.ok(group, `${id} липсва в дървото`);
+    assert.ok(group.subtopics.length >= 3, `${id}: само ${group.subtopics.length} подтеми`);
   }
-  assert.equal(ALL_SUBTOPICS.length, 30);
-  assert.equal(new Set(ALL_SUBTOPICS.map((s) => s.id)).size, 30);
+  // Редът им в дървото остава същият, макар между тях да влязоха нови групи.
+  const order = MATH_TREE.map((g) => g.id).filter((id) => NEW_GROUPS.includes(id));
+  assert.deepEqual(order, NEW_GROUPS);
+  assert.equal(new Set(ALL_SUBTOPICS.map((s) => s.id)).size, ALL_SUBTOPICS.length);
   // Всяка нова подтема има свой генератор и своя визуализация.
   for (const id of NEW_IDS) {
     const subtopic = ALL_SUBTOPICS.find((s) => s.id === id);
@@ -59,13 +63,13 @@ test('новите групи продължават стълбата, без п
   for (let i = 1; i < steps.length; i += 1) {
     assert.ok(steps[i] - steps[i - 1] <= 3, `празнина между ${steps[i - 1]} и ${steps[i]}`);
   }
-  // Съдържанието вече стига до Шимпанзе II: последната нова група.
-  assert.equal(steps[steps.length - 1], 28);
-  // Четирите нови групи стоят на различни стъпки, всяка след предишната.
-  const newSteps = MATH_TREE.slice(6).map((g) => g.unlockStep);
-  assert.deepEqual(newSteps, [19, 22, 25, 28]);
-  // Никоя нова група не идва преди последната игра: редът на наградите остава смесен.
-  assert.ok(newSteps[0] > Math.max(...MATH_TREE.slice(0, 6).map((g) => g.unlockStep)));
+  // Четирите групи стоят на различни стъпки, всяка след предишната.
+  const newSteps = NEW_GROUPS.map((id) => groupOf(id).unlockStep);
+  assert.deepEqual(newSteps, [...newSteps].sort((a, b) => a - b));
+  assert.equal(new Set(newSteps).size, newSteps.length);
+  assert.equal(newSteps[0], 19);
+  // Никоя от тях не идва преди последната игра: редът на наградите остава смесен.
+  assert.ok(newSteps[0] > Math.max(...games.map((g) => g.unlockStep)) - 1);
 });
 
 test('визуализациите на новите подтеми са различни и всяка има своя функция', () => {
