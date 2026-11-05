@@ -495,6 +495,111 @@ function moneyStack(host) {
   });
 }
 
+// Път, скорост и време: права от А до Б, движеща се кола и часовник. Показва s = v × t.
+// Анимацията се спира сама, когато рисунката вече не е на екрана, и не тръгва при
+// prefers-reduced-motion: там колата стои на края на пътя.
+function travel(host) {
+  let speed = 80; // км/ч
+  let hours = 3;
+  let anim = null;
+  frame(host, (render) => {
+    if (anim) cancelAnimationFrame(anim);
+    anim = null;
+    const dist = speed * hours;
+    const W = 340;
+    const X0 = 24;
+    const X1 = 246;
+    const Y = 62;
+    const CX = 296;
+    const CY = 52;
+    const R = 26;
+    const svg = svgRoot(W, 150, `Път от А до Б: ${speed} километра в час по ${hours} часа прави ${dist} километра`);
+
+    svg.append(s('line', { x1: X0, y1: Y, x2: X1, y2: Y, class: 'viz-road' }));
+    const done = s('line', { x1: X0, y1: Y, x2: X0, y2: Y, class: 'viz-road-done' });
+    svg.append(done);
+    [[X0, 'А', 0], [X1, 'Б', dist]].forEach(([x, name, km]) => {
+      svg.append(s('line', { x1: x, y1: Y - 9, x2: x, y2: Y + 9, class: 'viz-tick' }));
+      svg.append(s('text', { x, y: Y + 26, class: 'viz-label' }, name));
+      svg.append(s('text', { x, y: Y + 40, class: 'viz-label viz-label-soft' }, `${km} км`));
+    });
+
+    // Колата: каросерия, покрив и две колела. Формата идва от кода, цветовете – от tokens.css.
+    const car = s('g', { class: 'viz-car' });
+    car.append(s('path', { d: 'M1 10h30v8H1Z', class: 'viz-car-body' }));
+    car.append(s('path', { d: 'M8 3h15l5 7H8Z', class: 'viz-car-body' }));
+    car.append(s('circle', { cx: 9, cy: 19, r: 3.4, class: 'viz-wheel' }));
+    car.append(s('circle', { cx: 24, cy: 19, r: 3.4, class: 'viz-wheel' }));
+    svg.append(car);
+
+    // Часовник: 12 деления и стрелка, която минава по 30° на час.
+    svg.append(s('circle', { cx: CX, cy: CY, r: R, class: 'viz-clock-face' }));
+    for (let i = 0; i < 12; i += 1) {
+      const a = (i * 30 - 90) * (Math.PI / 180);
+      svg.append(s('line', {
+        x1: CX + Math.cos(a) * (R - 5), y1: CY + Math.sin(a) * (R - 5),
+        x2: CX + Math.cos(a) * (R - 1), y2: CY + Math.sin(a) * (R - 1),
+        class: 'viz-tick',
+      }));
+    }
+    const hand = s('line', { x1: CX, y1: CY, x2: CX, y2: CY - (R - 7), class: 'viz-clock-hand' });
+    svg.append(hand);
+    svg.append(s('circle', { cx: CX, cy: CY, r: 2.4, class: 'viz-dot' }));
+    const clockText = s('text', { x: CX, y: CY + R + 16, class: 'viz-label' }, '0 ч');
+    svg.append(clockText);
+
+    const kmText = s('text', { x: (X0 + X1) / 2, y: Y - 18, class: 'viz-label' }, '0 км');
+    svg.append(kmText);
+    svg.append(s('text', { x: W / 2, y: 142, class: 'viz-label' }, `${speed} км/ч × ${hours} ч = ${dist} км`));
+
+    // Единствената стъпка, която мести всичко: един дял от пътя – един дял от времето.
+    const place = (p) => {
+      const x = X0 + p * (X1 - X0);
+      car.setAttribute('transform', `translate(${x - 16} ${Y - 22})`);
+      done.setAttribute('x2', String(x));
+      kmText.textContent = `${Math.round(dist * p)} км`;
+      const h0 = hours * p;
+      clockText.textContent = `${Number.isInteger(h0) ? h0 : h0.toFixed(1).replace('.', ',')} ч`;
+      const a = (h0 * 30 - 90) * (Math.PI / 180);
+      hand.setAttribute('x2', String(CX + Math.cos(a) * (R - 7)));
+      hand.setAttribute('y2', String(CY + Math.sin(a) * (R - 7)));
+    };
+    place(1);
+
+    const play = () => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        place(1);
+        return;
+      }
+      const dur = Math.min(2600, 600 + 450 * hours);
+      const t0 = performance.now();
+      const step = (now) => {
+        // Напуснат екран: анимацията се спира сама, без да чака когото и да е.
+        if (!svg.isConnected) {
+          anim = null;
+          return;
+        }
+        const p = Math.min(1, (now - t0) / dur);
+        place(p);
+        anim = p < 1 ? requestAnimationFrame(step) : null;
+      };
+      place(0);
+      anim = requestAnimationFrame(step);
+    };
+
+    const set = (fn) => (v) => { fn(v); render(); };
+    return {
+      drawing: svg,
+      readout: `При ${speed} км/ч за ${hours} ч колата минава ${speed} × ${hours} = ${dist} км. Обратно: ${dist} ÷ ${speed} = ${hours} ч и ${dist} ÷ ${hours} = ${speed} км/ч.`,
+      controls: [
+        stepper('Скорост', () => speed, set((v) => { speed = v; }), 10, 140, 10),
+        stepper('Часове', () => hours, set((v) => { hours = v; }), 1, 8),
+        h('button', { class: 'chip', type: 'button', onclick: play }, 'Пусни колата'),
+      ],
+    };
+  });
+}
+
 export const VISUALIZATIONS = {
   blocks,
   jumps,
@@ -513,4 +618,5 @@ export const VISUALIZATIONS = {
   'root-square': rootSquare,
   'ratio-bars': ratioBars,
   'money-stack': moneyStack,
+  travel,
 };

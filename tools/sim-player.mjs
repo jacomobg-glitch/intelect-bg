@@ -8,6 +8,9 @@
 //   - умора: след 3 минути точността пада и времената се разтягат.
 import { CONFIG } from '../js/core/config.js';
 import { quickParams, simonParams, sortParams, swapParams } from '../js/content/games/generators.js';
+import {
+  TRACK_WINDOW_MS, choiceParams, instrumentParams, multitaskParams, peripheralParams, rotationParams, timeSenseParams,
+} from '../js/content/games/reflex.js';
 import { TrialLog, staircaseTarget } from '../js/modules/shared/trial-log.js';
 import { goNoGoParams } from '../js/modules/go-nogo.js';
 import { SPEED_LIMIT_MS as LOGIC_LIMIT_MS } from '../js/modules/logic.js';
@@ -17,6 +20,7 @@ import { INPUT_LIMIT_MS as SEQ_LIMIT_MS } from '../js/modules/sequence.js';
 import { reactionParams } from '../js/modules/simple-reaction.js';
 import { stroopParams } from '../js/modules/stroop.js';
 import { ANSWER_LIMIT_MS as SWAP_LIMIT_MS } from '../js/modules/swapped.js';
+import { ANSWER_LIMIT_MS as PF_LIMIT_MS, GAP_MS as PF_GAP_MS } from '../js/modules/peripheral.js';
 
 export const RT_RANGE = [250, 450];      // границите, в които стоят времената без разсейване
 export const BASE_ACCURACY = 0.85;       // 15% грешки на „своята“ трудност
@@ -118,6 +122,9 @@ export function calibrate(options = {}, runs = 40) {
 
 
 // --- Профили на отделните игри ---
+// Игра без срок за отговор: сметката „закъсня ли“ не важи за нея.
+const NO_DEADLINE = Infinity;
+
 // Срокът за отговор и паузата между опитите идват от самите модули, не се преписват тук.
 // Така калибрирането следва истинските числа и се чупи, ако някой ги промени.
 export const GAME_PROFILES = [
@@ -132,6 +139,16 @@ export const GAME_PROFILES = [
   { id: 'sequence', title: 'Цветни последователности', limit: () => SEQ_LIMIT_MS, gapMs: (l) => simonParams(l).length * (simonParams(l).showMs + simonParams(l).gapMs) + 1400, runMs: 120000 },
   { id: 'mirror', title: 'Огледални фигури', limit: () => MIRROR_LIMIT_MS, gapMs: 900, runMs: 240000 },
   { id: 'sorting', title: 'Сортиране по правило', limit: (l) => sortParams(l).limitMs, gapMs: 600, runMs: 90000 },
+  // Етап 6б. „Оценка на време“ и „Следене на цел“ нямат срок за реакция: там опитът е верен
+  // по свое правило (допуск в проценти, съответно дял от секундата върху целта), затова
+  // срокът е NO_DEADLINE и симулираната точност стои за самото правило.
+  { id: 'choice-reaction', title: 'Избирателна реакция', limit: (l) => choiceParams(l).limitMs, gapMs: (l) => (choiceParams(l).waitMin + choiceParams(l).waitMax) / 2 + 420, runMs: 60000 },
+  { id: 'peripheral', title: 'Периферно внимание', limit: (l) => peripheralParams(l).flashMs + PF_LIMIT_MS, gapMs: (l) => (PF_GAP_MS[0] + PF_GAP_MS[1]) / 2 + peripheralParams(l).flashMs + 420, runMs: 60000 },
+  { id: 'instruments', title: 'Ориентация по прибори', limit: (l) => instrumentParams(l).limitMs, gapMs: 700, runMs: 90000 },
+  { id: 'time-sense', title: 'Оценка на време', limit: () => NO_DEADLINE, gapMs: (l) => timeSenseParams(l).maxMs + 1100, runMs: 90000 },
+  { id: 'tracking', title: 'Следене на цел', limit: () => NO_DEADLINE, gapMs: TRACK_WINDOW_MS - 300, runMs: 60000 },
+  { id: 'rotation', title: 'Пространствена ротация', limit: (l) => rotationParams(l).limitMs, gapMs: 900, runMs: 120000 },
+  { id: 'multitask', title: 'Многозадачност', limit: (l) => multitaskParams(l).limitMs, gapMs: (l) => (multitaskParams(l).gapMin + multitaskParams(l).gapMax) / 2 + 380, runMs: 90000 },
 ];
 
 // Една игра, изиграна от симулирания човек със собствените ѝ срокове.

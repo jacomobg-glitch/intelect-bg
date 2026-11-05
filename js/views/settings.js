@@ -11,7 +11,7 @@ import { canInstall, promptInstall } from '../install.js';
 
 const THEMES = [['auto', 'Като системата'], ['dark', 'Тъмна'], ['light', 'Светла']];
 const COLOR_MODES = [[false, 'С цветове'], [true, 'С форми']];
-export const APP_VERSION = '0.8.0';
+export const APP_VERSION = '0.9.0';
 const TAPS_FOR_TEST_MODE = 7;
 
 async function exportBackup() {

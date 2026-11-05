@@ -95,6 +95,32 @@ function workedExample(example) {
   return h('div', { class: 'card example' }, h('strong', {}, example.title), list, next);
 }
 
+// Подтемата има една визуализация, а по желание и втора – друг поглед върху същата сметка.
+// Без vizAlt няма превключвател: един изглед не се избира.
+function vizSection(subtopic) {
+  const host = h('div', {});
+  if (!subtopic.vizAlt) {
+    VISUALIZATIONS[subtopic.viz](host);
+    return [host];
+  }
+  const ids = [subtopic.viz, subtopic.vizAlt];
+  const names = subtopic.vizNames || ['Основен изглед', 'Друг изглед'];
+  const buttons = ids.map((vizId, i) => h('button', {
+    class: 'chip', type: 'button',
+    onclick: () => {
+      buttons.forEach((b, j) => {
+        b.className = j === i ? 'chip chip-active' : 'chip';
+        b.setAttribute('aria-pressed', String(j === i));
+      });
+      VISUALIZATIONS[vizId](host);
+    },
+  }, names[i]));
+  buttons[0].className = 'chip chip-active';
+  buttons.forEach((b, j) => b.setAttribute('aria-pressed', String(j === 0)));
+  VISUALIZATIONS[ids[0]](host);
+  return [h('div', { class: 'row-inline', role: 'group', 'aria-label': 'Изглед' }, buttons), host];
+}
+
 export function renderSubtopic(root, id) {
   const subtopic = findSubtopic(id);
   if (!subtopic || !isOpen(subtopic)) {
@@ -102,14 +128,12 @@ export function renderSubtopic(root, id) {
     return;
   }
   const topic = topicOf(id);
-  const vizHost = h('div', {});
-  VISUALIZATIONS[subtopic.viz](vizHost);
   mount(root,
     h('a', { class: 'back', href: '#/math' }, '← Математика'),
     h('h1', { class: 'page-title' }, subtopic.title),
     h('div', { class: 'row-inline' }, masteredBadge(topic), checkbox(subtopic)),
     explanation(subtopic),
-    h('section', { class: 'group' }, h('h2', {}, 'Опитай сам'), vizHost),
+    h('section', { class: 'group' }, h('h2', {}, 'Опитай сам'), vizSection(subtopic)),
     h('section', { class: 'group' }, h('h2', {}, 'Решени примери'), subtopic.examples.map(workedExample)),
     h('section', { class: 'group' },
       h('h2', {}, 'Задачи'),

@@ -1,5 +1,6 @@
 // Общи SVG фигури за игрите. Само константи от кода минават през trustedSvg,
 // никога данни отвън. Цветовете идват от класове в tokens.css, не от кода тук.
+import { BANK_DEGREES, PITCH_OFFSET } from '../../content/games/reflex.js';
 import { trustedSvg } from '../../core/dom.js';
 
 // Десет различими форми за „Разменени неща“: различават се по контур, не по цвят.
@@ -60,4 +61,62 @@ export function shapeSvg(cells, grid, extra = '') {
     return `<line class="gm-rule" x1="${p}" y1="0" x2="${p}" y2="100"/><line class="gm-rule" x1="0" y1="${p}" x2="100" y2="${p}"/>`;
   }).join('');
   return trustedSvg(`<svg viewBox="-2 -2 104 104">${lines}${rects}</svg>`, `gm-shape ${extra}`.trim());
+}
+
+// --- Етап 6б ---
+
+// Стрелки: посоката е форма, не цвят. Ползват се от „Избирателна реакция“ и „Многозадачност“.
+const ARROW_PATHS = {
+  left: 'M64 18 32 50l32 32',
+  right: 'M36 18l32 32-32 32',
+  up: 'M18 64 50 32l32 32',
+  down: 'M18 36l32 32 32-32',
+};
+
+export const ARROW_LABELS = { left: 'наляво', right: 'надясно', up: 'нагоре', down: 'надолу' };
+
+export const arrowSvg = (dir, extra = '') => trustedSvg(
+  `<svg viewBox="0 0 100 100"><path class="gm-arrow" d="${ARROW_PATHS[dir]}"/></svg>`,
+  `gm-glyph ${extra}`.trim(),
+);
+
+// Авиохоризонт: наклонът е ъгълът на линията, а носът – мястото ѝ спрямо средата.
+// И двете са форма и положение, не цвят, затова приборът се чете и без цветове.
+// Ъглите и отместванията идват от reflex.js, за да се проверяват с тест.
+
+// Броячът пази id-тата уникални: два прибора на един екран не бива да си крадат маската.
+let aiSeq = 0;
+
+export function attitudeSvg({ bank, pitch }, extra = '') {
+  aiSeq += 1;
+  const face = `ai-face-${aiSeq}`;
+  const ground = `ai-ground-${aiSeq}`;
+  const deg = BANK_DEGREES[bank];
+  // Нос нагоре значи, че хоризонтът слиза надолу в прибора.
+  const y = 50 + PITCH_OFFSET[pitch];
+  const ladder = [-20, -10, 10, 20]
+    .map((d) => `<line class="gm-ai-mark" x1="${40 + Math.abs(d) * 0.3}" y1="${y + d}" x2="${60 - Math.abs(d) * 0.3}" y2="${y + d}"/>`)
+    .join('');
+  return trustedSvg(
+    `<svg viewBox="0 0 100 100">
+      <defs>
+        <clipPath id="${face}"><circle cx="50" cy="50" r="46"/></clipPath>
+        <pattern id="${ground}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line class="gm-ai-hatch" x1="0" y1="0" x2="0" y2="8"/>
+        </pattern>
+      </defs>
+      <g clip-path="url(#${face})">
+        <rect class="gm-ai-sky" x="0" y="0" width="100" height="100"/>
+        <g transform="rotate(${deg.toFixed(1)} 50 50)">
+          <rect fill="url(#${ground})" x="-60" y="${y.toFixed(1)}" width="220" height="160"/>
+          <line class="gm-ai-horizon" x1="-60" y1="${y.toFixed(1)}" x2="160" y2="${y.toFixed(1)}"/>
+          ${ladder}
+        </g>
+      </g>
+      <circle class="gm-ai-rim" cx="50" cy="50" r="46"/>
+      <path class="gm-ai-plane" d="M26 50h14l10 7 10-7h14"/>
+      <circle class="gm-ai-plane-dot" cx="50" cy="50" r="2.6"/>
+    </svg>`,
+    `gm-instrument ${extra}`.trim(),
+  );
 }

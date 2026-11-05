@@ -155,12 +155,12 @@ export const mirrorParams = (level) => ({
   cells: Math.min(level <= 3 ? 6 : 9, 3 + level),
 });
 
-const normalize = (cells) => {
+export const normalize = (cells) => {
   const minX = Math.min(...cells.map(([x]) => x));
   const minY = Math.min(...cells.map(([, y]) => y));
   return cells.map(([x, y]) => [x - minX, y - minY]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
 };
-const keyOf = (cells) => normalize(cells).map(([x, y]) => `${x},${y}`).join(' ');
+export const keyOf = (cells) => normalize(cells).map(([x, y]) => `${x},${y}`).join(' ');
 
 export const rotate90 = (cells) => cells.map(([x, y]) => [y, -x]);
 export const mirrorX = (cells) => cells.map(([x, y]) => [-x, y]);
@@ -181,7 +181,7 @@ export const rotationKeys = (cells) => new Set(rotations(cells).map(keyOf));
 export const isChiral = (cells) => !rotationKeys(cells).has(keyOf(mirrorX(cells)));
 
 // Свързана фигура: всички клетки се достигат една от друга. Разпаднала се фигура се чете трудно.
-function isConnected(cells) {
+export function isConnected(cells) {
   const keys = new Set(cells.map(([x, y]) => `${x},${y}`));
   const seen = new Set([`${cells[0][0]},${cells[0][1]}`]);
   const queue = [cells[0]];
@@ -198,7 +198,7 @@ function isConnected(cells) {
   return seen.size === cells.length;
 }
 
-function randomShape(grid, count, random) {
+export function randomShape(grid, count, random) {
   const cells = [[int(random, 0, grid - 1), int(random, 0, grid - 1)]];
   let guard = 0;
   while (cells.length < count && guard < 200) {

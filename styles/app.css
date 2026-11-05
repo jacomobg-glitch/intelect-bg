@@ -423,6 +423,14 @@ body.playing .view { max-width: none; padding: 0; height: 100dvh; margin: 0; }
 .viz-block-hundred, .viz-block-ten { fill: var(--accent); }
 .viz-block-one { fill: var(--highlight); }
 .viz-group { fill: var(--glow-soft); }
+.viz-label-soft { fill: var(--text-muted); font-weight: 500; }
+/* Път и време: пътят, колата и часовникът */
+.viz-road { stroke: var(--text-muted); stroke-width: 4; stroke-linecap: round; opacity: .45; }
+.viz-road-done { stroke: var(--accent); stroke-width: 4; stroke-linecap: round; }
+.viz-car-body { fill: var(--accent); }
+.viz-wheel { fill: var(--text); }
+.viz-clock-face { fill: var(--glow-soft); stroke: var(--text-muted); stroke-width: 1.5; }
+.viz-clock-hand { stroke: var(--highlight); stroke-width: 2.5; stroke-linecap: round; }
 
 /* Еволюция: мек проблясък и преливане на силуета */
 .evo-overlay {
@@ -651,6 +659,100 @@ body.playing .view { max-width: none; padding: 0; height: 100dvh; margin: 0; }
 .qm-bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--game-accent), var(--game-accent-2)); }
 .qm-option { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
 
+/* Игри от Етап 6б: общи части */
+.gm-glyph { display: block; width: 100%; height: 100%; }
+.gm-glyph svg { display: block; width: 100%; height: 100%; }
+.gm-arrow { fill: none; stroke: var(--game-text); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Избирателна реакция (стрелките се ползват и от „Многозадачност“) */
+/* Стимулът има своя сцена, както подложката при „Проста реакция“: иначе стрелката
+   виси в празно поле и чакането изглежда като счупен екран. */
+.cr-stim {
+  flex: 1; width: min(560px, 100%); min-height: 120px; max-height: 52dvh;
+  display: grid; place-items: center;
+  border-radius: var(--radius-l); background: var(--game-panel); border: 1px solid var(--game-line);
+}
+.cr-dash { font-size: clamp(2.4rem, 12vw, 4rem); font-weight: 800; color: var(--game-muted); }
+.cr-stim-arrow { width: min(40vw, 26dvh); height: min(40vw, 26dvh); }
+.cr-stim-arrow .gm-arrow { stroke: var(--game-green); stroke-width: 8; }
+.cr-pads { display: flex; gap: 10px; width: min(560px, 100%); }
+.cr-option { flex: 1; min-height: 84px; }
+.cr-option-arrow { width: 34px; height: 34px; }
+/* Изключена посока: остава на мястото си, за да не скачат бутоните при смяна на трудността. */
+.cr-option-off { opacity: .3; }
+
+/* Периферно внимание */
+.pf-field {
+  position: relative; width: min(88vw, calc(100dvh - 210px), 520px); aspect-ratio: 1;
+  border-radius: var(--radius-l); background: var(--game-panel); border: 1px solid var(--game-line);
+}
+.pf-center {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  font-size: clamp(2rem, 10vw, 3.2rem); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--game-text);
+}
+/* Местата идват от играта като дял от полето (4%–96%). Свиват се в 92% от него,
+   за да не излизат извън рамката, а средата да си остане среда. */
+.pf-slot {
+  position: absolute; left: calc(4% + var(--x) * .92); top: calc(4% + var(--y) * .92); transform: translate(-50%, -50%);
+  width: 52px; height: 52px; display: grid; place-items: center; padding: 0;
+  border: 1px solid var(--game-line); border-radius: 50%; background: transparent; cursor: pointer; touch-action: manipulation;
+}
+.pf-mark { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--game-line); }
+/* Търсеното е запълнено, разсейващото е дебел контур: различават се по форма, не по цвят. */
+.pf-lit .pf-mark { background: var(--game-text); border-color: var(--game-text); box-shadow: 0 0 14px var(--game-accent); }
+.pf-decoy .pf-mark { border-color: var(--game-text); border-width: 4px; }
+.pf-right { border-color: var(--game-green); box-shadow: 0 0 0 2px var(--game-green) inset; }
+.pf-wrong { border-color: var(--game-red); box-shadow: 0 0 0 2px var(--game-red) inset; }
+
+/* Оценка на време */
+.ts-pad { max-height: 44dvh; }
+.ts-running { border-color: var(--game-accent); box-shadow: 0 0 0 2px var(--game-accent) inset; }
+.ts-hit { border-color: var(--game-green); box-shadow: 0 0 0 2px var(--game-green) inset; }
+.ts-off { border-color: var(--game-red); box-shadow: 0 0 0 2px var(--game-red) inset; }
+
+/* Следене на цел */
+.tr-field {
+  position: relative; width: min(92vw, calc(100dvh - 190px), 560px); aspect-ratio: 1; overflow: hidden;
+  border-radius: var(--radius-l); background: var(--game-panel); border: 1px solid var(--game-line);
+  touch-action: none; cursor: crosshair;
+}
+.tr-target, .tr-own {
+  position: absolute; left: var(--x, 50%); top: var(--y, 50%); transform: translate(-50%, -50%);
+  border-radius: 50%; pointer-events: none;
+}
+/* Кръгът е точно допускът (--tol идва от играта): окото мери същото, което брои и играта. */
+.tr-target { width: var(--tol, 28%); height: var(--tol, 28%); border: 3px solid var(--game-muted); }
+.tr-own { width: 22px; height: 22px; background: var(--game-text); }
+.tr-target.tr-hit { border-color: var(--game-green); box-shadow: 0 0 18px var(--game-accent); }
+.tr-own.tr-hit { background: var(--game-green); }
+
+/* Ориентация по прибори */
+.ai-stage { flex: 1; min-height: 0; display: grid; place-items: center; }
+.gm-instrument { display: block; width: min(52vw, 30dvh); height: min(52vw, 30dvh); }
+.gm-instrument svg { display: block; width: 100%; height: 100%; }
+.gm-ai-sky { fill: var(--game-panel); }
+.gm-ai-hatch { stroke: var(--game-muted); stroke-width: 2.4; }
+.gm-ai-horizon { stroke: var(--game-text); stroke-width: 2.5; }
+.gm-ai-mark { stroke: var(--game-muted); stroke-width: 1.6; }
+.gm-ai-rim { fill: none; stroke: var(--game-line); stroke-width: 3; }
+.gm-ai-plane { fill: none; stroke: var(--game-yellow); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.gm-ai-plane-dot { fill: var(--game-yellow); }
+.ai-option { min-height: 76px; padding: 10px 12px; font-size: .95rem; text-align: center; line-height: 1.25; }
+
+/* Многозадачност */
+.mt-gauge { display: flex; align-items: center; gap: 10px; width: min(560px, 100%); }
+.mt-fuel-label, .mt-fuel-text { font-size: .9rem; font-weight: 700; color: var(--game-muted); }
+.mt-fuel-text { min-width: 3.4em; text-align: right; font-variant-numeric: tabular-nums; }
+.mt-fuel-track { position: relative; flex: 1; height: 14px; border-radius: 99px; background: var(--game-track); overflow: hidden; }
+.mt-fuel-fill { height: 100%; background: linear-gradient(90deg, var(--game-accent), var(--game-accent-2)); }
+/* Чертата на половината: прагът за допълване се вижда, а не само се помни. */
+.mt-fuel-mark { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--game-text); opacity: .55; }
+.mt-low .mt-fuel-fill { background: var(--game-yellow); }
+.mt-low .mt-fuel-text { color: var(--game-yellow); }
+.mt-pads { display: flex; gap: 10px; width: min(560px, 100%); }
+.mt-refill { flex: 1.3; font-size: 1.05rem; }
+.mt-refill-due { border-color: var(--game-yellow); box-shadow: 0 0 0 2px var(--game-yellow) inset; }
+
 /* Демонстрации за новите игри */
 .demo-swap-grid, .demo-odd-grid { width: 132px; gap: 4px; }
 .demo-swap-grid .gm-cell, .demo-odd-grid .gm-cell { padding: 2px; }
@@ -676,6 +778,27 @@ body.playing .view { max-width: none; padding: 0; height: 100dvh; margin: 0; }
 .demo-quick .qm-prompt { font-size: 1.8rem; }
 .demo-quick .demo-pick { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
 
+.demo-cr-stim { width: 54px; height: 54px; min-height: 0; flex: none; }
+.demo-cr-stim .cr-stim-arrow { width: 48px; height: 48px; }
+.demo-cr-pads { width: auto; gap: 5px; }
+.demo-cr-pads .cr-option { min-height: 0; padding: 5px; }
+.demo-cr-pads .cr-option-arrow { width: 22px; height: 22px; }
+.demo-pf-field { width: 128px; }
+.demo-pf-field .pf-slot { width: 30px; height: 30px; }
+.demo-pf-field .pf-mark { width: 14px; height: 14px; }
+.demo-pf-field .pf-center { font-size: 1.2rem; }
+.demo-ts-fill { animation: demo-ts 3s infinite; }
+@keyframes demo-ts { 0% { width: 0; } 55%, 100% { width: 100%; } }
+.demo-tr-field { width: 128px; }
+.demo-tr-target { width: 44px; height: 44px; border-width: 2px; animation: demo-track 4s infinite ease-in-out; }
+.demo-tr-own { width: 14px; height: 14px; animation: demo-track 4s infinite ease-in-out .4s; }
+@keyframes demo-track { 0%, 100% { left: 28%; top: 32%; } 50% { left: 72%; top: 68%; } }
+.demo-ai-dial { width: 84px; height: 84px; }
+.demo-mt { gap: 10px; }
+.demo-mt-gauge { width: 136px; }
+.demo-mt-fill { animation: demo-fuel 3.6s infinite; }
+@keyframes demo-fuel { 0% { width: 100%; } 72% { width: 22%; } 76%, 100% { width: 100%; } }
+
 /* Легнал телефон: елементите застават един до друг */
 @media (orientation: landscape) and (max-height: 500px) {
   .game-board { flex-direction: row; flex-wrap: wrap; }
@@ -696,6 +819,18 @@ body.playing .view { max-width: none; padding: 0; height: 100dvh; margin: 0; }
   .gm-card-slot { min-height: 0; }
   .gm-card { width: min(18vw, 28dvh); }
   .qm-prompt { font-size: 2.2rem; }
+  /* Лентата с времето не бива да заема цял ред: иначе отговорите слизат под екрана. */
+  .qm-bar { width: 46%; }
+  .gm-option { min-height: 54px; }
+  .gm-option .gm-shape { width: 46px; height: 46px; }
+  .cr-stim { min-height: 60px; width: min(26vw, 30dvh); }
+  .cr-stim-arrow { width: min(22vw, 26dvh); height: min(22vw, 26dvh); }
+  .cr-pads, .mt-pads, .mt-gauge { width: 46%; }
+  .cr-option { min-height: 54px; }
+  .pf-field { width: min(52vw, calc(100dvh - 90px)); }
+  .tr-field { width: min(52vw, calc(100dvh - 90px)); }
+  .gm-instrument { width: min(26vw, 34dvh); height: min(26vw, 34dvh); }
+  .ai-option { min-height: 54px; font-size: .85rem; }
 }
 
 /* Демонстрации */

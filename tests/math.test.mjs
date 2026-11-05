@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { GENERATORS, MAX_LEVEL, checkAnswer, makeTask, parseNumeric } from '../js/content/math/generators.js';
 import { ALL_SUBTOPICS, MATH_TREE } from '../js/content/math/topics.js';
@@ -236,6 +237,26 @@ test('съдържание: всяка подтема има 3 нива, 3 пр�
       assert.match(e.steps[e.steps.length - 1], /Отговор/, e.title);
     }
   }
+});
+
+// Визуализациите живеят в изглед с DOM, затова тук се четат от файла: важното е, че
+// всяко име от дървото има своя функция, а не как е нарисувана.
+test('всяко име на визуализация от дървото съществува в math-viz.js', () => {
+  const src = readFileSync(new URL('../js/views/math-viz.js', import.meta.url), 'utf8');
+  const block = src.slice(src.indexOf('export const VISUALIZATIONS = {'));
+  const names = new Set([...block.slice(0, block.indexOf('};')).matchAll(/^\s+'?([a-z-]+)'?[,:]/gm)].map((m) => m[1]));
+  for (const s of ALL_SUBTOPICS) {
+    assert.ok(names.has(s.viz), `липсва визуализация ${s.viz} за ${s.id}`);
+    if (s.vizAlt) {
+      assert.ok(names.has(s.vizAlt), `липсва втори изглед ${s.vizAlt} за ${s.id}`);
+      assert.notEqual(s.vizAlt, s.viz, s.id);
+      assert.equal(s.vizNames?.length, 2, `${s.id}: двата изгледа искат по едно име`);
+    }
+  }
+  // „Задачи с път и време“ получи собствена визуализация; отношенията са вторият изглед.
+  const travel = ALL_SUBTOPICS.find((s) => s.id === 'word-travel');
+  assert.equal(travel.viz, 'travel');
+  assert.equal(travel.vizAlt, 'ratio-bars');
 });
 
 test('модулът спазва общия интерфейс и е достъпен от началото', () => {

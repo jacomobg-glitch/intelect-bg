@@ -1,6 +1,7 @@
 // Етап 6а: шестте нови когнитивни игри и разпределението на отключването.
 // Всеки генератор се проверява с независима сметка, не с кода на самия генератор.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import {
   ODD_KINDS, PADS, SORT_RULES, SORT_VALUES, TOKENS, TONE_FILLS,
@@ -9,6 +10,8 @@ import {
   swapParams, shuffle,
 } from '../js/content/games/generators.js';
 import { SKILLS } from '../js/core/config.js';
+import { creatureIndex, subLabel } from '../js/core/evolution.js';
+import nature from '../js/content/skins/nature.js';
 import { cleanSettings, defaultSettings } from '../js/core/model.js';
 import { validateGame } from '../js/core/registry.js';
 import { ALL_SUBTOPICS, MATH_TREE } from '../js/content/math/topics.js';
@@ -32,7 +35,8 @@ const byId = Object.fromEntries(games.map((g) => [g.id, g]));
 // --- Регистър и способности ---
 
 test('новите игри спазват общия интерфейс и имат демонстрация', () => {
-  assert.equal(games.length, 14);
+  // 14 от Етап 6а плюс седемте рефлекса на Етап 6б.
+  assert.equal(games.length, 21);
   for (const g of games) assert.deepEqual(validateGame(g), [], g.id);
   for (const id of ['odd-one-out', 'swapped', 'quick-math', 'sequence', 'mirror', 'sorting']) {
     assert.ok(byId[id], `липсва модул ${id}`);
@@ -74,6 +78,27 @@ test('всяка способност има поне 2 игри до Гущер
     const count = games.filter((g) => g.skills.includes(skill) && g.unlockStep <= 9).length;
     assert.ok(count >= 2, `${skill}: само ${count} игри до стъпка 9`);
   }
+});
+
+// Имената на стъпките в документацията лесно се разминават с кода: unlockStep се брои от 0,
+// а таблицата на стълбата – от 1. Затова таблиците в ARCHITECTURE.md се сверяват с модулите.
+test('ARCHITECTURE.md назовава същата стъпка, на която играта наистина се отключва', () => {
+  const doc = readFileSync(new URL('../docs/ARCHITECTURE.md', import.meta.url), 'utf8');
+  const stepName = (step) => `${nature.creatures[creatureIndex(step)].name} ${subLabel(step)}`;
+  // Редът в таблицата може да уточнява името („Stroop (цветове или форми)“), затова се
+  // търси по начало на текста в двете посоки.
+  const matchGame = (cell) => games.find((g) => cell.startsWith(g.title) || g.title.startsWith(cell));
+  const checked = new Set();
+  for (const line of doc.split('\n')) {
+    const cells = line.split('|').map((c) => c.trim());
+    if (cells.length < 5 || !cells[1]) continue;
+    const game = matchGame(cells[1]);
+    if (!game) continue;
+    assert.equal(cells[3], stepName(game.unlockStep), `${game.title}: unlockStep ${game.unlockStep}`);
+    checked.add(game.id);
+  }
+  // Всички игри с таблица в документа: извън таблиците остават само „Математика“ и „Светулки“.
+  assert.ok(checked.size >= games.length - 2, `сверени са само ${checked.size} игри: ${[...checked]}`);
 });
 
 test('всяко отключване е на достижима стъпка и нито една игра не чака напразно', () => {
