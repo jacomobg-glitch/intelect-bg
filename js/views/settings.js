@@ -1,5 +1,6 @@
 // Настройки: тема, моят профил, профилите (за администратор), резервно копие, инсталиране.
-// Тестовият режим се зарежда само при нужда.
+// Диагностиката стои скрита зад седем докосвания по номера на версията: трябва само
+// докато тече проверката на телефон и не бива да се вижда при обикновена употреба.
 import {
   BackupError, buildBackup, formatMoment, parseBackup, summarizeEntry, summarizePayload,
 } from '../core/backup.js';
@@ -21,8 +22,8 @@ import { avatarEl } from './ui.js';
 
 const THEMES = [['auto', 'Като системата'], ['dark', 'Тъмна'], ['light', 'Светла']];
 const COLOR_MODES = [[false, 'С цветове'], [true, 'С форми']];
-export const APP_VERSION = '0.15.0';
-const TAPS_FOR_TEST_MODE = 7;
+export const APP_VERSION = '0.16.0';
+const TAPS_FOR_DIAGNOSTICS = 7;
 
 const stepLabel = (step) => `${activeSkin().creatures[creatureIndex(step)].name} ${subLabel(step)}`;
 const cardOfPayload = (payload) => ({ step: payload.profile.step, totalXP: payload.profile.totalXP });
@@ -406,14 +407,20 @@ export function renderSettings(root) {
     },
   });
 
-  const testSlot = h('div', {});
-  const showTestPanel = async () => {
-    try {
-      const { renderSimulator } = await import('../dev/simulator.js');
-      renderSimulator(testSlot, rerender);
-    } catch {
-      toast('Тестовият режим не е наличен в тази версия.');
-    }
+  // Веднъж отворена, диагностиката остава видима: при проверка на телефон се влиза
+  // в нея често, а седемте докосвания по сензорен екран не са безобидни.
+  const diagSlot = h('div', {});
+  const showDiagnostics = () => {
+    updateDevice({ diagnostics: true });
+    mount(diagSlot, h('section', { class: 'group' },
+      h('h2', {}, 'Диагностика'),
+      h('p', { class: 'muted small' }, 'Измерва кадри и закъснение на докосването на това устройство. Служи за проверката преди издаване; нищо не излиза навън.'),
+      h('div', { class: 'row' },
+        h('a', { class: 'btn', href: '#/diagnostics' }, 'Отвори диагностиката'),
+        h('button', {
+          class: 'btn btn-small btn-quiet',
+          onclick: () => { updateDevice({ diagnostics: false }); mount(diagSlot); },
+        }, 'Скрий'))));
   };
 
   const newProfile = async () => {
@@ -467,8 +474,10 @@ export function renderSettings(root) {
       h('h2', {}, 'Резервно копие'),
       h('p', { class: 'muted small' }, 'Всичко се пази само на това устройство. За пренос между лаптопа и телефона изтегли копие тук и го зареди там. Заключен профил излиза шифрован и импортът му иска паролата.'),
       h('div', { class: 'row' },
-        state.entry ? h('button', { class: 'btn', onclick: () => exportProfiles([state.entry], 'profil') }, 'Изтегли моето копие') : null,
-        isAdmin() ? h('button', { class: 'btn', onclick: () => exportProfiles(state.profiles, 'vsichki') }, 'Копие на всички') : null,
+        // След експорта екранът се рисува наново: иначе „Последен експорт“ показва
+        // старата стойност до следващото влизане в Настройки.
+        state.entry ? h('button', { class: 'btn', onclick: () => { exportProfiles([state.entry], 'profil'); rerender(); } }, 'Изтегли моето копие') : null,
+        isAdmin() ? h('button', { class: 'btn', onclick: () => { exportProfiles(state.profiles, 'vsichki'); rerender(); } }, 'Копие на всички') : null,
         h('button', { class: 'btn', onclick: () => fileInput.click() }, 'Зареди копие'),
         fileInput),
       // Тихо поле: само информация. Без напомняне, без известие и без оцветяване.
@@ -485,12 +494,11 @@ export function renderSettings(root) {
         class: 'version',
         onclick: () => {
           taps += 1;
-          if (taps === TAPS_FOR_TEST_MODE) showTestPanel();
+          if (taps === TAPS_FOR_DIAGNOSTICS) showDiagnostics();
         },
       }, `Версия ${APP_VERSION}`)),
-    testSlot,
+    diagSlot,
   );
 
-  // Ако тестовият режим вече е включен, панелът трябва да е видим, за да може да се излезе.
-  if (state.simSnapshot) showTestPanel();
+  if (deviceSettings().diagnostics) showDiagnostics();
 }

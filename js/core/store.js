@@ -11,7 +11,7 @@ import {
 } from './profiles.js';
 import { activeSkills } from './registry.js';
 import {
-  FEELS, cleanProfile, defaultProfile, defaultRecord, defaultSettings, defaultTopic,
+  FEELS, defaultProfile, defaultRecord, defaultSettings, defaultTopic,
 } from './model.js';
 
 export const state = {
@@ -19,7 +19,6 @@ export const state = {
   settings: defaultSettings(),
   records: new Map(),
   topics: new Map(),
-  simSnapshot: null, // реалният прогрес, докато тестовият режим е включен
 
   profiles: [],      // всички записи: име, роля, карта. Съдържанието им е заключено.
   entry: null,       // отвореният профил
@@ -102,7 +101,6 @@ function applyPayload(payload) {
   state.settings = payload.settings;
   state.records = new Map(payload.records.map((r) => [r.id, r]));
   state.topics = new Map(payload.topics.map((t) => [t.id, t]));
-  state.simSnapshot = payload.simSnapshot ? cleanProfile(payload.simSnapshot) : null;
 }
 
 const payloadOf = () => ({
@@ -110,7 +108,6 @@ const payloadOf = () => ({
   settings: state.settings,
   records: [...state.records.values()],
   topics: [...state.topics.values()],
-  simSnapshot: state.simSnapshot,
 });
 
 // Отваря профил. За заключен профил иска паролата и връща причината при отказ,
@@ -157,7 +154,6 @@ export function closeProfile() {
   state.settings = defaultSettings();
   state.records = new Map();
   state.topics = new Map();
-  state.simSnapshot = null;
 }
 
 export const lastActiveId = async () => (await getOne('meta', 'activeProfile'))?.id || null;
@@ -175,12 +171,6 @@ async function persist() {
   state.entry = entry;
   state.profiles = state.profiles.map((p) => (p.id === entry.id ? entry : p));
   await writeAll([{ store: PROFILES, value: entry }]);
-}
-
-// Тестовият режим прибира истинския прогрес встрани, но вътре в същия профил.
-export async function setSimSnapshot(profile) {
-  state.simSnapshot = profile;
-  await persist();
 }
 
 // Записва променен запис на профил (име, роля, ограничения) без да пипа съдържанието.

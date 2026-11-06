@@ -58,7 +58,6 @@ export function renderHome(root) {
   const target = gameForObstacle(obstacle, profile.step);
 
   mount(root,
-    state.simSnapshot ? h('p', { class: 'badge badge-test' }, 'Тестов режим: реалният прогрес е запазен') : null,
     // Купеният фон сменя фона на hero картата; без фон остава стъклото.
     applyScene(h('section', { class: 'hero' },
       h('div', { class: 'hero-art', 'aria-hidden': 'true' }, avatarEl(creature)),

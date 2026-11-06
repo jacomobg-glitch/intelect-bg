@@ -8,7 +8,8 @@ const newerDate = (a, b) => {
   return a > b ? a : b;
 };
 
-// Докато тестовият режим е включен, реалният прогрес е в снимката, а не в профила.
+// Копие отпреди профилите може да носи прибран прогрес от изтрития тестов режим.
+// Тогава истинският прогрес е в снимката, а не в профила, и се чете оттам.
 export function realProfile(data) {
   const snapshot = data.meta.find((m) => m.key === 'simSnapshot');
   return snapshot ? snapshot.profile : data.meta.find((m) => m.key === 'profile');
@@ -74,15 +75,14 @@ function mergeById(listA, listB, mergeOne) {
   return [...out.values()];
 }
 
-// Сливане на съдържанието на ЕДИН профил. Настройките остават на устройството,
-// а тестовият режим започва начисто: снимката му не се слива.
+// Сливане на съдържанието на ЕДИН профил. Настройките остават на устройството:
+// темата и шрифтът важат за този екран, не за прогреса.
 export function mergePayload(local, incoming, activeFor) {
   return {
-    profile: mergeProfiles(local.simSnapshot || local.profile, incoming.simSnapshot || incoming.profile, activeFor),
+    profile: mergeProfiles(local.profile, incoming.profile, activeFor),
     settings: local.settings,
     records: mergeById(local.records, incoming.records, mergeRecord),
     topics: mergeById(local.topics, incoming.topics, mergeTopic),
-    simSnapshot: null,
   };
 }
 

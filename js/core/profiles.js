@@ -113,13 +113,15 @@ export function cleanPayload(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const profile = cleanProfile(raw.profile);
   if (!profile) return null;
+  // Тестовият режим го няма от Етап 7. Останал ли е някъде прибран истински прогрес
+  // (стар профил или старо копие), той се връща на мястото си още при четенето:
+  // иначе щеше да остане скрит завинаги зад изтрития панел.
+  const real = cleanProfile(raw.simSnapshot);
   return {
-    profile,
+    profile: real || profile,
     settings: cleanSettings(raw.settings),
     records: Array.isArray(raw.records) ? raw.records.map(cleanRecord).filter(Boolean) : [],
     topics: Array.isArray(raw.topics) ? raw.topics.map(cleanTopic).filter(Boolean) : [],
-    // Тестовият режим пази истинския прогрес тук, вътре в профила, а не отстрани.
-    simSnapshot: cleanProfile(raw.simSnapshot),
   };
 }
 

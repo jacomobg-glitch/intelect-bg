@@ -161,7 +161,7 @@ test('всички модули спазват общия интерфейс', (
 test('приложението не съдържа известия, серии или външни заявки', () => {
   const m = buildManifest();
   const code = m.files
-    .filter((f) => f.endsWith('.js') && f !== './js/dev/simulator.js')
+    .filter((f) => f.endsWith('.js'))
     .map((f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8'))
     .join('\n');
   assert.doesNotMatch(code, /Notification\.|PushManager|setAppBadge|streak/);

@@ -15,11 +15,13 @@
   <link rel="stylesheet" href="styles/app.css">
 </head>
 <body>
+  <!-- Първата спирка на клавиатурата: иначе менюто стои пред съдържанието на всеки екран -->
+  <button id="skip" class="skip-link" type="button">Към съдържанието</button>
   <div class="bg-grid" aria-hidden="true"></div>
   <aside id="sidebar" class="sidebar glass" aria-label="Меню"></aside>
   <div id="scrim" class="scrim" aria-hidden="true"></div>
-  <main id="view" class="view"></main>
-  <nav id="tabbar" class="tabbar" aria-label="Основна навигация"></nav>
+  <main id="view" class="view" tabindex="-1"></main>
+  <nav id="tabbar" class="tabbar" aria-label="Долна навигация"></nav>
   <noscript>Приложението изисква JavaScript.</noscript>
   <script type="module" src="js/app.js"></script>
 </body>

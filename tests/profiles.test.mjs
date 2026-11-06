@@ -188,7 +188,6 @@ const payload = (xp, step = 0, extra = {}) => ({
   settings: defaultSettings(),
   records: [],
   topics: [],
-  simSnapshot: null,
   ...extra,
 });
 
@@ -213,7 +212,7 @@ test('сливане по профили: взема по-доброто, а н�
   assert.equal(merged.topics.length, 2);
   assert.ok(merged.profile.totalXP >= 900);
   assert.ok(merged.profile.step >= 3, 'достигнатата стъпка не се отнема');
-  assert.equal(merged.simSnapshot, null, 'тестовият режим започва начисто');
+  assert.equal(merged.simSnapshot, undefined, 'изтритият тестов режим не оставя поле след себе си');
   assert.equal(summarizePayload(merged).records, 2);
 });
 

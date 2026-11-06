@@ -277,7 +277,10 @@ export function renderMathSession(root, id, mode, options = {}) {
 
     mount(root,
       options.kicker ? h('p', { class: 'muted small' }, options.kicker) : null,
-      h('p', { class: 'muted small' }, `${MODE_TITLES[mode]} · ${subtopic.title} · задача ${math.index + 1} от ${math.total}`),
+      // Заглавието е тихо на вид, но е h1: иначе екранният четец влиза в задачата без
+      // да каже къде се намира. Броячът е отделно, за да не се чете наново при всяка задача.
+      h('h1', { class: 'session-title' }, `${MODE_TITLES[mode]} · ${subtopic.title}`),
+      h('p', { class: 'muted small' }, `Задача ${math.index + 1} от ${math.total}`),
       h('p', { class: 'task-prompt' }, task.prompt),
       answerArea, feedback, hintBox, actions,
       h('a', { class: 'btn btn-quiet', href: options.back || `#/math/${id}` }, 'Изход'));

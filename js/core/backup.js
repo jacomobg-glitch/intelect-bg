@@ -62,7 +62,7 @@ export function parseBackup(text) {
 // Кратко описание за сравнението „устройство / файл / резултат“.
 export function summarizePayload(payload) {
   if (!payload) return { step: null, totalXP: null, records: null, mastered: null };
-  const profile = payload.simSnapshot || payload.profile;
+  const { profile } = payload;
   return {
     step: profile.step,
     totalXP: profile.totalXP,

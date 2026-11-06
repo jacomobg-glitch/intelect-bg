@@ -129,4 +129,10 @@ export function renderShell(name, arg) {
 export function initShell() {
   document.getElementById('scrim').addEventListener('click', closeDrawer);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+  // Прескачане на менюто. Бутон, а не връзка: адресът е маршрут, а „#view“ би сменил екрана.
+  document.getElementById('skip').addEventListener('click', () => {
+    const view = document.getElementById('view');
+    view.focus();
+    view.scrollIntoView({ block: 'start' });
+  });
 }

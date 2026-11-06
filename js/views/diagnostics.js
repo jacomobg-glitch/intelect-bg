@@ -1,4 +1,5 @@
-// Скрит екран „Диагностика“ за проверка на истински телефон. Отключва се от тестовия режим.
+// Скрит екран „Диагностика“ за проверка на истински телефон. Отключва се от Настройки:
+// седем докосвания по номера на версията. Служи само докато тече проверката преди издаване.
 import { h, mount, toast } from '../core/dom.js';
 import { LowFpsDetector, buildReport, frameStats, inputLine, latencyStats, summarizeInput } from '../core/stats.js';
 import { requestPersistence, storageStatus } from '../core/store.js';
