@@ -2,7 +2,7 @@
 // От Етап 6г нататък всичко е в рамките на ЕДИН профил: в паметта стои само отвореният,
 // а ключовете му не се записват никъде. Профилите не се виждат един друг.
 import { coinsFor } from '../content/shop.js';
-import { CONFIG } from './config.js';
+import { CONFIG, SKILLS } from './config.js';
 import { decryptJson, encryptJson, openWithPassword } from './crypto.js';
 import { PROFILES, getAll, getOne, writeAll } from './db.js';
 import { applyXP, difficultyCeiling, syncActivation } from './evolution.js';
@@ -237,6 +237,17 @@ export const isHidden = (gameId) => hiddenGames().has(gameId);
 export async function saveProfile(profile) {
   state.profile = profile;
   await persist();
+}
+
+// Колко пъти всяка способност е спирала стълбата. Брои се само при СМЯНА: иначе числото
+// щеше да казва колко пъти е отварян началният екран. Стои тук, а не в изгледа, защото
+// изгледите четат, а не пишат.
+export async function noteObstacle(skill) {
+  const next = SKILLS.includes(skill) ? skill : null;
+  if (state.profile.obstacleNow === next) return;
+  const obstacles = { ...state.profile.obstacles };
+  if (next) obstacles[next] = (obstacles[next] || 0) + 1;
+  await saveProfile({ ...state.profile, obstacles, obstacleNow: next });
 }
 
 export async function saveSettings(patch) {

@@ -3,7 +3,7 @@ import { CONFIG, SKILL_LABELS } from '../core/config.js';
 import { h, mount } from '../core/dom.js';
 import { creatureIndex, nearestObstacle, subIndex } from '../core/evolution.js';
 import { activeSkills, allGames, isUnlocked, moduleForSkill } from '../core/registry.js';
-import { saveProfile, state } from '../core/store.js';
+import { noteObstacle, state } from '../core/store.js';
 import { icon } from './icons.js';
 import { dueSubtopics } from './math.js';
 import { activeSkin, applyScene, avatarEl, creatureAt, formatXP, fullName, meter, t, xpName } from './ui.js';
@@ -19,17 +19,6 @@ export function obstacleText(obstacle) {
     return t('home.obstacle.skill', { step: fullName(obstacle.step), xp, skill: SKILL_LABELS[obstacle.skill] });
   }
   return t('home.obstacle.any', { step: fullName(obstacle.step), xp });
-}
-
-// Колко пъти всяка способност е ставала препятствие. Брои се при СМЯНА, не при всяко
-// рисуване: иначе числото би казвало колко пъти е отварян началният екран. Няма дати —
-// само брой, и само за отчета за калибриране.
-function countObstacle(profile, obstacle) {
-  const skill = obstacle.kind === 'skill' ? obstacle.skill : null;
-  if (profile.obstacleNow === skill) return;
-  const obstacles = { ...profile.obstacles };
-  if (skill) obstacles[skill] = (obstacles[skill] || 0) + 1;
-  saveProfile({ ...profile, obstacles, obstacleNow: skill });
 }
 
 // Подходящата игра за препятствието: най-рано отключената, която тренира точно тази способност.
@@ -67,7 +56,8 @@ export function renderHome(root) {
   const info = obstacle.info;
   const due = dueSubtopics().length;
   const target = gameForObstacle(obstacle, profile.step);
-  countObstacle(profile, obstacle);
+  // Само съобщаване: самото броене и записът живеят в store-а.
+  noteObstacle(obstacle.kind === 'skill' ? obstacle.skill : null);
 
   mount(root,
     // Купеният фон сменя фона на hero картата; без фон остава стъклото.

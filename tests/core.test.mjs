@@ -7,7 +7,7 @@ import {
   CUMULATIVE_XP, STEP_COSTS, TARGET_TOTAL_XP, TOTAL_STEPS, applyXP, canReach, creatureIndex,
   difficultyCeiling, levelFromXP, nextStepInfo, requiredLevel, sessionXP, subLabel,
 } from '../js/core/evolution.js';
-import { defaultProfile } from '../js/core/model.js';
+import { SCHEMA_VERSION, defaultProfile } from '../js/core/model.js';
 import { validateGame } from '../js/core/registry.js';
 import nature from '../js/content/worlds/nature.json' with { type: 'json' };
 import games from '../js/modules/index.js';
@@ -134,6 +134,39 @@ test('импорт: повредени файлове се отхвърлят с
     JSON.stringify({ ...validBackup(), data: { meta: [{ ...balanced(10), step: 99 }] } }),
   ];
   for (const text of cases) assert.throws(() => parseBackup(text), BackupError, text);
+});
+
+// Лаптопът и телефонът може да стоят на различни кеширани версии. По-старото приложение
+// трябва да каже защо не може да прочете файла, вместо да го обяви за повреден.
+test('импорт: файл от по-нова схема се отказва спокойно и без загуба', () => {
+  const future = JSON.stringify({ ...validBackup(), schema: SCHEMA_VERSION + 1 });
+  assert.throws(() => parseBackup(future), (err) => {
+    assert.ok(err instanceof BackupError);
+    assert.match(err.message, /по-нова версия/, 'съобщението казва КОЯ е причината');
+    assert.match(err.message, /интернет/, 'съобщението казва КАКВО да се направи');
+    assert.doesNotMatch(err.message, /повреден|грешка|невалид/i, 'файлът не е счупен, а само по-нов');
+    return true;
+  });
+  // Още по-далечна схема дава същото съобщение, а не друго.
+  assert.throws(() => parseBackup(JSON.stringify({ ...validBackup(), schema: 999 })), /по-нова версия/);
+
+  // Липсващ или безсмислен номер е друго: това вече е повреден файл.
+  for (const schema of [0, -3, 'две', null, 1.5]) {
+    assert.throws(() => parseBackup(JSON.stringify({ ...validBackup(), schema })), /повреден/, String(schema));
+  }
+
+  // Днешната и всяка по-стара схема се четат.
+  for (let schema = 1; schema <= SCHEMA_VERSION; schema += 1) {
+    assert.ok(parseBackup(JSON.stringify({ ...validBackup(), schema })).profiles.length);
+  }
+});
+
+// parseBackup е чиста функция: отказът става, преди каквото и да било да се запише.
+test('импорт: отказът идва от чиста функция, затова нищо не се пипа', () => {
+  const before = JSON.parse(JSON.stringify(validBackup()));
+  const text = JSON.stringify({ ...before, schema: SCHEMA_VERSION + 1 });
+  assert.throws(() => parseBackup(text), BackupError);
+  assert.deepEqual(JSON.parse(text).data, before.data, 'подаденото копие остава непокътнато');
 });
 
 test('импорт: непознати полета и невалидни записи се изчистват', () => {

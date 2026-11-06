@@ -16,6 +16,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { recommend } from '../js/core/calibration.js';
+import { SCHEMA_VERSION } from '../js/core/model.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SHOTS = join(ROOT, 'docs', 'screenshots');
@@ -802,7 +803,33 @@ async function release(cdp) {
   console.log(`  след импорта: стъпка ${mergedAfter.step}, ${Math.round(mergedAfter.totalXP)} XP`);
   if (mergedAfter.step < after.step || mergedAfter.totalXP < after.totalXP) die('Импортът отне напредък.');
 
-  // 7. Отчетът за калибриране: сглобява се от току-що изиграната сесия и се сваля,
+  // 7. Копие от по-нова версия: двете устройства може да са на различни кеширани версии.
+  // Отказът трябва да е спокоен и да НЕ пипа нищо.
+  const futureFile = join(downloads, 'ot-badeshteto.json');
+  writeFileSync(futureFile, JSON.stringify({ ...backup, schema: SCHEMA_VERSION + 1 }, null, 2));
+  const { root: doc2 } = await cdp.send('DOM.getDocument');
+  const future = await cdp.send('DOM.querySelector', { nodeId: doc2.nodeId, selector: 'input[type="file"]' });
+  await cdp.send('DOM.setFileInputFiles', { files: [futureFile], nodeId: future.nodeId });
+  await waitFor(cdp, "[...document.querySelectorAll('dialog[open] h2')].some((h) => h.textContent.includes('Импортът не мина'))", 'отказът при по-нова версия');
+  const refusal = await evaluate(cdp, "[...document.querySelectorAll('dialog[open] p')].map((p) => p.textContent).join(' ')");
+  console.log(`  по-нова версия: ${refusal}`);
+  if (!refusal.includes('по-нова версия') || !refusal.includes('интернет')) {
+    die('Съобщението за по-нова версия не казва причината и какво да се направи.');
+  }
+  if (!refusal.includes('Данните ти не са променени')) die('Отказът не успокоява, че нищо не е пипнато.');
+  await screenshot(cdp, 'stage7-future-version');
+  await evaluate(cdp, PRESS('Добре', 'dialog[open]'));
+  await wait(300);
+  const untouched = await evaluate(cdp, `(async () => {
+    const { state } = await import('./js/core/store.js');
+    return { step: state.profile.step, totalXP: state.profile.totalXP };
+  })()`);
+  if (untouched.step !== mergedAfter.step || untouched.totalXP !== mergedAfter.totalXP) {
+    die('Отказаният импорт все пак е променил прогреса.');
+  }
+  console.log('  прогресът след отказа е непокътнат');
+
+  // 8. Отчетът за калибриране: сглобява се от току-що изиграната сесия и се сваля,
   // после Node го прекарва през същата препоръка, която ползва и `npm run calibrate`.
   await evaluate(cdp, ALLOW_DIAGNOSTICS);
   await go(cdp, '/diagnostics');
@@ -836,7 +863,7 @@ async function release(cdp) {
   console.log(`  препоръка: ${advice.staircaseUp.reason}`);
   if (!calib.games.length) die('Отчетът е празен след изиграна сесия.');
 
-  // 8. Офлайн: приложението се вдига от кеша на service worker-а.
+  // 9. Офлайн: приложението се вдига от кеша на service worker-а.
   await cdp.send('Network.enable');
   await cdp.send('Network.emulateNetworkConditions', {
     offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0,

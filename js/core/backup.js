@@ -42,8 +42,13 @@ export function parseBackup(text) {
     throw new BackupError('Файлът не е валиден JSON.');
   }
   if (!obj || obj.app !== APP_ID) throw new BackupError('Това не е резервно копие на „Еволюция на ума“.');
-  if (!Number.isInteger(obj.schema) || obj.schema < 1 || obj.schema > SCHEMA_VERSION) {
-    throw new BackupError('Копието е от непозната версия. Обнови приложението и опитай пак.');
+  if (!Number.isInteger(obj.schema) || obj.schema < 1) {
+    throw new BackupError('Копието е повредено: няма номер на версията.');
+  }
+  // Лаптопът и телефонът може да стоят на различни кеширани версии. Тогава по-старото
+  // приложение няма как да прочете новия файл — казва го спокойно и НЕ пипа нищо.
+  if (obj.schema > SCHEMA_VERSION) {
+    throw new BackupError('Файлът е от по-нова версия. Отвори приложението с интернет, за да се обнови, и опитай пак.');
   }
 
   // Копие отпреди профилите: целият прогрес е един профил.
