@@ -244,7 +244,7 @@ test('копието носи профилите, а заключеният из
   const opened = await openWithPassword(second.lock, '2468');
   assert.ok(opened);
   assert.equal((await decryptJson(opened.dataKey, second.enc)).profile.totalXP, 300);
-  assert.equal(SCHEMA_VERSION, 2);
+  assert.equal(SCHEMA_VERSION, 3);
 });
 
 test('профилите не се смесват: всеки запис носи своето съдържание', () => {

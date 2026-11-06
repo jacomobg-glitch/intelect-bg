@@ -4,9 +4,11 @@ import { TOTAL_STEPS } from './evolution.js';
 import { DEFAULT_HERO, cleanHero } from '../content/hero.js';
 import { itemOf } from '../content/shop.js';
 import { DEFAULT_WORLD, WORLD_IDS } from '../content/worlds/index.js';
+import { INPUT_KINDS } from './stats.js';
 import { isISODate } from './sm2.js';
 
-export const SCHEMA_VERSION = 2;
+// 3: записите носят сборни числа за калибриране (calib), профилът брои препятствията.
+export const SCHEMA_VERSION = 3;
 
 export const defaultProfile = () => ({
   key: 'profile',
@@ -16,6 +18,10 @@ export const defaultProfile = () => ({
   activationSteps: {}, // способност → стъпка, на която е станала активна
   coins: 0,            // печелят се с практика и НЕ изгарят при пауза
   owned: [],           // купена украса; нищо от нея не дава предимство
+  // Колко пъти всяка способност е ставала препятствие на началния екран. Брой, не история:
+  // няма кога, само колко. Служи само за отчета за калибриране.
+  obstacles: Object.fromEntries(SKILLS.map((s) => [s, 0])),
+  obstacleNow: null,   // коя е преброена в момента, за да не се брои наново при всяко рисуване
 });
 
 export const defaultSettings = () => ({
@@ -29,6 +35,21 @@ export const defaultSettings = () => ({
   colorFree: false,       // true: игрите с цветове минават на форми (цветна слепота)
 });
 
+// Сборните числа на една игра за отчета за калибриране. Само суми и броячи:
+// нито дата, нито списък със сесии — отчетът казва КОЛКО, никога КОГА.
+export const emptyCalib = () => ({
+  sessions: 0,
+  trials: 0,
+  correct: 0,
+  wrong: 0,
+  misses: 0,
+  premature: 0,
+  levelSum: 0,       // сума от трудностите по опити → средна трудност
+  levelTrials: 0,
+  rt: {},            // вид вход → { n, sum, sumSq }; от тях излизат средно и разсейване
+  feels: { easy: 0, right: 0, hard: 0 },
+});
+
 export const defaultRecord = (id) => ({
   id,
   bestScore: 0,
@@ -37,7 +58,40 @@ export const defaultRecord = (id) => ({
   plays: 0,
   demoSeen: false,
   feel: null,        // последната оценка „Лесно / Точно / Трудно“, без история
+  calib: emptyCalib(),
 });
+
+// Добавя сборните числа на една сесия към натрупаните. Чиста функция.
+export function addSession(calib, session) {
+  const base = calib || emptyCalib();
+  if (!session) return base;
+  const rt = { ...base.rt };
+  for (const [kind, box] of Object.entries(session.rt || {})) {
+    if (!INPUT_KINDS.includes(kind) || !box || !isCount(box.n)) continue;
+    const prev = rt[kind] || { n: 0, sum: 0, sumSq: 0 };
+    rt[kind] = { n: prev.n + box.n, sum: prev.sum + box.sum, sumSq: prev.sumSq + box.sumSq };
+  }
+  const add = (key) => base[key] + (isCount(session[key]) ? session[key] : 0);
+  return {
+    ...base,
+    sessions: base.sessions + 1,
+    trials: add('trials'),
+    correct: add('correct'),
+    wrong: add('wrong'),
+    misses: add('misses'),
+    premature: add('premature'),
+    levelSum: add('levelSum'),
+    levelTrials: add('levelTrials'),
+    rt,
+  };
+}
+
+// Оценката „как беше“ се брои, а не само се помни: за калибрирането важи разпределението.
+export function addFeel(calib, feel) {
+  const base = calib || emptyCalib();
+  if (!FEELS.includes(feel)) return base;
+  return { ...base, feels: { ...base.feels, [feel]: base.feels[feel] + 1 } };
+}
 
 export const FEELS = Object.freeze(['easy', 'right', 'hard']);
 export const FEEL_LABELS = Object.freeze({ easy: 'Лесно', right: 'Точно', hard: 'Трудно' });
@@ -72,7 +126,15 @@ export function cleanProfile(raw) {
   const owned = Array.isArray(raw.owned)
     ? [...new Set(raw.owned.filter((id) => typeof id === 'string' && itemOf(id)))]
     : [];
-  return { key: 'profile', totalXP: raw.totalXP, skillXP, step: raw.step, activationSteps, coins, owned };
+  const obstacles = Object.fromEntries(SKILLS.map((s) => {
+    const n = raw.obstacles && raw.obstacles[s];
+    return [s, isCount(n) ? Math.min(1e6, Math.round(n)) : 0];
+  }));
+  const obstacleNow = SKILLS.includes(raw.obstacleNow) ? raw.obstacleNow : null;
+  return {
+    key: 'profile', totalXP: raw.totalXP, skillXP, step: raw.step, activationSteps, coins, owned,
+    obstacles, obstacleNow,
+  };
 }
 
 export function cleanSettings(raw) {
@@ -92,6 +154,24 @@ export function cleanSettings(raw) {
   return base;
 }
 
+// Записи отпреди схема 3 нямат сборни числа: започват от нули, без да се губи рекордът.
+function cleanCalib(raw) {
+  const out = emptyCalib();
+  if (!raw || typeof raw !== 'object') return out;
+  for (const key of ['sessions', 'trials', 'correct', 'wrong', 'misses', 'premature', 'levelSum', 'levelTrials']) {
+    if (isCount(raw[key])) out[key] = Math.min(1e9, raw[key]);
+  }
+  for (const kind of INPUT_KINDS) {
+    const box = raw.rt && raw.rt[kind];
+    if (!box || !isCount(box.n) || !isCount(box.sum) || !isCount(box.sumSq) || box.n === 0) continue;
+    out.rt[kind] = { n: box.n, sum: box.sum, sumSq: box.sumSq };
+  }
+  for (const feel of FEELS) {
+    if (raw.feels && isCount(raw.feels[feel])) out.feels[feel] = Math.min(1e6, raw.feels[feel]);
+  }
+  return out;
+}
+
 export function cleanRecord(raw) {
   if (!raw || typeof raw !== 'object' || typeof raw.id !== 'string' || !ID_PATTERN.test(raw.id)) return null;
   const rec = defaultRecord(raw.id);
@@ -101,6 +181,7 @@ export function cleanRecord(raw) {
   if (isCount(raw.plays)) rec.plays = raw.plays;
   rec.demoSeen = raw.demoSeen === true;
   if (FEELS.includes(raw.feel)) rec.feel = raw.feel;
+  rec.calib = cleanCalib(raw.calib);
   return rec;
 }
 

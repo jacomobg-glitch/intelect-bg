@@ -27,6 +27,11 @@ export function mergeProfiles(a, b, activeFor) {
   // Вече достигнатата стъпка не се отнема; слетите данни могат само да я вдигнат.
   // Монетите вземат по-голямото (не се събират: сесиите по двете устройства може
   // да са едни и същи), а купеното се обединява — нищо платено не се губи.
+  // Броячът на препятствията взема по-голямото, като монетите: двете устройства
+  // може да са видели едни и същи препятствия, затова сборът би ги удвоил.
+  const obstacles = Object.fromEntries(SKILLS.map((s) => [
+    s, Math.max((a.obstacles || {})[s] || 0, (b.obstacles || {})[s] || 0),
+  ]));
   return advance({
     key: 'profile',
     skillXP,
@@ -35,13 +40,21 @@ export function mergeProfiles(a, b, activeFor) {
     activationSteps,
     coins: Math.max(a.coins || 0, b.coins || 0),
     owned: [...new Set([...(a.owned || []), ...(b.owned || [])])],
+    obstacles,
+    obstacleNow: null,
   }, activeFor);
 }
 
 export function mergeRecord(a, b) {
   const times = [a.bestMeanRT, b.bestMeanRT].filter((t) => t !== null);
+  // Сборните числа за калибриране се вземат ЦЕЛИ от по-богатия запис, а не поле по поле:
+  // сборът би удвоил общи сесии, а максимум по полета би дал вътрешно противоречиви числа
+  // (например повече верни, отколкото опити).
+  const ca = a.calib || { trials: 0 };
+  const cb = b.calib || { trials: 0 };
   return {
     id: a.id,
+    calib: (cb.trials || 0) > (ca.trials || 0) ? cb : ca,
     bestScore: Math.max(a.bestScore, b.bestScore),
     bestMeanRT: times.length ? Math.min(...times) : null,
     lastDifficulty: Math.max(a.lastDifficulty, b.lastDifficulty),

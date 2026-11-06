@@ -4,7 +4,7 @@ import { APP_ID, BackupError, parseBackup, summarizePayload } from '../js/core/b
 import { SKILLS } from '../js/core/config.js';
 import { CUMULATIVE_XP, TOTAL_STEPS, applyXP, advancedStep, nextStepInfo, requiredLevel, requirementFor, syncActivation } from '../js/core/evolution.js';
 import { mergeData, mergeProfiles, mergeRecord, mergeTopic } from '../js/core/merge.js';
-import { cleanTopic, defaultProfile, defaultRecord, defaultSettings } from '../js/core/model.js';
+import { cleanTopic, defaultProfile, defaultRecord, defaultSettings, emptyCalib } from '../js/core/model.js';
 import { addDays, gradeFromPercent, isDue, reviewUpdate } from '../js/core/sm2.js';
 
 const FIREFLIES_ONLY = () => ['speed', 'attention'];
@@ -150,7 +150,13 @@ test('сливане: рекордите вземат по-доброто, а о
   const b = { ...defaultRecord('x'), bestScore: 50, bestMeanRT: 450, plays: 7, lastDifficulty: 4 };
   assert.deepEqual(mergeRecord(a, b), {
     id: 'x', bestScore: 50, bestMeanRT: 300, lastDifficulty: 4, plays: 7, demoSeen: true, feel: null,
+    calib: emptyCalib(),
   });
+  // Сборните числа идват ЦЕЛИ от по-богатия запис: иначе общите сесии се броят два пъти.
+  const rich = { ...defaultRecord('x'), calib: { ...emptyCalib(), sessions: 9, trials: 300, correct: 240 } };
+  const poor = { ...defaultRecord('x'), calib: { ...emptyCalib(), sessions: 2, trials: 60, correct: 50 } };
+  assert.deepEqual(mergeRecord(poor, rich).calib, rich.calib);
+  assert.deepEqual(mergeRecord(rich, poor).calib, rich.calib);
   assert.equal(mergeRecord(defaultRecord('x'), { ...defaultRecord('x'), bestMeanRT: 400 }).bestMeanRT, 400);
 });
 

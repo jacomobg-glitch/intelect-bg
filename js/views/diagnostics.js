@@ -1,8 +1,10 @@
 // Скрит екран „Диагностика“ за проверка на истински телефон. Отключва се от Настройки:
 // седем докосвания по номера на версията. Служи само докато тече проверката преди издаване.
-import { h, mount, toast } from '../core/dom.js';
+import { downloadText, h, mount, toast } from '../core/dom.js';
+import { buildCalibration, formatCalibration } from '../core/calibration.js';
+import { allGames } from '../core/registry.js';
 import { LowFpsDetector, buildReport, frameStats, inputLine, latencyStats, summarizeInput } from '../core/stats.js';
-import { requestPersistence, storageStatus } from '../core/store.js';
+import { requestPersistence, state, storageStatus } from '../core/store.js';
 import { deviceSettings, fallbackStatus, resetFallback, updateDevice, watchFrames } from './perf.js';
 import { APP_VERSION } from './settings.js';
 
@@ -36,6 +38,50 @@ async function copyText(text, area) {
     area.select();
     toast('Копирай избрания текст на ръка.');
   }
+}
+
+// Отчетът за калибриране се сглобява от записите на ТЕКУЩИЯ профил. Нищо чуждо:
+// другите профили са заключени и не се четат оттук.
+function calibrationOf() {
+  const titles = Object.fromEntries(allGames().map((g) => [g.id, g.title]));
+  return buildCalibration({
+    version: APP_VERSION,
+    profile: state.profile,
+    records: [...state.records.values()],
+    titles,
+  });
+}
+
+// Секцията с отчета. Строи се чак при натискане: преди това няма какво да се чете.
+function calibrationSection() {
+  const slot = h('div', {});
+  const build = () => {
+    const report = calibrationOf();
+    const text = formatCalibration(report);
+    const area = h('textarea', { class: 'diag-report', readonly: true, rows: '16', 'aria-label': 'Текст на отчета за калибриране' });
+    area.value = text;
+    mount(slot,
+      area,
+      h('div', { class: 'row' },
+        h('button', { class: 'btn btn-primary', type: 'button', onclick: () => copyText(text, area) }, 'Копирай'),
+        h('button', {
+          class: 'btn',
+          type: 'button',
+          onclick: () => {
+            downloadText('evolyutsiya-kalibrirane.json', JSON.stringify(report, null, 2));
+            toast('Отчетът е свален като JSON.');
+          },
+        }, 'Свали като JSON')),
+      h('p', { class: 'muted small' },
+        `Сборно от ${report.totals.sessions} сесии и ${report.totals.trials} опита. Прочита се с: `,
+        // Командата е за преписване: моноширинен шрифт без лигатури, иначе „--“ се слива в тире.
+        h('code', {}, 'npm run calibrate -- --from <файл>')));
+  };
+  return h('section', { class: 'group' },
+    h('h2', {}, 'Отчет за калибриране'),
+    h('p', { class: 'muted small' }, 'Сборните числа от този профил: по игри успех, трудност и време за реакция по вид вход, плюс оценките „как беше“. Само колко, никога кога — без дати, часове и история по дни.'),
+    h('button', { class: 'btn', type: 'button', onclick: build }, 'Отчет за калибриране'),
+    slot);
 }
 
 export function renderDiagnostics(root) {
@@ -167,8 +213,10 @@ export function renderDiagnostics(root) {
           h('span', { class: 'small muted diag-input' }, g.input ? inputLine(g.input) : `докосване ${num(g.tapMean, 1)} ms`)))
         : h('p', { class: 'muted small' }, 'Изиграй игра до края и се върни тук.')),
 
+    calibrationSection(),
+
     h('section', { class: 'group' },
-      h('h2', {}, 'Отчет'),
+      h('h2', {}, 'Отчет за устройството'),
       report,
       h('button', { class: 'btn btn-primary btn-big', type: 'button', onclick: () => { paintReport(); copyText(report.value, report); } }, 'Копирай отчета')));
 

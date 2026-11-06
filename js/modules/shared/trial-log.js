@@ -1,6 +1,6 @@
 // Общо за всички игри: дневник на опитите, staircase, точкуване. Без DOM, за да се тества в Node.
 import { CONFIG } from '../../core/config.js';
-import { mean, sd } from '../../core/stats.js';
+import { INPUT_KINDS, mean, sd } from '../../core/stats.js';
 
 export const MIN_VALID_RT = 100; // реакции под 100 ms се отхвърлят като преждевременни
 
@@ -12,6 +12,15 @@ export const staircaseTarget = (up = CONFIG.STAIRCASE_UP) => 0.5 ** (1 / Math.ma
 // Времето идва от момента на самото докосване (pointerdown), а не от обработката му.
 export const reactionMs = (event, onset) => (event.timeStamp || performance.now()) - onset;
 export const isValidReaction = (rt) => rt >= MIN_VALID_RT;
+
+// С какво е отговорено. Времената от мишка, пръст, писалка и клавиатура не се смесват:
+// един и същ човек дава различни числа с различен вход, затова всеки опит носи своя вид.
+export function inputKindOf(event) {
+  if (!event) return 'mouse';
+  if (typeof event.key === 'string') return 'keyboard';
+  const kind = event.pointerType;
+  return INPUT_KINDS.includes(kind) ? kind : 'mouse';
+}
 
 // Точки за верен отговор: трудност × 10, плюс до още толкова за бързина.
 // Без време (например правилно въздържане) остава половината от основата.
@@ -34,12 +43,34 @@ export class TrialLog {
     this.wrong = 0;
     this.prematureCount = 0;
     this.run = 0;
+    // За отчета за калибриране: суми вместо списъци, защото отчетът е сборен и без история.
+    this.input = 'mouse';   // вида вход на текущия опит; base-game го слага от събитието
+    this.byInput = {};      // вид вход → { n, sum, sumSq } за време на реакция
+    this.levelSum = 0;      // сума от трудностите по опити → средна трудност на сесията
+    this.levelTrials = 0;
+  }
+
+  // Един приключил опит: трудността, на която е станал, влиза в средната.
+  noteLevel() {
+    this.levelSum += this.level;
+    this.levelTrials += 1;
+  }
+
+  noteReaction(rt) {
+    const box = (this.byInput[this.input] ||= { n: 0, sum: 0, sumSq: 0 });
+    box.n += 1;
+    box.sum += rt;
+    box.sumSq += rt * rt;
   }
 
   correct({ rt = null, limit = null } = {}) {
     this.points += trialPoints(this.level, rt, limit);
     this.correctCount += 1;
-    if (rt !== null) this.rts.push(rt);
+    this.noteLevel();
+    if (rt !== null) {
+      this.rts.push(rt);
+      this.noteReaction(rt);
+    }
     if (!this.adapt) return;
     this.run += 1;
     if (this.run >= this.up) {
@@ -50,6 +81,7 @@ export class TrialLog {
 
   // kind: 'miss' (пропуск) или 'wrong' (грешно натискане)
   error(kind = 'wrong') {
+    this.noteLevel();
     if (kind === 'miss') this.misses += 1;
     else this.wrong += 1;
     if (!this.adapt) return;
@@ -63,6 +95,21 @@ export class TrialLog {
 
   get total() {
     return this.correctCount + this.misses + this.wrong;
+  }
+
+  // Сборните числа за отчета за калибриране. Само суми: без дати и без списък с опити.
+  summary() {
+    return {
+      trials: this.total,
+      correct: this.correctCount,
+      wrong: this.wrong,
+      misses: this.misses,
+      premature: this.prematureCount,
+      level: this.level,
+      levelSum: this.levelSum,
+      levelTrials: this.levelTrials,
+      rt: this.byInput,
+    };
   }
 
   quality() {

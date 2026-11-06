@@ -147,6 +147,23 @@ const math = {
       ],
     };
   },
+
+  // Сборните числа за отчета за калибриране. Математиката не мери време за реакция:
+  // замисленият над задача не е бавен, а внимателен, затова rt остава празно.
+  calibration() {
+    const levels = this.levels || Array.from({ length: this.total }, () => this.difficulty);
+    return {
+      trials: this.total,
+      correct: this.correctCount,
+      wrong: this.total - this.correctCount,
+      misses: 0,
+      premature: 0,
+      level: this.difficulty,
+      levelSum: levels.reduce((a, b) => a + b, 0),
+      levelTrials: levels.length,
+      rt: {},
+    };
+  },
 };
 
 // Какво се променя в записа на темата след сесия. Чиста функция.

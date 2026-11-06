@@ -114,6 +114,17 @@ export function chooseDialog({ title, body = [], options }) {
   });
 }
 
+// Сваля текст като файл. Единственият път, по който нещо излиза от устройството,
+// минава оттук — и само защото човекът е натиснал бутон.
+export function downloadText(name, text, type = 'application/json') {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const link = h('a', { href: url, download: name });
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
 export function toast(message) {
   const el = h('div', { class: 'toast', role: 'status' }, message);
   document.body.append(el);

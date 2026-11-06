@@ -11,7 +11,7 @@ import {
 } from './profiles.js';
 import { activeSkills } from './registry.js';
 import {
-  FEELS, defaultProfile, defaultRecord, defaultSettings, defaultTopic,
+  FEELS, addFeel, addSession, defaultProfile, defaultRecord, defaultSettings, defaultTopic,
 } from './model.js';
 
 export const state = {
@@ -252,7 +252,10 @@ export async function saveTopic(topic) {
 // „Лесно / Точно / Трудно“ след игра. По желание, без напомняне, само последната оценка.
 export async function saveFeel(id, feel) {
   if (!FEELS.includes(feel)) return;
-  state.records.set(id, { ...recordOf(id), feel });
+  const prev = recordOf(id);
+  // Оценката се помни за следващата сесия И се брои за отчета: разпределението
+  // „Лесно / Точно / Трудно“ е единственото, което казва дали FEEL_SHIFT е добре избран.
+  state.records.set(id, { ...prev, feel, calib: addFeel(prev.calib, feel) });
   await persist();
 }
 
@@ -278,6 +281,8 @@ export async function completeSession(game) {
     plays: prev.plays + 1,
     demoSeen: true,
     feel: null, // оценката важи за точно една сесия; тази вече я ползва
+    // Сборните числа на сесията влизат в записа: от тях излиза отчетът за калибриране.
+    calib: addSession(prev.calib, typeof game.calibration === 'function' ? game.calibration() : null),
   };
   const { profile, from, to } = applyXP(state.profile, xp, game.skills, activeSkills);
   // Монетите идват от същата сесия и от същия XP: друг начин да се печелят няма.

@@ -2,7 +2,7 @@
 // Самата игра описва само своите стъпки в spec: setup, frame, onAnswer, onTap, onKey.
 import { h } from '../../core/dom.js';
 import { sessionXP } from '../../core/evolution.js';
-import { TrialLog, isValidReaction, reactionMs } from './trial-log.js';
+import { TrialLog, inputKindOf, isValidReaction, reactionMs } from './trial-log.js';
 
 // Цифрите 1–9 избират n-тия бутон с отговор. Стои тук, а не във всяка игра поотделно,
 // защото е един и същ жест навсякъде, където отговорът е бутон.
@@ -162,6 +162,9 @@ export function createGame(spec) {
         this.log.premature();
         return null;
       }
+      // Видът вход се чете от самото събитие и важи за този опит: така нито една игра
+      // не го пренася на ръка, а времената от мишка и клавиатура не се смесват в отчета.
+      this.log.input = inputKindOf(event);
       return rt;
     },
 
@@ -179,6 +182,11 @@ export function createGame(spec) {
 
     stats() {
       return { meanRT: spec.reportsRT === false ? null : this.log.meanRT(), rows: spec.rows ? spec.rows(this) : this.log.rows() };
+    },
+
+    // Сборните числа на сесията за отчета за калибриране. Без тях записът пази само рекорда.
+    calibration() {
+      return this.log ? this.log.summary() : null;
     },
   };
 }

@@ -15,6 +15,7 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { recommend } from '../js/core/calibration.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SHOTS = join(ROOT, 'docs', 'screenshots');
@@ -801,7 +802,41 @@ async function release(cdp) {
   console.log(`  след импорта: стъпка ${mergedAfter.step}, ${Math.round(mergedAfter.totalXP)} XP`);
   if (mergedAfter.step < after.step || mergedAfter.totalXP < after.totalXP) die('Импортът отне напредък.');
 
-  // 7. Офлайн: приложението се вдига от кеша на service worker-а.
+  // 7. Отчетът за калибриране: сглобява се от току-що изиграната сесия и се сваля,
+  // после Node го прекарва през същата препоръка, която ползва и `npm run calibrate`.
+  await evaluate(cdp, ALLOW_DIAGNOSTICS);
+  await go(cdp, '/diagnostics');
+  await waitFor(cdp, "Boolean([...document.querySelectorAll('button')].find((b) => b.textContent.includes('Отчет за калибриране')))", 'бутонът за отчета');
+  await evaluate(cdp, PRESS('Отчет за калибриране'));
+  await waitFor(cdp, "Boolean(document.querySelector('.diag-report'))", 'текстът на отчета');
+  const shown = await evaluate(cdp, "[...document.querySelectorAll('.diag-report')].map((t) => t.value).find((v) => v.includes('Отчет за калибриране')) || ''");
+  console.log(`  отчет за калибриране: ${shown.split('\n')[4] || 'празен'}`);
+  if (!shown.includes('Stroop')) die('Отчетът не носи току-що изиграната игра.');
+  if (/\d{4}-\d{2}-\d{2}/.test(shown)) die('Отчетът съдържа дата, а не бива.');
+  // Секцията е под целия екран: снимката трябва да показва нея, не заглавието.
+  await evaluate(cdp, `(() => {
+    const area = [...document.querySelectorAll('.diag-report')].find((t) => t.value.includes('Отчет за калибриране'));
+    area.closest('section').scrollIntoView({ block: 'start' });
+    return true;
+  })()`);
+  await wait(200);
+  await screenshot(cdp, 'stage7-calibration');
+  await evaluate(cdp, PRESS('Свали като JSON'));
+  let calibFile = null;
+  for (let i = 0; i < 50 && !calibFile; i += 1) {
+    const found = readdirSync(downloads).filter((n) => n.includes('kalibrirane'));
+    if (found.length) calibFile = join(downloads, found[0]);
+    else await wait(200);
+  }
+  if (!calibFile) die('Отчетът за калибриране не се свали.');
+  const calib = JSON.parse(readFileSync(calibFile, 'utf8'));
+  if (calib.kind !== 'calibration') die('Свалененият отчет не е за калибриране.');
+  const advice = recommend(calib);
+  console.log(`  сборно: ${calib.totals.sessions} сесии, ${calib.totals.trials} опита, успех ${Math.round((calib.totals.accuracy || 0) * 100)}%`);
+  console.log(`  препоръка: ${advice.staircaseUp.reason}`);
+  if (!calib.games.length) die('Отчетът е празен след изиграна сесия.');
+
+  // 8. Офлайн: приложението се вдига от кеша на service worker-а.
   await cdp.send('Network.enable');
   await cdp.send('Network.emulateNetworkConditions', {
     offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0,

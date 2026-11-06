@@ -5,7 +5,7 @@ import {
   BackupError, buildBackup, formatMoment, parseBackup, summarizeEntry, summarizePayload,
 } from '../core/backup.js';
 import { decryptJson, encryptJson, openWithPassword, unwrapDataKey } from '../core/crypto.js';
-import { chooseDialog, confirmDialog, h, mount, promptDialog, toast } from '../core/dom.js';
+import { chooseDialog, confirmDialog, downloadText, h, mount, promptDialog, toast } from '../core/dom.js';
 import { creatureIndex, subLabel } from '../core/evolution.js';
 import { mergePayload } from '../core/merge.js';
 import {
@@ -22,7 +22,7 @@ import { avatarEl } from './ui.js';
 
 const THEMES = [['auto', 'Като системата'], ['dark', 'Тъмна'], ['light', 'Светла']];
 const COLOR_MODES = [[false, 'С цветове'], [true, 'С форми']];
-export const APP_VERSION = '0.16.0';
+export const APP_VERSION = '0.17.0';
 const TAPS_FOR_DIAGNOSTICS = 7;
 
 const stepLabel = (step) => `${activeSkin().creatures[creatureIndex(step)].name} ${subLabel(step)}`;
@@ -35,20 +35,10 @@ const SUMMARY_ROWS = [
   ['Усвоени теми', (s) => (s.mastered === null ? '–' : String(s.mastered))],
 ];
 
-function download(name, text) {
-  const blob = new Blob([text], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const link = h('a', { href: url, download: name });
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10000);
-}
-
 // Експорт на избрани профили. Заключените излизат шифровани, както си стоят.
 function exportProfiles(entries, suffix) {
   const backup = buildBackup(entries);
-  download(`evolyutsiya-${suffix}-${backup.exportedAt.slice(0, 10)}.json`, JSON.stringify(backup, null, 2));
+  downloadText(`evolyutsiya-${suffix}-${backup.exportedAt.slice(0, 10)}.json`, JSON.stringify(backup, null, 2));
   updateDevice({ lastExport: backup.exportedAt });
   toast(entries.length > 1 ? 'Копието с всички профили е изтеглено.' : 'Копието е изтеглено.');
 }

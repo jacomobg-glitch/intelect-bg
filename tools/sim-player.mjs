@@ -6,7 +6,9 @@
 //   - около 15% грешки на „своята“ трудност, повече при по-висока;
 //   - разсейване: рядък опит с време далеч над срока, който играта брои като пропуск;
 //   - умора: след 3 минути точността пада и времената се разтягат.
+import { readFileSync } from 'node:fs';
 import { CONFIG } from '../js/core/config.js';
+import { formatCalibration, recommend } from '../js/core/calibration.js';
 import { quickParams, simonParams, sortParams, swapParams } from '../js/content/games/generators.js';
 import {
   TRACK_WINDOW_MS, choiceParams, instrumentParams, multitaskParams, peripheralParams, rotationParams, timeSenseParams,
@@ -231,6 +233,40 @@ function printTable() {
   }
 }
 
+// `npm run calibrate -- --from <файл>`: чете свалените от Диагностика сборни числа
+// и дава препоръка за трите настройки. Истинските данни бият симулацията винаги.
+function printFromReport(path) {
+  let report;
+  try {
+    report = JSON.parse(readFileSync(path, 'utf8'));
+  } catch (err) {
+    console.error(`\n  Файлът не се чете: ${err.message}\n`);
+    process.exit(1);
+  }
+  if (!report || report.kind !== 'calibration') {
+    console.error('\n  Това не е отчет за калибриране. Свали го от Диагностика → „Свали като JSON“.\n');
+    process.exit(1);
+  }
+  console.log(formatCalibration(report, recommend(report)));
+
+  // За сравнение: какво дава симулираният играч при СЪЩАТА настройка. Разминаване
+  // значи, че моделът на симулатора трябва да се поправи по реалните числа.
+  const sim = calibrate({ ability: 4, runMs: 180000, maxLevel: 9 });
+  console.log(`\nЗа сравнение: симулираният играч дава ${(sim.quality * 100).toFixed(1)}% успех при STAIRCASE_UP ${CONFIG.STAIRCASE_UP}.`);
+  if (report.totals.accuracy !== null) {
+    const gap = Math.abs(report.totals.accuracy - sim.quality);
+    console.log(gap > 0.08
+      ? `Разликата с реалния успех е ${(gap * 100).toFixed(1)} пункта: моделът на симулатора се разминава с човека.`
+      : `Разликата с реалния успех е ${(gap * 100).toFixed(1)} пункта: моделът на симулатора е близо до човека.`);
+  }
+}
+
 if (process.argv[1] && process.argv[1].endsWith('sim-player.mjs')) {
-  printTable();
+  const args = process.argv.slice(2);
+  const at = args.indexOf('--from');
+  if (at < 0) printTable();
+  else if (!args[at + 1]) {
+    console.error('\n  Подай файл: npm run calibrate -- --from otchet.json\n');
+    process.exit(1);
+  } else printFromReport(args[at + 1]);
 }

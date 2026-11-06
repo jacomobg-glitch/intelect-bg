@@ -95,7 +95,7 @@ test('оценката се пази само като последна стой
   assert.equal(cleanRecord({ id: 'x', feel: ['hard'] }).feel, null);
   // Няма поле за история: записът има точно тези ключове.
   assert.deepEqual(Object.keys(defaultRecord('x')).sort(),
-    ['bestMeanRT', 'bestScore', 'demoSeen', 'feel', 'id', 'lastDifficulty', 'plays']);
+    ['bestMeanRT', 'bestScore', 'calib', 'demoSeen', 'feel', 'id', 'lastDifficulty', 'plays']);
 });
 
 // --- Най-близкото препятствие (раздел 4.3) ---
